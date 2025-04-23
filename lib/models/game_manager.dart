@@ -1,0 +1,911 @@
+import 'dart:async';
+import 'board_manager.dart';
+import 'synergy_manager.dart';
+import 'combat_manager.dart';
+import 'unit.dart';
+import 'item.dart';
+import '../enums/item_type.dart';
+import 'shop_manager.dart';
+import 'ai_opponent_manager.dart';
+import 'board_position.dart';
+import 'package:flutter/material.dart';
+import 'dart:math';
+import '../game_data/units.dart';
+import '../game_data/items.dart';
+import 'package:realm_of_tactics/models/summoned_unit.dart';
+
+// Core states the game transitions between
+enum GameState { chooseStart, shopping, combat, postCombat, gameOver }
+
+// Represents a selectable game opening
+class StartOption {
+  final String name;
+  final String description;
+
+  const StartOption({required this.name, required this.description});
+}
+
+// All possible starting presets for the player to choose from
+final allStartOptions = [
+  StartOption(
+    name: "Basic Start",
+    description: "Level 3, 2 XP, 15 gold, 2 basic items",
+  ),
+  StartOption(
+    name: "High Tier",
+    description: "Level 3, 2 XP, 2x 3-cost units, 1x 2-cost, 3 items",
+  ),
+  StartOption(
+    name: "Full Bench",
+    description: "Level 4, 0 XP, 4x 2-cost, 4x 1-cost, 2 items",
+  ),
+  StartOption(name: "Max Gold", description: "Level 1, 0 XP, 33 gold"),
+  StartOption(name: "Equipped", description: "Level 3, 2 XP, 4 items, 5 gold"),
+  StartOption(
+    name: "Champion",
+    description: "Level 1, 0 XP, 1x 4-cost unit, 2 items, 10 gold",
+  ),
+  StartOption(
+    name: "Leveled Up",
+    description: "Level 5, 2 XP, 5x 2-cost units",
+  ),
+];
+
+// Singleton GameManager class – oversees game lifecycle, economy, board, shop, and combat flow
+class GameManager extends ChangeNotifier {
+  // UI reference for board layout positioning
+  GlobalKey? boardKey;
+  // Board/bench/unit logic
+  BoardManager? _boardManager;
+  // Handles trait bonuses
+  SynergyManager? _synergyManager;
+  // Controls combat flow
+  CombatManager? _combatManager;
+  // Controls unit shop
+  ShopManager? _shopManager;
+  // Combat ticking interval
+  Timer? _combatTickTimer;
+  // For visual effects
+  OverlayState? overlayState;
+  // Needed for animations
+  TickerProvider? overlayTicker;
+  // Controls enemy team generation
+  late final AIOpponentManager _aiOpponentManager;
+
+  static GameManager? instance;
+  List<Item> getBasicItems() {
+    return allItems.values.where((item) => item.isComponent).toList();
+  }
+
+  GameManager() {
+    GameManager.instance = this;
+  }
+
+  double? _tileSize;
+  double? get tileSize => _tileSize;
+  void setTileSize(double size) {
+    _tileSize = size;
+  }
+
+  // Optional tile size for rendering the board/grid
+  void setBoardKey(GlobalKey key) {
+    boardKey = key;
+  }
+
+  // Controls the current global game state
+  GameState _currentState = GameState.chooseStart;
+
+  // Starting options presented to the player
+  List<StartOption> currentStartOptions = [];
+  int startRerolls = 1;
+
+  // Generates a fresh set of randomized starting options
+  void offerStartOptions() {
+    final shuffled = [...allStartOptions]..shuffle();
+    currentStartOptions = shuffled.take(3).toList();
+    notifyListeners();
+  }
+
+  // Player's persistent stats
+  int _gold = 0;
+  int _playerLevel = 1;
+  int _playerHealth = 100;
+  int _playerXp = 0;
+  int _currentStage = 0;
+  int _roundsWon = 0;
+  int _roundsLost = 0;
+  int _ironvaleScrap = 0;
+
+  // UI and round transition helpers
+  bool isDragging = false;
+  final List<Unit> _nextRoundEnemies = [];
+  Unit? _currentIronvaleSummonInstance;
+  final Map<String, Position> _initialPlayerPositions = {};
+  List<Unit> _originalPlayerUnits = [];
+
+  // How much XP is needed to reach each level
+  static const Map<int, int> xpBreakpoints = {
+    2: 2,
+    3: 4,
+    4: 6,
+    5: 10,
+    6: 20,
+    7: 36,
+    8: 48,
+    9: 76,
+    10: 84,
+  };
+
+  // Various global game getters
+  GameState get currentState => _currentState;
+  int get gold => _gold;
+  int get playerGold => _gold;
+  int get playerLevel => _playerLevel;
+  int get playerHealth => _playerHealth;
+  int get currentStage => _currentStage;
+  int get playerXp => _playerXp;
+  int get ironvaleScrap => _ironvaleScrap;
+  int get expForNextLevel => 4;
+  BoardManager? get boardManager => _boardManager;
+  CombatManager? get combatManager => _combatManager;
+  ShopManager? get shopManager => _shopManager;
+  SynergyManager? get synergyManager => _synergyManager;
+  List<Unit> get nextRoundEnemies => _nextRoundEnemies;
+
+  // How much XP is needed to reach the next level
+  int get xpForNextLevel {
+    if (_playerLevel >= 10) return 0;
+    return xpBreakpoints[_playerLevel + 1] ?? 0;
+  }
+
+  // Current progress toward the next level
+  int get currentXpProgress {
+    if (_playerLevel >= 10) return 0;
+
+    return _playerXp;
+  }
+
+  // Injects dependencies into GameManager
+  void setBoardManager(BoardManager manager) {
+    _boardManager = manager;
+  }
+
+  void setSynergyManager(SynergyManager manager) {
+    _synergyManager = manager;
+  }
+
+  void setCombatManager(CombatManager manager) {
+    _combatManager = manager;
+  }
+
+  void setShopManager(ShopManager manager) {
+    _shopManager = manager;
+  }
+
+  // If player has a reroll available, replace the start options
+  void useStartReroll() {
+    if (startRerolls > 0) {
+      startRerolls--;
+      offerStartOptions();
+    }
+  }
+
+  // Advance state from start screen to shop phase
+  void transitionToShopping() {
+    _currentState = GameState.shopping;
+    notifyListeners();
+  }
+
+  // Fully resets all major game values and initializes managers and systems
+  void initialize() {
+    _gold = 0;
+    _playerLevel = 1;
+    _playerHealth = 100;
+    _currentStage = 1;
+    _roundsWon = 0;
+    _roundsLost = 0;
+    _ironvaleScrap = 0;
+    _currentIronvaleSummonInstance = null;
+    _nextRoundEnemies.clear();
+
+    _combatManager?.reset();
+    _combatTickTimer?.cancel();
+    _combatTickTimer = null;
+
+    if (_boardManager == null) {
+      return;
+    }
+    _boardManager!.initialize();
+
+    if (_shopManager == null) {
+      return;
+    }
+    _shopManager!.initialize();
+
+    if (_synergyManager == null) {
+      return;
+    }
+    _synergyManager!.initialize();
+
+    // If no CombatManager yet, make one
+    if (_combatManager == null &&
+        _boardManager != null &&
+        _synergyManager != null) {
+      _combatManager = CombatManager(
+        boardManager: _boardManager!,
+        synergyManager: _synergyManager!,
+      );
+    } else if (_combatManager == null) {
+      return;
+    }
+
+    _aiOpponentManager = AIOpponentManager();
+
+    _currentState = GameState.chooseStart;
+    startRerolls = 1;
+    offerStartOptions();
+
+    _prepareNextRound();
+
+    notifyListeners();
+  }
+
+  // Applies effects from the chosen starting setup
+  void applyStartOption(String optionKey) {
+    final gm = GameManager.instance!;
+
+    gm.addGold(-gm.gold); // Reset gold to 0 before applying rewards
+
+    switch (optionKey) {
+      case "Basic Start":
+        gm._playerLevel = 3;
+        gm._playerXp = 2;
+        gm.addGold(15);
+        addRandomBasicItems(2);
+        break;
+      case "High Tier":
+        gm._playerLevel = 3;
+        gm._playerXp = 2;
+        gm.addGold(0);
+        addRandomUnitsToBench(3, 2);
+        addRandomUnitsToBench(2, 1);
+        addRandomBasicItems(3);
+        break;
+      case "Full Bench":
+        gm._playerLevel = 4;
+        gm._playerXp = 0;
+        gm.addGold(0);
+        addRandomUnitsToBench(2, 4);
+        addRandomUnitsToBench(1, 4);
+        addRandomBasicItems(2);
+        break;
+      case "Max Gold":
+        gm._playerLevel = 1;
+        gm._playerXp = 0;
+        gm.addGold(33);
+        break;
+      case "Equipped":
+        gm._playerLevel = 3;
+        gm._playerXp = 2;
+        gm.addGold(5);
+        addRandomBasicItems(4);
+        break;
+      case "Champion":
+        gm._playerLevel = 1;
+        gm._playerXp = 0;
+        gm.addGold(10);
+        addRandomUnitsToBench(4, 1);
+        addRandomBasicItems(2);
+        break;
+      case "Leveled Up":
+        gm._playerLevel = 5;
+        gm._playerXp = 2;
+        gm.addGold(0);
+        addRandomUnitsToBench(2, 5);
+        break;
+    }
+
+    gm.notifyListeners();
+  }
+
+  // Filters the master unit list by cost value
+  List<Unit> getUnitsByCost(int cost) {
+    return unitData.values.where((unit) => unit.cost == cost).toList();
+  }
+
+  // Pulls a random unit of a certain cost
+  Unit getRandomUnitByCost(int cost) {
+    final matching = getUnitsByCost(cost);
+    if (matching.isEmpty) {
+      throw Exception("No units found for cost $cost");
+    }
+
+    final rand = Random();
+    final unitTemplate = matching[rand.nextInt(matching.length)];
+    return unitTemplate.copyWith(
+      id:
+          '${unitTemplate.unitName}_${DateTime.now().millisecondsSinceEpoch}_${rand.nextInt(10000)}',
+    );
+  }
+
+  // Adds several random units of a given cost to the player's bench
+  void addRandomUnitsToBench(int cost, int count) {
+    for (int i = 0; i < count; i++) {
+      final unit = getRandomUnitByCost(cost);
+      boardManager!.addUnitToBench(unit);
+    }
+  }
+
+  // Selects a random base-level item from the component list
+  Item getRandomBasicItem() {
+    final basicItems = getBasicItems();
+    if (basicItems.isEmpty) throw Exception("No tier 1 items found");
+
+    final randomItem = basicItems[Random().nextInt(basicItems.length)];
+    return randomItem.copyWith();
+  }
+
+  // Adds random basic (tier 1) items to the bench
+  void addRandomBasicItems(int count) {
+    for (int i = 0; i < count; i++) {
+      boardManager!.addItemToBench(getRandomBasicItem());
+    }
+  }
+
+  // Adds gold and notifies listeners
+  void addGold(int amount) {
+    _gold += amount;
+    notifyListeners();
+  }
+
+  // Tries to spend gold; returns true if successful
+  bool spendGold(int amount) {
+    if (_gold >= amount) {
+      _gold -= amount;
+      notifyListeners();
+      return true;
+    }
+    return false;
+  }
+
+  // Adds XP and checks for level up
+  void addXp(int amount) {
+    if (_playerLevel >= 10) return;
+
+    _playerXp += amount;
+
+    checkAndApplyLevelUp();
+
+    notifyListeners();
+  }
+
+  // Applies level-ups based on XP thresholds
+  void checkAndApplyLevelUp() {
+    bool levelChanged = false;
+
+    while (_playerLevel < 10) {
+      int? neededXp = xpBreakpoints[_playerLevel + 1];
+      if (neededXp == null || _playerXp < neededXp) break;
+
+      _playerXp -= neededXp;
+      _playerLevel++;
+      levelChanged = true;
+    }
+
+    if (levelChanged) {
+      notifyListeners();
+    }
+  }
+
+  // Buys XP if the player has enough gold
+  bool levelUp() {
+    if (_playerLevel >= 10) return false;
+
+    if (spendGold(4)) {
+      addXp(4);
+      return true;
+    }
+    return false;
+  }
+
+  // Deducts unit cost and adds unit to bench (called by shop)
+  bool purchaseUnit(Unit unit) {
+    if (_gold < unit.cost) {
+      return false;
+    }
+
+    _gold -= unit.cost;
+    notifyListeners();
+
+    return true;
+  }
+
+  // Starts a combat round if in shopping phase
+  void startCombatRound() {
+    if (_currentState != GameState.shopping) return;
+
+    _currentState = GameState.combat;
+    notifyListeners();
+
+    _initialPlayerPositions.clear();
+    List<Unit> playerUnits = _boardManager!.getAllBoardUnits();
+
+    _originalPlayerUnits = List.from(playerUnits);
+    for (var unit in playerUnits) {
+      _initialPlayerPositions[unit.id] = Position(unit.boardY, unit.boardX);
+    }
+
+    List<Unit> enemyUnits =
+        _nextRoundEnemies.map((unit) {
+          var clone = Unit.clone(unit);
+          clone.isEnemy = true;
+          clone.isOnBoard = true;
+          clone.boardX = unit.boardX;
+          clone.boardY = unit.boardY;
+          return clone;
+        }).toList();
+
+    _combatManager!.startCombat(_originalPlayerUnits, enemyUnits);
+
+    _startCombatTimer();
+  }
+
+  // Begins a timer that advances combat each tick
+  void _startCombatTimer() {
+    _combatTickTimer?.cancel();
+    _combatTickTimer = Timer.periodic(const Duration(milliseconds: 100), (
+      timer,
+    ) {
+      if (_currentState != GameState.combat) {
+        timer.cancel();
+        return;
+      }
+
+      _combatManager!.tick(const Duration(milliseconds: 100));
+
+      if (_combatManager!.state == CombatState.finished) {
+        _finishCombatRound();
+      }
+    });
+  }
+
+  // Triggers a visual attack effect (projectile or melee)
+  void playAttackEffect(Unit attacker, Unit target) {
+    final rangedSprite = combatManager!.getRangedEffectSprite(
+      attacker.unitName,
+    );
+    final meleeSprite = combatManager!.getMeleeEffectSprite(attacker.unitName);
+    if (rangedSprite != null) {
+      showProjectileEffectFollowing(
+        from: boardTileToScreenOffset(
+          attacker.boardY,
+          attacker.boardX,
+          tileSize!,
+          "ranged",
+        ),
+        target: target,
+        imagePath: rangedSprite,
+      );
+    } else if (meleeSprite != null) {
+      showEffectOnUnit(target: target, imagePath: meleeSprite);
+    }
+  }
+
+  // Called when combat round ends to process win/loss results
+  void _finishCombatRound() {
+    _combatTickTimer?.cancel();
+    _combatTickTimer = null;
+
+    if (_currentState != GameState.combat) return;
+
+    bool playerWon = _combatManager!.enemyUnits.every((u) => !u.isAlive);
+
+    _currentState = GameState.postCombat;
+    notifyListeners();
+
+    _handlePostCombat(playerWon);
+
+    for (var unit in _boardManager!.getAllBoardUnits()) {
+      if (unit.isAlive) {
+        unit.stats.currentHealth = unit.stats.maxHealth;
+      }
+    }
+
+    Future.delayed(Duration(seconds: 1), () {
+      if (_currentState == GameState.postCombat) {
+        if (_playerHealth > 0) {
+          _currentState = GameState.shopping;
+
+          _synergyManager?.clearSynergies();
+
+          _boardManager?.resetBoardPositions(
+            _originalPlayerUnits,
+            _initialPlayerPositions,
+          );
+          _prepareNextRound();
+
+          _synergyManager?.handleGreendaleGoldGeneration(
+            didPlayerWin: playerWon,
+          );
+
+          _shopManager?.resetFreeRefresh();
+        } else {
+          _currentState = GameState.gameOver;
+        }
+        notifyListeners();
+      }
+    });
+  }
+
+  // Handles player win/loss, scrap, repositioning, gold
+  void _handlePostCombat(bool playerWon) {
+    if (_boardManager == null) return;
+
+    _currentStage++;
+    _addRoundIncome();
+
+    addXp(2);
+
+    if (playerWon) {
+      _roundsWon++;
+      _roundsLost = 0;
+
+      int streakBonus = 0;
+      if (_roundsWon >= 5) {
+        streakBonus = 2;
+      } else if (_roundsWon >= 3) {
+        streakBonus = 1;
+      }
+
+      _gold += 1 + streakBonus;
+    } else {
+      _roundsLost++;
+      _roundsWon = 0;
+
+      int streakBonus = 0;
+      if (_roundsLost >= 5) {
+        streakBonus = 2;
+      } else if (_roundsLost >= 3) {
+        streakBonus = 1;
+      }
+
+      _gold += streakBonus;
+
+      int damage = 2 + (_currentStage ~/ 2);
+      _playerHealth -= damage;
+    }
+
+    if (_playerHealth <= 0) {
+      _playerHealth = 0;
+      _currentState = GameState.gameOver;
+    }
+  }
+
+  // Adds base round income and interest from banked gold
+  void _addRoundIncome() {
+    int income = 5;
+
+    int interest = (_gold / 10).floor();
+    if (interest > 5) interest = 5;
+
+    _gold += income + interest;
+  }
+
+  // Resets the entire game state
+  void resetGame() {
+    _combatTickTimer?.cancel();
+    _combatTickTimer = null;
+    _playerHealth = 100;
+    _gold = 0;
+    _playerLevel = 1;
+    _playerXp = 0;
+    _currentStage = 1;
+    _ironvaleScrap = 0;
+    _currentState = GameState.shopping;
+
+    if (_currentIronvaleSummonInstance != null) {
+      _boardManager?.remove(_currentIronvaleSummonInstance!);
+      _currentIronvaleSummonInstance = null;
+    }
+
+    _boardManager?.initialize();
+    _synergyManager?.reset();
+    _combatManager?.reset();
+
+    notifyListeners();
+  }
+
+  // Spawns or replaces the Ironvale summon based on synergy tier
+  void handleIronvaleSummon(Type summonType, {required bool isEnemy}) {
+    if (_boardManager == null) return;
+
+    if (_currentIronvaleSummonInstance != null) {
+      _boardManager!.remove(_currentIronvaleSummonInstance);
+    }
+
+    SummonedUnit? newSummon;
+    switch (summonType) {
+      case const (IronvaleDrone):
+        newSummon = IronvaleDrone();
+        break;
+      case const (IronvaleTurret):
+        newSummon = IronvaleTurret();
+        break;
+      case const (IronvaleTank):
+        newSummon = IronvaleTank();
+        break;
+      default:
+        return;
+    }
+
+    newSummon.isEnemy = isEnemy;
+
+    if (_synergyManager != null) {
+      int engineerLevel =
+          isEnemy
+              ? _synergyManager!.getEnemySynergyLevel(
+                'Engineer',
+                _boardManager!
+                    .getAllBoardUnits()
+                    .where((u) => u.isEnemy)
+                    .toList(),
+              )
+              : _synergyManager!.getSynergyLevel('Engineer');
+
+      if (engineerLevel > 0) {
+        newSummon.applyEngineerBonus();
+      }
+    }
+
+    _boardManager!.addSummonedUnit(newSummon, isEnemy: isEnemy);
+
+    _synergyManager?.setCurrentIronvaleSummon(newSummon, isEnemy: isEnemy);
+  }
+
+  // Adds a forged item to the bench if space exists
+  bool addForgedItemToBench(Item item) {
+    bool success = false;
+    if (!item.isForged) {
+      return false;
+    }
+    if (_boardManager != null) {
+      success = _boardManager!.addItemToBench(item);
+    }
+
+    return success;
+  }
+
+  // Unequips a forged item from a unit and removes it from the board
+  void removeForgedItemFromUnit(Unit unit, Item item) {
+    if (!item.isForged || _boardManager == null) return;
+
+    bool itemRemoved = false;
+
+    if (unit.weapon?.id == item.id) {
+      unit.unequipItem(ItemType.weapon);
+      itemRemoved = true;
+    }
+    if (unit.armor?.id == item.id) {
+      unit.unequipItem(ItemType.armor);
+      itemRemoved = true;
+    }
+    if (unit.trinket?.id == item.id) {
+      unit.unequipItem(ItemType.trinket);
+      itemRemoved = true;
+    }
+
+    if (_boardManager!.remove(item)) {
+      itemRemoved = true;
+    }
+
+    if (itemRemoved) {
+      notifyListeners();
+    }
+  }
+
+  // Called at the end of post-combat to prepare units and shop for next round
+  void _prepareNextRound() {
+    _refreshShop();
+
+    _originalPlayerUnits.clear();
+    _initialPlayerPositions.clear();
+
+    var allUnits = _boardManager?.getAllBoardUnits() ?? [];
+    var playerUnits = allUnits.where((unit) => !unit.isEnemy).toList();
+
+    for (var unit in playerUnits) {
+      _originalPlayerUnits.add(unit);
+      _initialPlayerPositions[unit.id] = Position(unit.boardY, unit.boardX);
+    }
+
+    _boardManager?.resetBoard();
+
+    for (var unit in _originalPlayerUnits) {
+      var position = _initialPlayerPositions[unit.id];
+      if (position != null) {
+        unit.isOnBoard = true;
+        unit.boardX = position.col;
+        unit.boardY = position.row;
+        _boardManager?.placeUnit(unit, position);
+      }
+    }
+
+    var enemyTeam = _aiOpponentManager.generateEnemyTeam(_currentStage);
+
+    _nextRoundEnemies.clear();
+
+    for (var unit in enemyTeam) {
+      var position = unit.position;
+
+      unit.isEnemy = true;
+      unit.team = 1;
+      unit.boardX = position.col;
+      unit.boardY = position.row;
+      unit.isOnBoard = true;
+
+      _nextRoundEnemies.add(unit);
+    }
+
+    int ironvaleLevel = _synergyManager?.getSynergyLevel('Ironvale') ?? 0;
+    if (ironvaleLevel > 0) {
+      int scrapGained = 0;
+      List<Unit> boardUnits = _boardManager!.getAllBoardUnits();
+      for (var unit in boardUnits) {
+        if (unit.origins.contains('Ironvale') && unit.generateScrap) {
+          scrapGained += unit.tier;
+        }
+      }
+      if (scrapGained > 0) {
+        _ironvaleScrap += scrapGained;
+      }
+    }
+
+    notifyListeners();
+  }
+
+  // Getter for all player and enemy units during combat
+  List<Unit> get allUnitsInCombat {
+    List<Unit> units = [];
+    if (_combatManager != null) {
+      units.addAll(_combatManager!.playerUnits);
+      units.addAll(_combatManager!.enemyUnits);
+    }
+    return units;
+  }
+
+  // Searches combat units by ID
+  Unit? findUnitById(String id) {
+    if (_combatManager == null) return null;
+
+    try {
+      return allUnitsInCombat.firstWhere(
+        (unit) => unit.id == id,
+        orElse: () => throw Exception('Unit not found'),
+      );
+    } catch (e) {
+      return null;
+    }
+  }
+
+  // Refreshes the shop manually
+  void _refreshShop() {
+    _shopManager?.refreshShop();
+  }
+
+  // Launches a projectile effect from attacker to target
+  void showProjectileEffectFollowing({
+    required Offset from,
+    required Unit target,
+    required String imagePath,
+    Duration duration = const Duration(milliseconds: 300),
+  }) {
+    late OverlayEntry entry;
+
+    entry = OverlayEntry(
+      builder: (context) {
+        return TweenAnimationBuilder<double>(
+          tween: Tween(begin: 0.0, end: 1.0),
+          duration: duration,
+          onEnd: () => entry.remove(),
+          builder: (context, value, child) {
+            final gm = GameManager.instance!;
+            final tileSize = gm.tileSize ?? 48.0;
+
+            final to = gm.boardTileToScreenOffset(
+              target.boardY,
+              target.boardX,
+              tileSize,
+              "ranged",
+            );
+
+            final currentX = from.dx + (to.dx - from.dx) * value;
+            final currentY = from.dy + (to.dy - from.dy) * value;
+            final angle = atan2(to.dy - from.dy, to.dx - from.dx);
+
+            return Positioned(
+              left: currentX,
+              top: currentY,
+              child: Transform.rotate(
+                angle: angle,
+                child: Image.asset(imagePath, width: 24, height: 24),
+              ),
+            );
+          },
+        );
+      },
+    );
+
+    GameManager.instance!.overlayState!.insert(entry);
+  }
+
+  // Displays an effect (like an animation or sprite) on a specific unit
+  void showEffectOnUnit({
+    required Unit target,
+    required String imagePath,
+    Duration? duration,
+  }) {
+    final entry = OverlayEntry(
+      builder: (context) {
+        return AnimatedBuilder(
+          animation: target,
+          builder: (context, _) {
+            final tileSize = GameManager.instance!.tileSize;
+            final pos = GameManager.instance!.boardTileToScreenOffset(
+              target.boardY,
+              target.boardX,
+              tileSize!,
+              "effect",
+            );
+
+            return Positioned(
+              left: pos.dx,
+              top: pos.dy,
+              child: Image.asset(imagePath, width: tileSize, height: tileSize),
+            );
+          },
+        );
+      },
+    );
+
+    GameManager.instance!.overlayState!.insert(entry);
+
+    Future.delayed(duration ?? Duration(milliseconds: 500), () {
+      entry.remove();
+    });
+  }
+
+  // Converts a tile coordinate into a global screen position
+  Offset boardTileToScreenOffset(
+    int row,
+    int col,
+    double tileSize,
+    String type,
+  ) {
+    if (boardKey == null) {
+      return Offset.zero;
+    }
+
+    final context = boardKey!.currentContext;
+    if (context == null) {
+      return Offset.zero;
+    }
+
+    final box = context.findRenderObject() as RenderBox?;
+    if (box == null || !box.hasSize) {
+      return Offset.zero;
+    }
+
+    final boardTopLeft = box.localToGlobal(Offset.zero);
+    if (type == "ranged") {
+      return Offset(
+        boardTopLeft.dx + col * tileSize + tileSize / 2,
+        boardTopLeft.dy + row * tileSize + tileSize / 2,
+      );
+    } else {
+      return Offset(
+        boardTopLeft.dx + col * tileSize,
+        boardTopLeft.dy + row * tileSize,
+      );
+    }
+  }
+}

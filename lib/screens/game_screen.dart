@@ -1,0 +1,1335 @@
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:realm_of_tactics/models/board_position.dart';
+import 'package:realm_of_tactics/widgets/combat_stats_tab.dart';
+import 'package:realm_of_tactics/widgets/start_choice_ui.dart';
+import 'package:realm_of_tactics/widgets/unit_info_box.dart';
+import 'dart:math';
+import '../models/board_manager.dart';
+import '../models/game_manager.dart';
+import '../models/shop_manager.dart';
+import '../models/synergy_manager.dart';
+import '../models/unit.dart';
+import '../models/item.dart';
+import '../widgets/game_board.dart';
+import '../widgets/shop_widget.dart';
+import '../widgets/synergy_display.dart';
+import '../widgets/unit_widget.dart';
+import '../widgets/item_widget.dart';
+import '../widgets/item_info_box.dart';
+import 'package:auto_size_text/auto_size_text.dart';
+
+// A simple data class representing a tutorial screen's content
+class TutorialPage {
+  final String imagePath;
+  final String text;
+
+  TutorialPage({required this.imagePath, required this.text});
+}
+
+// Enum used to control which stat to display in the stats panel
+enum StatType { damageDealt, damageTaken, healing }
+
+// The main screen of the game, managing gameplay interaction and UI state
+class GameScreen extends StatefulWidget {
+  const GameScreen({Key? key}) : super(key: key);
+
+  @override
+  _GameScreenState createState() => _GameScreenState();
+}
+
+class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
+  // Currently selected unit, used for displaying stats/details
+  Unit? selectedUnit;
+
+  // Info item displayed in the unit details
+  Item? _infoItem;
+
+  // Toggles for UI visibility
+  bool _isShopOpen = false;
+  bool _isStatsOpen = false;
+  bool _isDragging = false;
+
+  // Current selected stat tab in stats panel
+  StatType _selectedStat = StatType.damageDealt;
+
+  // Global key used to measure board position for animations
+  final GlobalKey boardKey = GlobalKey();
+
+  @override
+  void initState() {
+    super.initState();
+
+    // Hook board key into GameManager so it can calculate positions
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Provider.of<GameManager>(context, listen: false).setBoardKey(boardKey);
+    });
+
+    // Setup the overlay/ticker in the GameManager for animations and effects
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final overlay = Overlay.of(context);
+      final gameManager = GameManager.instance;
+      if (gameManager != null) {
+        gameManager.overlayState = overlay;
+        gameManager.overlayTicker = this;
+      }
+    });
+  }
+
+  // Tutorial screens displayed in order
+  final List<TutorialPage> _tutorialPages = [
+    TutorialPage(
+      imagePath: 'assets/images/tutorial_images/TutorialImageStartChoice.png',
+      text: '''At the start of every game, you get to choose your start...''',
+    ),
+    TutorialPage(
+      imagePath: 'assets/images/tutorial_images/TutorialImageGold.png',
+      text: '''Gold is used for buying units...''',
+    ),
+    TutorialPage(
+      imagePath: 'assets/images/tutorial_images/TutorialImageLevel.png',
+      text: '''The other thing you can spend your gold on is buying XP...''',
+    ),
+    TutorialPage(
+      imagePath: 'assets/images/tutorial_images/TutorialImageEnemyBoard.png',
+      text:
+          '''Now that we have chosen our start, there's just a few more things to go over...''',
+    ),
+    TutorialPage(
+      imagePath: 'assets/images/tutorial_images/TutorialImageButtons.png',
+      text: '''From this main screen there are 3 buttons...''',
+    ),
+    TutorialPage(
+      imagePath: 'assets/images/tutorial_images/TutorialImageShop.png',
+      text: '''This is the shop...''',
+    ),
+  ];
+
+  // Tracks the current tutorial page index
+  int _tutorialPageIndex = 0;
+
+  // Whether or not the tutorial modal is open
+  bool _showTutorial = false;
+
+  // Select a unit on the board or bench
+  void _selectUnit(Unit unit) {
+    setState(() {
+      selectedUnit = unit;
+    });
+  }
+
+  // Deselect the currently selected unit
+  void _deselectUnit() {
+    setState(() {
+      selectedUnit = null;
+    });
+  }
+
+  // Attempts to sell the selected unit
+  void _handleSellUnit(Unit unit) {
+    final boardManager = Provider.of<BoardManager>(context, listen: false);
+    final gameManager = Provider.of<GameManager>(context, listen: false);
+
+    if (gameManager.currentState == GameState.combat) {
+      // Prevent selling during combat
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Cannot sell units during combat!',
+            textAlign: TextAlign.center,
+            style: TextStyle(fontWeight: FontWeight.bold),
+          ),
+          duration: Duration(seconds: 2),
+          backgroundColor: Colors.red[700],
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+      return;
+    }
+
+    // Try to sell unit, get gold if successful
+    int goldReceived = boardManager.sellUnit(unit);
+
+    if (goldReceived > 0) {
+      gameManager.addGold(goldReceived);
+
+      // Show success toast
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Sold ${unit.unitName} for $goldReceived gold',
+            textAlign: TextAlign.center,
+            style: TextStyle(fontWeight: FontWeight.bold),
+          ),
+          duration: Duration(seconds: 1),
+          backgroundColor: Colors.green[700],
+          behavior: SnackBarBehavior.floating,
+          margin: EdgeInsets.only(
+            bottom:
+                MediaQuery.of(context).size.height -
+                AppBar().preferredSize.height,
+            left: MediaQuery.of(context).size.width / 3,
+            right: MediaQuery.of(context).size.width / 3,
+          ),
+        ),
+      );
+
+      // Deselect if it was the selected unit
+      if (selectedUnit?.id == unit.id) {
+        _deselectUnit();
+      }
+    } else {
+      // Error if the unit still has items
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Must remove items from unit to sell',
+            textAlign: TextAlign.center,
+            style: TextStyle(fontWeight: FontWeight.bold),
+          ),
+          duration: Duration(seconds: 2),
+          backgroundColor: Colors.red[700],
+          behavior: SnackBarBehavior.floating,
+          margin: EdgeInsets.only(
+            bottom:
+                MediaQuery.of(context).size.height -
+                AppBar().preferredSize.height,
+            left: MediaQuery.of(context).size.width / 3,
+            right: MediaQuery.of(context).size.width / 3,
+          ),
+        ),
+      );
+    }
+  }
+
+  // Handles buying a unit from the shop
+  void _purchaseUnit(int shopIndex) {
+    final shopManager = Provider.of<ShopManager>(context, listen: false);
+    final boardManager = Provider.of<BoardManager>(context, listen: false);
+    final gameManager = Provider.of<GameManager>(context, listen: false);
+    final unit = shopManager.shopUnits[shopIndex];
+
+    if (gameManager.currentState == GameState.combat) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Cannot purchase units during combat!',
+            textAlign: TextAlign.center,
+            style: TextStyle(fontWeight: FontWeight.bold),
+          ),
+          duration: Duration(seconds: 2),
+          backgroundColor: Colors.red[700],
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+      return;
+    }
+
+    if (boardManager.isBenchFull()) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Bench is full! Sell or combine units to make space.',
+            textAlign: TextAlign.center,
+            style: TextStyle(fontWeight: FontWeight.bold),
+          ),
+          duration: Duration(seconds: 2),
+          backgroundColor: Colors.red[700],
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+      return;
+    }
+
+    if (unit != null && shopManager.tryPurchaseUnit(shopIndex)) {
+      boardManager.addUnitToBench(unit);
+    }
+  }
+
+  // Refreshes the shop with a reroll
+  void _rerollShop() {
+    final shopManager = Provider.of<ShopManager>(context, listen: false);
+    shopManager.tryReroll();
+  }
+
+  // Buys XP to level up the player
+  void _levelUp() {
+    final gameManager = Provider.of<GameManager>(context, listen: false);
+    gameManager.levelUp();
+  }
+
+  // Starts the combat round
+  void _startCombatRound() {
+    final gameManager = Provider.of<GameManager>(context, listen: false);
+    gameManager.startCombatRound();
+  }
+
+  // Toggles shop panel open/close
+  void _toggleShop() {
+    final gameManager = Provider.of<GameManager>(context, listen: false);
+
+    if (gameManager.currentState == GameState.combat) {
+      return;
+    }
+
+    setState(() {
+      _isShopOpen = !_isShopOpen;
+    });
+  }
+
+  // Clean up
+  @override
+  void dispose() {
+    Provider.of<BoardManager>(context, listen: false);
+    super.dispose();
+  }
+
+  // Builds the main game UI including board, bench, shop, stats, combat controls, and overlays
+  @override
+  Widget build(BuildContext context) {
+    // Screen dimensions and breakpoints
+    final screenSize = MediaQuery.of(context).size;
+    final isSmallScreen = screenSize.width < 1200;
+    final isVerySmallScreen = screenSize.width < 900;
+
+    // Access game-related managers
+    final gameManager = Provider.of<GameManager>(context);
+    final boardManager = Provider.of<BoardManager>(context);
+    final shopManager = Provider.of<ShopManager>(context);
+    final synergyManager = Provider.of<SynergyManager>(context);
+    final bool isInCombat = gameManager.currentState == GameState.combat;
+
+    // Automatically close shop if combat starts
+    if (isInCombat && _isShopOpen) {
+      _isShopOpen = false;
+    }
+
+    // Determine available board area
+    final availableHeight =
+        screenSize.height - AppBar().preferredSize.height - 16;
+    final desiredBoardWidth = (availableHeight * 8) / 6;
+    final boardSize = min(desiredBoardWidth, screenSize.width * 0.6);
+    final boardHeight = (boardSize * 6) / 8;
+
+    // Estimate bench width based on screen size
+    final double benchWidthEstimate =
+        isVerySmallScreen
+            ? screenSize.width * 0.14
+            : (isSmallScreen
+                ? screenSize.width * 0.17
+                : screenSize.width * 0.18);
+
+    // Space remaining for left-side panels
+    final boardContainerWidth = boardSize + 16;
+    final remainingWidth =
+        screenSize.width - benchWidthEstimate - boardContainerWidth;
+    max(remainingWidth - 24, screenSize.width * 0.15);
+
+    // Hide stats panel if shop is opened
+    if (_isShopOpen && _isStatsOpen) _isStatsOpen = false;
+
+    return Stack(
+      children: [
+        Scaffold(
+          backgroundColor: Colors.grey[900],
+          appBar: AppBar(
+            toolbarHeight: 24,
+            centerTitle: false,
+
+            // Top bar buttons for shop, help, stats, reroll, and combat
+            title: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // Shop toggle button
+                IconButton(
+                  icon: Icon(
+                    _isShopOpen ? Icons.store_outlined : Icons.store,
+                    color: isInCombat ? Colors.grey : Colors.white,
+                  ),
+                  onPressed: isInCombat ? null : _toggleShop,
+                  tooltip:
+                      isInCombat
+                          ? 'Shop disabled during combat'
+                          : 'Toggle Shop',
+                ),
+
+                // Help and Stats toggle
+                if (!_isShopOpen)
+                  IconButton(
+                    icon: Icon(Icons.help_outline, color: Colors.white),
+                    tooltip: "How to Play",
+                    onPressed: () {
+                      setState(() {
+                        _showTutorial = true;
+                      });
+                    },
+                  ),
+                if (!_isShopOpen)
+                  IconButton(
+                    icon: Icon(Icons.bar_chart, color: Colors.white),
+                    tooltip: "Combat Stats",
+                    onPressed: () {
+                      setState(() {
+                        _isStatsOpen = !_isStatsOpen;
+                      });
+                    },
+                  ),
+
+                // Reroll button when shop is open
+                if (_isShopOpen && !isVerySmallScreen)
+                  Padding(
+                    padding: const EdgeInsets.only(left: 8.0),
+                    child: ElevatedButton.icon(
+                      onPressed: _rerollShop,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.amber,
+                        padding: EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 0,
+                        ),
+                        minimumSize: Size(0, 36),
+                      ),
+                      icon: Icon(
+                        Icons.refresh,
+                        size: isVerySmallScreen ? 14 : 16,
+                      ),
+                      label: Text(
+                        shopManager.hasFreeRefresh
+                            ? 'Free Refresh'
+                            : 'Reroll (2)',
+                        style: TextStyle(fontSize: isVerySmallScreen ? 10 : 12),
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+
+            // Top right player/combat controls
+            actions: [
+              // Game state summary
+              if (!isSmallScreen && !isVerySmallScreen)
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                  child: _buildGameStateHeader(gameManager),
+                ),
+
+              // Player stats panel
+              Flexible(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                  child: _buildPlayerInfo(gameManager),
+                ),
+              ),
+
+              // Start combat button
+              Padding(
+                padding: const EdgeInsets.only(right: 8.0, left: 4.0),
+                child: ElevatedButton.icon(
+                  onPressed: _startCombatRound,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.red,
+                    padding: EdgeInsets.symmetric(
+                      horizontal: isVerySmallScreen ? 4 : 6,
+                      vertical: 0,
+                    ),
+                    minimumSize: Size(0, 36),
+                  ),
+                  icon: Icon(
+                    Icons.sports_martial_arts,
+                    size: isVerySmallScreen ? 12 : 16,
+                  ),
+                  label: Text(
+                    'Combat',
+                    style: TextStyle(fontSize: isVerySmallScreen ? 10 : 12),
+                  ),
+                ),
+              ),
+            ],
+            backgroundColor: Colors.blueGrey[900],
+            automaticallyImplyLeading: false,
+          ),
+
+          // Body area for game layout
+          body: Stack(
+            children: [
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  // Left panel - Shop, Stats, or Synergy
+                  Expanded(
+                    flex: 4,
+                    child: Stack(
+                      children: [
+                        // Shop / Stats / Synergy toggle area
+                        Container(
+                          padding: EdgeInsets.all(isVerySmallScreen ? 4 : 8),
+                          constraints: BoxConstraints(
+                            minWidth: screenSize.width * 0.25,
+                          ),
+                          child:
+                              _isShopOpen
+                                  ? ShopWidget(
+                                    shopManager: shopManager,
+                                    onReroll: _rerollShop,
+                                    onPurchaseUnit: _purchaseUnit,
+                                    onClose: _toggleShop,
+                                  )
+                                  : _isStatsOpen
+                                  ? CombatStatsTab(
+                                    selectedStat: _selectedStat,
+                                    onStatSelected: (newStat) {
+                                      setState(() {
+                                        _selectedStat = newStat;
+                                      });
+                                    },
+                                  )
+                                  : SynergyDisplay(
+                                    synergyManager: synergyManager,
+                                  ),
+                        ),
+
+                        // Drag target for selling units
+                        if (!isInCombat)
+                          DragTarget<Map<String, dynamic>>(
+                            onWillAccept:
+                                (data) =>
+                                    data != null && data['type'] == 'unit',
+                            onAccept: (data) {
+                              final Unit unit = data['unit'] as Unit;
+                              _handleSellUnit(unit);
+                            },
+                            builder: (context, candidateData, rejectedData) {
+                              bool isHovering = candidateData.isNotEmpty;
+                              Unit? hoveringUnit;
+                              int sellValue = 0;
+
+                              if (isHovering && candidateData.first != null) {
+                                final data = candidateData.first!;
+                                if (data['type'] == 'unit') {
+                                  hoveringUnit = data['unit'] as Unit;
+                                  sellValue = boardManager.calculateSellValue(
+                                    hoveringUnit,
+                                  );
+                                }
+                              }
+
+                              // Sell hover UI overlay
+                              return isHovering
+                                  ? Container(
+                                    decoration: BoxDecoration(
+                                      color: Colors.red.withOpacity(0.3),
+                                      border: Border.all(
+                                        color: Colors.red.withOpacity(0.6),
+                                        width: 2,
+                                      ),
+                                    ),
+                                    child: Center(
+                                      child: Column(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
+                                        children: [
+                                          Text(
+                                            'Sell Unit?',
+                                            style: TextStyle(
+                                              color: Colors.white,
+                                              fontSize: 24,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+                                          SizedBox(height: 8),
+                                          Row(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.center,
+                                            children: [
+                                              Icon(
+                                                Icons.monetization_on,
+                                                color: Colors.amber,
+                                                size: 24,
+                                              ),
+                                              SizedBox(width: 4),
+                                              Text(
+                                                '+$sellValue Gold',
+                                                style: TextStyle(
+                                                  color: Colors.amber,
+                                                  fontSize: 20,
+                                                  fontWeight: FontWeight.bold,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  )
+                                  : Container();
+                            },
+                          ),
+                      ],
+                    ),
+                  ),
+
+                  // Board in the center
+                  Container(
+                    width: boardContainerWidth,
+                    padding: EdgeInsets.all(8),
+                    child: Stack(
+                      children: [
+                        // Main board with aspect ratio
+                        Container(
+                          padding: EdgeInsets.all(2),
+                          child: Center(
+                            child: AspectRatio(
+                              aspectRatio: 8 / 6,
+                              child: Container(
+                                width: boardSize,
+                                height: boardHeight,
+                                child: GameBoard(
+                                  key: boardKey,
+                                  boardManager: boardManager,
+                                  onUnitSelected: _selectUnit,
+                                  onClearSelection: _deselectUnit,
+                                  selectedUnit: selectedUnit,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+
+                        // Start selection overlay
+                        if (gameManager.currentState == GameState.chooseStart)
+                          StartChoiceOverlay(
+                            startOptions: gameManager.currentStartOptions,
+                            rerolls: gameManager.startRerolls,
+                            onChoose: (optionKey) {
+                              gameManager.applyStartOption(optionKey);
+                              gameManager.transitionToShopping();
+                            },
+                            onReroll: () {
+                              gameManager.useStartReroll();
+                            },
+                          ),
+
+                        // Item info overlay
+                        if (_infoItem != null)
+                          ItemInfoBox(
+                            item: _infoItem!,
+                            onClose: () {
+                              setState(() {
+                                _infoItem = null;
+                              });
+                            },
+                          ),
+
+                        // Unit info overlay
+                        if (selectedUnit != null)
+                          UnitInfoBox(
+                            unit: selectedUnit!,
+                            onClose: () {
+                              setState(() {
+                                selectedUnit = null;
+                              });
+                            },
+                          ),
+                      ],
+                    ),
+                  ),
+
+                  // Bench panel on the right
+                  Container(
+                    width: benchWidthEstimate,
+                    padding: EdgeInsets.symmetric(
+                      vertical: isVerySmallScreen ? 4 : 8,
+                      horizontal: isVerySmallScreen ? 2 : 4,
+                    ),
+                    child: _buildVerticalBench(
+                      boardManager,
+                      isSmallScreen,
+                      isVerySmallScreen,
+                      benchWidthEstimate,
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+
+        // Tutorial overlay, if active
+        if (_showTutorial)
+          Positioned.fill(
+            child: Stack(
+              children: [
+                // Dimmed background
+                AbsorbPointer(
+                  absorbing: true,
+                  child: Container(color: Colors.black.withOpacity(0.75)),
+                ),
+
+                // Tutorial content card
+                Center(
+                  child: FractionallySizedBox(
+                    widthFactor: 0.8,
+                    heightFactor: 0.8,
+                    child: Container(
+                      padding: EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: Colors.blueGrey[900],
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      child: Stack(
+                        children: [
+                          Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              // Image
+                              Expanded(
+                                flex: 5,
+                                child: Image.asset(
+                                  _tutorialPages[_tutorialPageIndex].imagePath,
+                                  fit: BoxFit.contain,
+                                  width: double.infinity,
+                                ),
+                              ),
+                              const SizedBox(height: 16),
+
+                              // Tutorial text
+                              Expanded(
+                                flex: 2,
+                                child: AutoSizeText(
+                                  _tutorialPages[_tutorialPageIndex].text,
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 16,
+                                    decoration: TextDecoration.none,
+                                  ),
+                                  textAlign: TextAlign.center,
+                                  maxLines: 10,
+                                  minFontSize: 10,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                              const SizedBox(height: 16),
+
+                              // Navigation controls
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  if (_tutorialPageIndex > 0)
+                                    IconButton(
+                                      icon: Icon(
+                                        Icons.arrow_left,
+                                        color: Colors.white,
+                                      ),
+                                      onPressed: () {
+                                        setState(() {
+                                          _tutorialPageIndex--;
+                                        });
+                                      },
+                                    )
+                                  else
+                                    SizedBox(width: 48),
+                                  if (_tutorialPageIndex <
+                                      _tutorialPages.length - 1)
+                                    IconButton(
+                                      icon: Icon(
+                                        Icons.arrow_right,
+                                        color: Colors.white,
+                                      ),
+                                      onPressed: () {
+                                        setState(() {
+                                          _tutorialPageIndex++;
+                                        });
+                                      },
+                                    )
+                                  else
+                                    TextButton.icon(
+                                      onPressed: () {
+                                        setState(() {
+                                          _showTutorial = false;
+                                          _tutorialPageIndex = 0;
+                                        });
+                                      },
+                                      icon: Icon(
+                                        Icons.check,
+                                        color: Colors.white,
+                                      ),
+                                      label: Text(
+                                        "Close",
+                                        style: TextStyle(color: Colors.white),
+                                      ),
+                                    ),
+                                ],
+                              ),
+                            ],
+                          ),
+
+                          // Close button in top right
+                          Positioned(
+                            top: 0,
+                            right: 0,
+                            child: IconButton(
+                              icon: Icon(Icons.close, color: Colors.white),
+                              onPressed: () {
+                                setState(() {
+                                  _showTutorial = false;
+                                  _tutorialPageIndex = 0;
+                                });
+                              },
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+      ],
+    );
+  }
+
+  // Builds the player's HUD info bar (health, gold, level, XP)
+  Widget _buildPlayerInfo(GameManager gameManager) {
+    final screenSize = MediaQuery.of(context).size;
+    final bool isSmallScreen = screenSize.width < 800;
+    final bool isVerySmallScreen = screenSize.width < 600;
+
+    return FittedBox(
+      fit: BoxFit.scaleDown,
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // Player Health
+          Icon(
+            Icons.favorite,
+            color: Colors.red,
+            size: isVerySmallScreen ? 12 : (isSmallScreen ? 14 : 16),
+          ),
+          SizedBox(width: 2),
+          Text(
+            '${gameManager.playerHealth}',
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: isVerySmallScreen ? 9 : (isSmallScreen ? 10 : 12),
+            ),
+          ),
+          SizedBox(width: isVerySmallScreen ? 2 : 4),
+
+          // Player Gold
+          Icon(
+            Icons.monetization_on,
+            color: Colors.amber,
+            size: isVerySmallScreen ? 12 : (isSmallScreen ? 14 : 16),
+          ),
+          SizedBox(width: 2),
+          Text(
+            '${gameManager.gold}',
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: isVerySmallScreen ? 9 : (isSmallScreen ? 10 : 12),
+            ),
+          ),
+          SizedBox(width: isVerySmallScreen ? 2 : 4),
+
+          // Player Level
+          Icon(
+            Icons.arrow_upward,
+            color: Colors.blue,
+            size: isVerySmallScreen ? 12 : (isSmallScreen ? 14 : 16),
+          ),
+          SizedBox(width: 2),
+          Text(
+            'Lvl ${gameManager.playerLevel}',
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: isVerySmallScreen ? 9 : (isSmallScreen ? 10 : 12),
+            ),
+          ),
+
+          // Player XP progress (hidden on very small screens)
+          if (!isVerySmallScreen)
+            Text(
+              ' (${gameManager.currentXpProgress}/${gameManager.xpForNextLevel})',
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: isVerySmallScreen ? 9 : (isSmallScreen ? 10 : 12),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
+  // Displays the current game phase/status (Combat, Planning, Game Over, etc.)
+  Widget _buildGameStateHeader(GameManager gameManager) {
+    String stateText;
+    Color stateColor;
+
+    // Set label and color based on current game state
+    switch (gameManager.currentState) {
+      case GameState.combat:
+        stateText = 'Combat';
+        stateColor = Colors.red;
+        break;
+      case GameState.shopping:
+        stateText = 'Planning';
+        stateColor = Colors.green;
+        break;
+      case GameState.postCombat:
+        stateText = 'Round Over';
+        stateColor = Colors.orange;
+        break;
+      case GameState.gameOver:
+        stateText = 'Game Over';
+        stateColor = Colors.grey;
+        break;
+      case GameState.chooseStart:
+        stateText = 'Choose Start';
+        stateColor = Colors.blue;
+        break;
+    }
+
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 2, horizontal: 8),
+      decoration: BoxDecoration(
+        color: stateColor.withOpacity(0.2),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            stateText,
+            style: TextStyle(
+              color: stateColor,
+              fontWeight: FontWeight.bold,
+              fontSize: 12,
+            ),
+          ),
+          SizedBox(width: 4),
+          Text(
+            'S${gameManager.currentStage}',
+            style: TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+              fontSize: 12,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // Builds the vertical bench on the right side of the screen (2x5 grid)
+  Widget _buildVerticalBench(
+    BoardManager boardManager,
+    bool isSmallScreen,
+    bool isVerySmallScreen,
+    double benchWidthEstimate,
+  ) {
+    final double spacing = 4.0;
+    final gameManager = Provider.of<GameManager>(context);
+    final bool isInCombat = gameManager.currentState == GameState.combat;
+
+    final containerWidth = benchWidthEstimate - 8;
+
+    return Container(
+      width: containerWidth,
+      padding: EdgeInsets.all(4.0),
+      decoration: BoxDecoration(
+        color: Colors.blueGrey[800],
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // Grid layout for 10 bench slots (5 per column)
+          Expanded(
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                final double maxTileSize = min(
+                  (constraints.maxHeight - (6 * spacing)) / 5,
+                  (containerWidth - (3 * spacing)) / 2,
+                );
+
+                return Center(
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        // Left column (slots 0-4)
+                        Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: List.generate(
+                            5,
+                            (index) => _buildBenchTile(
+                              boardManager,
+                              isSmallScreen,
+                              isVerySmallScreen,
+                              maxTileSize,
+                              spacing / 2,
+                              index,
+                            ),
+                          ),
+                        ),
+                        SizedBox(width: spacing),
+
+                        // Right column (slots 5-9)
+                        Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: List.generate(
+                            5,
+                            (index) => _buildBenchTile(
+                              boardManager,
+                              isSmallScreen,
+                              isVerySmallScreen,
+                              maxTileSize,
+                              spacing / 2,
+                              index + 5,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
+
+          // XP button below bench (only visible outside combat)
+          if (!isInCombat)
+            Padding(
+              padding: EdgeInsets.only(top: 8.0),
+              child: Container(
+                width: double.infinity,
+                height: 32,
+                child: ElevatedButton.icon(
+                  onPressed: _levelUp,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.blue,
+                    padding: EdgeInsets.symmetric(horizontal: 8),
+                  ),
+                  icon: Icon(Icons.arrow_upward, size: 16),
+                  label: Text(
+                    'Buy XP',
+                    style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+                  ),
+                ),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
+  // Builds a single bench slot (drag target) which can hold either a unit or an item
+  Widget _buildBenchTile(
+    BoardManager boardManager,
+    bool isSmallScreen,
+    bool isVerySmallScreen,
+    double tileSize,
+    double tilePadding,
+    int index,
+  ) {
+    final benchItem = boardManager.getBenchSlotItem(index);
+    final gameManager = Provider.of<GameManager>(context);
+    final bool isInCombat = gameManager.currentState == GameState.combat;
+
+    return Container(
+      margin: EdgeInsets.symmetric(
+        vertical: tilePadding,
+        horizontal: tilePadding,
+      ),
+      height: tileSize,
+      width: tileSize,
+
+      // Makes each tile a valid DragTarget
+      child: DragTarget<Map<String, dynamic>>(
+        // Check if the tile can accept a drop
+        onWillAccept: (data) {
+          if (isInCombat || data == null) return false;
+
+          final targetItem = boardManager.getBenchSlotItem(index);
+
+          // Allow unit drops if target is empty or another unit
+          if (data['type'] == 'unit') {
+            return targetItem == null || targetItem is Unit;
+          }
+          // Allow item drops if target is empty or combinable
+          else if (data['type'] == 'item') {
+            final Item draggedItem = data['item'];
+            if (targetItem == null) return true;
+            return targetItem is Item && draggedItem.canCombineWith(targetItem);
+          }
+
+          return false;
+        },
+
+        // Handles drop acceptance and applies the swap/move logic
+        onAccept: (data) {
+          if (isInCombat) return;
+
+          final dynamic targetItem = boardManager.getBenchSlotItem(index);
+
+          // Handle dropped unit
+          if (data['type'] == 'unit') {
+            final Unit draggedUnit = data['unit'] as Unit;
+            final int? sourceIndex = draggedUnit.benchIndex;
+
+            if (targetItem == null) {
+              boardManager.remove(draggedUnit);
+              boardManager.addUnitToBench(draggedUnit, index);
+            }
+            // Swapping units
+            else if (targetItem is Unit) {
+              if (draggedUnit.isOnBoard) {
+                final Position fromBoardPos = Position(
+                  draggedUnit.boardY,
+                  draggedUnit.boardX,
+                );
+                boardManager.remove(draggedUnit);
+                boardManager.placeUnit(targetItem, fromBoardPos);
+                boardManager.addUnitToBench(draggedUnit, index);
+              } else if (sourceIndex != null) {
+                boardManager.swapBenchUnits(sourceIndex, index);
+              }
+            }
+            return;
+          }
+
+          // Handle dropped item
+          if (data['type'] == 'item') {
+            final Item draggedItem = data['item'] as Item;
+            final int? sourceIndex = data['sourceIndex'];
+
+            if (targetItem == null) {
+              if (sourceIndex != null) {
+                boardManager.remove(targetItem);
+              }
+              boardManager.addItemToBench(draggedItem, index);
+            }
+            // Item-to-item swap
+            else if (targetItem is Item && sourceIndex != null) {
+              boardManager.swapBenchItems(sourceIndex, index);
+            }
+          }
+
+          _deselectUnit();
+        },
+
+        // Builds the visual appearance of the tile
+        builder: (context, candidateData, rejectedData) {
+          bool canAcceptDrop = false;
+
+          // Preview drop feedback logic
+          if (!isInCombat &&
+              candidateData.isNotEmpty &&
+              candidateData.first != null) {
+            final data = candidateData.first!;
+            final targetItem = boardManager.getBenchSlotItem(index);
+
+            if (data['type'] == 'unit') {
+              canAcceptDrop = targetItem == null || targetItem is Unit;
+            } else if (data['type'] == 'item' && targetItem is Item) {
+              final Item draggedItem = data['item'] as Item;
+              canAcceptDrop = draggedItem.canCombineWith(targetItem);
+            }
+          }
+
+          // Final tile container with drop highlighting and item/unit content
+          return Container(
+            decoration: BoxDecoration(
+              color:
+                  isInCombat
+                      ? Colors.grey.withOpacity(0.3)
+                      : (canAcceptDrop
+                          ? Colors.green.withOpacity(0.5)
+                          : Colors.blueGrey[600]),
+              borderRadius: BorderRadius.circular(4),
+              border: Border.all(
+                color:
+                    isInCombat
+                        ? Colors.grey
+                        : (canAcceptDrop
+                            ? Colors.green
+                            : Colors.blueGrey[500]!),
+                width: 1,
+              ),
+            ),
+
+            // Show unit or item widget if there's content in the bench slot
+            child:
+                benchItem != null
+                    ? (benchItem is Unit
+                        ? _buildDraggableUnitWidget(
+                          benchItem,
+                          tileSize,
+                          isInCombat,
+                        )
+                        : _buildDraggableItemWidget(
+                          benchItem,
+                          tileSize,
+                          isInCombat,
+                        ))
+                    : null,
+          );
+        },
+      ),
+    );
+  }
+
+  // Builds a draggable unit widget that responds differently depending on whether combat is active
+  Widget _buildDraggableUnitWidget(
+    Unit unit,
+    double tileSize,
+    bool isInCombat,
+  ) {
+    // If it's combat, handle drag gestures and selection in a slightly stricter way
+    if (isInCombat) {
+      bool hasDragged = false;
+
+      return Listener(
+        onPointerDown: (_) => hasDragged = false,
+        onPointerMove: (_) => hasDragged = true,
+
+        // Wraps the unit in a Draggable with proper drag data and visuals
+        child: Draggable<Map<String, dynamic>>(
+          data: {
+            'type': 'unit',
+            'unit': unit,
+            'sourceIndex': unit.benchIndex,
+            'sourceType': unit.isOnBoard ? 'board' : 'bench',
+          },
+
+          // What appears during drag
+          feedback: Material(
+            elevation: 8,
+            color: Colors.transparent,
+            child: Container(
+              width: tileSize * 1.1,
+              height: tileSize * 1.1,
+              child: UnitWidget(unit: unit, isEnemy: unit.isEnemy),
+            ),
+          ),
+
+          // Placeholder widget when unit is being dragged
+          childWhenDragging: Container(
+            decoration: BoxDecoration(
+              color: Colors.grey.withOpacity(0.3),
+              borderRadius: BorderRadius.circular(4),
+              border: Border.all(color: Colors.grey, width: 1),
+            ),
+          ),
+
+          onDragStarted: () => hasDragged = true,
+
+          // Allows tapping the unit to select it (if it wasn’t dragged)
+          child: GestureDetector(
+            onTap: () {
+              if (!hasDragged) {
+                _selectUnit(unit);
+              }
+            },
+            child: UnitWidget(unit: unit, isEnemy: unit.isEnemy),
+          ),
+        ),
+      );
+    } else {
+      // During non-combat, allow regular drag behavior with selection on tap
+      return Listener(
+        onPointerDown: (_) {},
+        onPointerMove: (_) {
+          _isDragging = true;
+        },
+        onPointerUp: (_) {
+          if (!_isDragging) {
+            _selectUnit(unit);
+          }
+          _isDragging = false;
+        },
+
+        // Standard draggable for unit when not in combat
+        child: Draggable<Map<String, dynamic>>(
+          data: {
+            'type': 'unit',
+            'unit': unit,
+            'sourceIndex': unit.benchIndex,
+            'sourceType': unit.isOnBoard ? 'board' : 'bench',
+          },
+          feedback: Material(
+            elevation: 8,
+            color: Colors.transparent,
+            child: Container(
+              width: tileSize * 1.1,
+              height: tileSize * 1.1,
+              child: UnitWidget(unit: unit, isEnemy: unit.isEnemy),
+            ),
+          ),
+          childWhenDragging: Container(
+            decoration: BoxDecoration(
+              color: Colors.grey.withOpacity(0.3),
+              borderRadius: BorderRadius.circular(4),
+            ),
+          ),
+          child: UnitWidget(unit: unit, isEnemy: unit.isEnemy),
+        ),
+      );
+    }
+  }
+
+  // Builds a draggable item widget, tapping reveals item info, and dragging allows swapping
+  Widget _buildDraggableItemWidget(
+    Item item,
+    double tileSize,
+    bool isInCombat,
+  ) {
+    final int benchIndex = item.benchIndex;
+
+    return GestureDetector(
+      // On tap, open the info box for this item
+      onTap: () {
+        setState(() {
+          _infoItem = item;
+        });
+      },
+
+      // If in combat, don't allow drag behavior
+      child:
+          isInCombat
+              ? ItemWidget(item: item)
+              // Otherwise allow item to be dragged with proper drag metadata
+              : Draggable<Map<String, dynamic>>(
+                data: {
+                  'type': 'item',
+                  'item': item,
+                  'sourceIndex': benchIndex,
+                  'sourceType': 'bench',
+                },
+                feedback: Material(
+                  elevation: 8,
+                  color: Colors.transparent,
+                  child: Container(
+                    width: tileSize * 1.1,
+                    height: tileSize * 1.1,
+                    child: ItemWidget(item: item),
+                  ),
+                ),
+                childWhenDragging: Container(
+                  width: tileSize,
+                  height: tileSize,
+                  decoration: BoxDecoration(
+                    color: Colors.grey.withOpacity(0.3),
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                ),
+                child: ItemWidget(item: item),
+              ),
+    );
+  }
+}
