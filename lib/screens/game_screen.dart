@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:realm_of_tactics/models/board_position.dart';
+import 'package:realm_of_tactics/models/map_manager.dart';
 import 'package:realm_of_tactics/widgets/combat_stats_tab.dart';
 import 'package:realm_of_tactics/widgets/start_choice_ui.dart';
 import 'package:realm_of_tactics/widgets/unit_info_box.dart';
@@ -18,6 +19,7 @@ import '../widgets/unit_widget.dart';
 import '../widgets/item_widget.dart';
 import '../widgets/item_info_box.dart';
 import 'package:auto_size_text/auto_size_text.dart';
+import '../widgets/map_widget.dart';
 
 // A simple data class representing a tutorial screen's content
 class TutorialPage {
@@ -52,6 +54,8 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
 
   // Current selected stat tab in stats panel
   StatType _selectedStat = StatType.damageDealt;
+
+  MapNode? _hoveredMapNode;
 
   // Global key used to measure board position for animations
   final GlobalKey boardKey = GlobalKey();
@@ -284,6 +288,109 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
     super.dispose();
   }
 
+  // New tab on the left with node info when the nodes are hovered
+  Widget _buildNodeInfoBox(MapNode? node) {
+    return Container(
+      padding: EdgeInsets.all(8),
+      decoration: BoxDecoration(
+        color: Colors.blueGrey[800],
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            "Node Info",
+            style: TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+              fontSize: 16,
+            ),
+          ),
+          SizedBox(height: 8),
+          if (node == null)
+            Text("Nothing hovered", style: TextStyle(color: Colors.white70))
+          else if (node.type == MapNodeType.combat ||
+              node.type == MapNodeType.elite)
+            ..._buildCombatPreviewLines(node)
+          else
+            Text(node.type.name, style: TextStyle(color: Colors.white)),
+        ],
+      ),
+    );
+  }
+
+  // The actual text displayed when a combat/elite node is hovered
+  List<Widget> _buildCombatPreviewLines(MapNode node) {
+    final List<Widget> lines = [];
+
+    final bool isElite = node.type == MapNodeType.elite;
+
+    for (int i = 0; i < node.rounds.length; i++) {
+      final round = node.rounds[i];
+
+      final Map<String, int> countMap = {};
+      final Map<String, int> tierMap = {};
+
+      for (final unit in round) {
+        countMap[unit.name] = (countMap[unit.name] ?? 0) + 1;
+        tierMap[unit.name] = unit.tier; // capture the tier
+      }
+
+      final units = countMap.entries.toList();
+
+      // Add round header
+      lines.add(
+        Text(
+          "${isElite ? "Elite Round" : "Round"} ${i + 1}:",
+          style: TextStyle(
+            color: isElite ? Colors.purpleAccent : Colors.white,
+            fontWeight: FontWeight.bold,
+            fontSize: 13,
+          ),
+        ),
+      );
+
+      // Show units 2 per row
+      for (int j = 0; j < units.length; j += 2) {
+        final left = units[j];
+        final right = (j + 1 < units.length) ? units[j + 1] : null;
+
+        lines.add(
+          Padding(
+            padding: const EdgeInsets.only(left: 8.0, top: 2.0, bottom: 2.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: [
+                Expanded(
+                  child: Text(
+                    "⭐${tierMap[left.key] ?? 1} ${left.key} x${left.value}",
+                    style: TextStyle(color: Colors.white70, fontSize: 11),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+                if (right != null)
+                  Expanded(
+                    child: Text(
+                      "⭐${tierMap[right.key] ?? 1} ${right.key} x${right.value}",
+                      style: TextStyle(color: Colors.white70, fontSize: 11),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  )
+                else
+                  Spacer(), // fill if no second unit
+              ],
+            ),
+          ),
+        );
+      }
+
+      lines.add(SizedBox(height: 6));
+    }
+
+    return lines;
+  }
+
   // Builds the main game UI including board, bench, shop, stats, combat controls, and overlays
   @override
   Widget build(BuildContext context) {
@@ -344,12 +451,25 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
                 IconButton(
                   icon: Icon(
                     _isShopOpen ? Icons.store_outlined : Icons.store,
-                    color: isInCombat ? Colors.grey : Colors.white,
+                    color:
+                        (isInCombat ||
+                                gameManager.currentState == GameState.map ||
+                                gameManager.currentState ==
+                                    GameState.chooseStart)
+                            ? Colors.grey
+                            : Colors.white,
                   ),
-                  onPressed: isInCombat ? null : _toggleShop,
+                  onPressed:
+                      (isInCombat ||
+                              gameManager.currentState == GameState.map ||
+                              gameManager.currentState == GameState.chooseStart)
+                          ? null
+                          : _toggleShop,
                   tooltip:
-                      isInCombat
-                          ? 'Shop disabled during combat'
+                      (isInCombat ||
+                              gameManager.currentState == GameState.map ||
+                              gameManager.currentState == GameState.chooseStart)
+                          ? 'Shop disabled right now'
                           : 'Toggle Shop',
                 ),
 
@@ -366,13 +486,31 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
                   ),
                 if (!_isShopOpen)
                   IconButton(
-                    icon: Icon(Icons.bar_chart, color: Colors.white),
-                    tooltip: "Combat Stats",
-                    onPressed: () {
-                      setState(() {
-                        _isStatsOpen = !_isStatsOpen;
-                      });
-                    },
+                    icon: Icon(
+                      Icons.bar_chart,
+                      color:
+                          (gameManager.currentState == GameState.map ||
+                                  gameManager.currentState ==
+                                      GameState.chooseStart)
+                              ? Colors.grey
+                              : Colors.white,
+                    ),
+                    tooltip:
+                        (gameManager.currentState == GameState.map ||
+                                gameManager.currentState ==
+                                    GameState.chooseStart)
+                            ? "Stats disabled right now"
+                            : "Combat Stats",
+                    onPressed:
+                        (gameManager.currentState == GameState.map ||
+                                gameManager.currentState ==
+                                    GameState.chooseStart)
+                            ? null
+                            : () {
+                              setState(() {
+                                _isStatsOpen = !_isStatsOpen;
+                              });
+                            },
                   ),
 
                 // Reroll button when shop is open
@@ -483,6 +621,8 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
                                       });
                                     },
                                   )
+                                  : gameManager.currentState == GameState.map
+                                  ? _buildNodeInfoBox(_hoveredMapNode)
                                   : SynergyDisplay(
                                     synergyManager: synergyManager,
                                   ),
@@ -595,17 +735,32 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
                           ),
                         ),
 
-                        // Start selection overlay
+                        // Start choice overlay
                         if (gameManager.currentState == GameState.chooseStart)
                           StartChoiceOverlay(
                             startOptions: gameManager.currentStartOptions,
                             rerolls: gameManager.startRerolls,
                             onChoose: (optionKey) {
                               gameManager.applyStartOption(optionKey);
-                              gameManager.transitionToShopping();
+                              // now handled inside applyStartOption -> sets state to map
                             },
                             onReroll: () {
                               gameManager.useStartReroll();
+                            },
+                          )
+                        else if (gameManager.currentState == GameState.map)
+                          MapWidget(
+                            mapManager: gameManager.mapManager,
+                            onNodeSelected: (node) {
+                              gameManager.chooseMapNode(node);
+                            },
+                            onConfirmSelection: () {
+                              gameManager.enterSelectedMapNode();
+                            },
+                            onNodeHover: (node) {
+                              setState(() {
+                                _hoveredMapNode = node;
+                              });
                             },
                           ),
 
@@ -889,6 +1044,10 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
         stateText = 'Choose Start';
         stateColor = Colors.blue;
         break;
+      case GameState.map:
+        stateText = 'Choose Start';
+        stateColor = Colors.purple;
+        break;
     }
 
     return Container(
@@ -931,6 +1090,13 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
   ) {
     final double spacing = 4.0;
     final gameManager = Provider.of<GameManager>(context);
+    if (gameManager.currentState == GameState.map ||
+        gameManager.currentState == GameState.chooseStart) {
+      if (_isShopOpen || _isStatsOpen) {
+        _isShopOpen = false;
+        _isStatsOpen = false;
+      }
+    }
     final bool isInCombat = gameManager.currentState == GameState.combat;
 
     final containerWidth = benchWidthEstimate - 8;

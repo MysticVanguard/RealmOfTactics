@@ -1,4 +1,6 @@
 import 'dart:async';
+import 'package:realm_of_tactics/models/round_data.dart';
+
 import 'board_manager.dart';
 import 'synergy_manager.dart';
 import 'combat_manager.dart';
@@ -6,16 +8,16 @@ import 'unit.dart';
 import 'item.dart';
 import '../enums/item_type.dart';
 import 'shop_manager.dart';
-import 'ai_opponent_manager.dart';
 import 'board_position.dart';
 import 'package:flutter/material.dart';
 import 'dart:math';
 import '../game_data/units.dart';
 import '../game_data/items.dart';
 import 'package:realm_of_tactics/models/summoned_unit.dart';
+import 'map_manager.dart';
 
 // Core states the game transitions between
-enum GameState { chooseStart, shopping, combat, postCombat, gameOver }
+enum GameState { chooseStart, map, shopping, combat, postCombat, gameOver }
 
 // Represents a selectable game opening
 class StartOption {
@@ -70,7 +72,9 @@ class GameManager extends ChangeNotifier {
   // Needed for animations
   TickerProvider? overlayTicker;
   // Controls enemy team generation
-  late final AIOpponentManager _aiOpponentManager;
+  late final OpponentManager _opponentManager;
+  // Controls the map and it's generation
+  late final MapManager _mapManager;
 
   static GameManager? instance;
   List<Item> getBasicItems() {
@@ -122,6 +126,7 @@ class GameManager extends ChangeNotifier {
   Unit? _currentIronvaleSummonInstance;
   final Map<String, Position> _initialPlayerPositions = {};
   List<Unit> _originalPlayerUnits = [];
+  bool _isRoundPrepared = false;
 
   // How much XP is needed to reach each level
   static const Map<int, int> xpBreakpoints = {
@@ -151,6 +156,7 @@ class GameManager extends ChangeNotifier {
   ShopManager? get shopManager => _shopManager;
   SynergyManager? get synergyManager => _synergyManager;
   List<Unit> get nextRoundEnemies => _nextRoundEnemies;
+  MapManager get mapManager => _mapManager;
 
   // How much XP is needed to reach the next level
   int get xpForNextLevel {
@@ -212,22 +218,10 @@ class GameManager extends ChangeNotifier {
     _combatTickTimer?.cancel();
     _combatTickTimer = null;
 
-    if (_boardManager == null) {
-      return;
-    }
-    _boardManager!.initialize();
+    _boardManager?.initialize();
+    _shopManager?.initialize();
+    _synergyManager?.initialize();
 
-    if (_shopManager == null) {
-      return;
-    }
-    _shopManager!.initialize();
-
-    if (_synergyManager == null) {
-      return;
-    }
-    _synergyManager!.initialize();
-
-    // If no CombatManager yet, make one
     if (_combatManager == null &&
         _boardManager != null &&
         _synergyManager != null) {
@@ -235,18 +229,33 @@ class GameManager extends ChangeNotifier {
         boardManager: _boardManager!,
         synergyManager: _synergyManager!,
       );
-    } else if (_combatManager == null) {
-      return;
     }
 
-    _aiOpponentManager = AIOpponentManager();
+    _opponentManager = OpponentManager();
+    _mapManager = MapManager()..generateMap();
 
     _currentState = GameState.chooseStart;
     startRerolls = 1;
     offerStartOptions();
 
-    _prepareNextRound();
+    notifyListeners();
+  }
 
+  // Used to set a map node to selected if it's valid
+  void chooseMapNode(MapNode node) {
+    _mapManager.selectNode(node);
+    notifyListeners();
+  }
+
+  // Enters a node, adding the rounds and moving to the prep phase
+  void enterSelectedMapNode() {
+    final node = _mapManager.selectedNode;
+    if (node == null) return;
+
+    _mapManager.enterSelectedNode();
+
+    _currentState = GameState.shopping;
+    _prepareNextRound();
     notifyListeners();
   }
 
@@ -305,6 +314,8 @@ class GameManager extends ChangeNotifier {
         break;
     }
 
+    _mapManager.generateMap();
+    _currentState = GameState.map;
     gm.notifyListeners();
   }
 
@@ -424,29 +435,29 @@ class GameManager extends ChangeNotifier {
   void startCombatRound() {
     if (_currentState != GameState.shopping) return;
 
+    if (!_isRoundPrepared) return;
+
+    _isRoundPrepared = false;
+
     _currentState = GameState.combat;
     notifyListeners();
 
     _initialPlayerPositions.clear();
     List<Unit> playerUnits = _boardManager!.getAllBoardUnits();
-
     _originalPlayerUnits = List.from(playerUnits);
     for (var unit in playerUnits) {
       _initialPlayerPositions[unit.id] = Position(unit.boardY, unit.boardX);
     }
 
-    List<Unit> enemyUnits =
-        _nextRoundEnemies.map((unit) {
-          var clone = Unit.clone(unit);
-          clone.isEnemy = true;
-          clone.isOnBoard = true;
-          clone.boardX = unit.boardX;
-          clone.boardY = unit.boardY;
-          return clone;
-        }).toList();
+    final enemies = List<Unit>.from(_nextRoundEnemies);
 
-    _combatManager!.startCombat(_originalPlayerUnits, enemyUnits);
+    for (var unit in enemies) {
+      unit.isEnemy = true;
+      unit.team = 1;
+      unit.isOnBoard = true;
+    }
 
+    _combatManager!.startCombat(_originalPlayerUnits, enemies);
     _startCombatTimer();
   }
 
@@ -514,20 +525,20 @@ class GameManager extends ChangeNotifier {
     Future.delayed(Duration(seconds: 1), () {
       if (_currentState == GameState.postCombat) {
         if (_playerHealth > 0) {
-          _currentState = GameState.shopping;
+          final currentNode = mapManager.currentNode;
+
+          if (currentNode != null && currentNode.rounds.isNotEmpty) {
+            _prepareNextRound();
+            _currentState = GameState.shopping;
+          } else {
+            _currentState = GameState.map;
+          }
 
           _synergyManager?.clearSynergies();
-
           _boardManager?.resetBoardPositions(
             _originalPlayerUnits,
             _initialPlayerPositions,
           );
-          _prepareNextRound();
-
-          _synergyManager?.handleGreendaleGoldGeneration(
-            didPlayerWin: playerWon,
-          );
-
           _shopManager?.resetFreeRefresh();
         } else {
           _currentState = GameState.gameOver;
@@ -707,17 +718,6 @@ class GameManager extends ChangeNotifier {
   void _prepareNextRound() {
     _refreshShop();
 
-    _originalPlayerUnits.clear();
-    _initialPlayerPositions.clear();
-
-    var allUnits = _boardManager?.getAllBoardUnits() ?? [];
-    var playerUnits = allUnits.where((unit) => !unit.isEnemy).toList();
-
-    for (var unit in playerUnits) {
-      _originalPlayerUnits.add(unit);
-      _initialPlayerPositions[unit.id] = Position(unit.boardY, unit.boardX);
-    }
-
     _boardManager?.resetBoard();
 
     for (var unit in _originalPlayerUnits) {
@@ -730,7 +730,18 @@ class GameManager extends ChangeNotifier {
       }
     }
 
-    var enemyTeam = _aiOpponentManager.generateEnemyTeam(_currentStage);
+    final currentNode = mapManager.currentNode;
+    if (currentNode == null) return;
+
+    if (currentNode.rounds.isEmpty) {
+      _currentState = GameState.map;
+      notifyListeners();
+      return;
+    }
+
+    final roundUnits = currentNode.rounds.removeAt(0);
+    final enemyTeam = _opponentManager.createUnitsFromList(roundUnits);
+    _isRoundPrepared = true;
 
     _nextRoundEnemies.clear();
 
