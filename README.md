@@ -1,21 +1,21 @@
 # Realm of Tactics
 
-A Flutter implementation of a Teamfight Tactics (TFT) clone.
+A Flutter implementation of an autochess mobile game with roguelike aspects.
 
 ## Overview
 
-Realm of Tactics is a mobile and desktop game inspired by auto-battlers like Teamfight Tactics. Players collect units, place them on a game board, and watch them battle against opponents. Key features include:
+Realm of Tactics is a mobile and desktop game where players collect units, place them on a game board, and watch them battle against opponents. Key features include:
 
 - Unit placement and management
 - Unit shop system with different tiers and costs
 - Class and Origin synergies
-- Combat simulation (partially implemented)
+- Combat simulation
 - Gold management and player leveling
 
 ## Project Structure
 
 - **lib/models/**: Data models and game logic
-  - `unit.dart`: Base unit class and unit stats
+  - `unit.dart`: Base unit class
   - `board_manager.dart`: Game board and unit placement logic
   - `game_manager.dart`: Game state and player stat management
   - `shop_manager.dart`: Shop mechanics and unit purchasing
@@ -38,12 +38,4 @@ Realm of Tactics is a mobile and desktop game inspired by auto-battlers like Tea
 
 ## Future Improvements
 
-- Combat simulation with animations
-- More unit types and abilities
-- Player vs player functionality
-- Persistent storage for player progress
-- Better visual design and assets
-
-## Credits
-
-This project was converted from a Unity-based implementation to Flutter.
+- Current plans can be found in plans.txt

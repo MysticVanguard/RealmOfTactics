@@ -13,7 +13,6 @@ import 'package:flutter/material.dart';
 import 'dart:math';
 import '../game_data/units.dart';
 import '../game_data/items.dart';
-import 'package:realm_of_tactics/models/summoned_unit.dart';
 import 'map_manager.dart';
 
 // Core states the game transitions between
@@ -123,7 +122,6 @@ class GameManager extends ChangeNotifier {
   // UI and round transition helpers
   bool isDragging = false;
   final List<Unit> _nextRoundEnemies = [];
-  Unit? _currentIronvaleSummonInstance;
   final Map<String, Position> _initialPlayerPositions = {};
   List<Unit> _originalPlayerUnits = [];
   bool _isRoundPrepared = false;
@@ -211,7 +209,6 @@ class GameManager extends ChangeNotifier {
     _roundsWon = 0;
     _roundsLost = 0;
     _ironvaleScrap = 0;
-    _currentIronvaleSummonInstance = null;
     _nextRoundEnemies.clear();
 
     _combatManager?.reset();
@@ -534,7 +531,6 @@ class GameManager extends ChangeNotifier {
             _currentState = GameState.map;
           }
 
-          _synergyManager?.clearSynergies();
           _boardManager?.resetBoardPositions(
             _originalPlayerUnits,
             _initialPlayerPositions,
@@ -613,63 +609,11 @@ class GameManager extends ChangeNotifier {
     _ironvaleScrap = 0;
     _currentState = GameState.shopping;
 
-    if (_currentIronvaleSummonInstance != null) {
-      _boardManager?.remove(_currentIronvaleSummonInstance!);
-      _currentIronvaleSummonInstance = null;
-    }
-
     _boardManager?.initialize();
     _synergyManager?.reset();
     _combatManager?.reset();
 
     notifyListeners();
-  }
-
-  // Spawns or replaces the Ironvale summon based on synergy tier
-  void handleIronvaleSummon(Type summonType, {required bool isEnemy}) {
-    if (_boardManager == null) return;
-
-    if (_currentIronvaleSummonInstance != null) {
-      _boardManager!.remove(_currentIronvaleSummonInstance);
-    }
-
-    SummonedUnit? newSummon;
-    switch (summonType) {
-      case const (IronvaleDrone):
-        newSummon = IronvaleDrone();
-        break;
-      case const (IronvaleTurret):
-        newSummon = IronvaleTurret();
-        break;
-      case const (IronvaleTank):
-        newSummon = IronvaleTank();
-        break;
-      default:
-        return;
-    }
-
-    newSummon.isEnemy = isEnemy;
-
-    if (_synergyManager != null) {
-      int engineerLevel =
-          isEnemy
-              ? _synergyManager!.getEnemySynergyLevel(
-                'Engineer',
-                _boardManager!
-                    .getAllBoardUnits()
-                    .where((u) => u.isEnemy)
-                    .toList(),
-              )
-              : _synergyManager!.getSynergyLevel('Engineer');
-
-      if (engineerLevel > 0) {
-        newSummon.applyEngineerBonus();
-      }
-    }
-
-    _boardManager!.addSummonedUnit(newSummon, isEnemy: isEnemy);
-
-    _synergyManager?.setCurrentIronvaleSummon(newSummon, isEnemy: isEnemy);
   }
 
   // Adds a forged item to the bench if space exists

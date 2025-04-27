@@ -923,7 +923,7 @@ class BoardManager extends ChangeNotifier {
   }
 
   // Adds a summoned unit to the board at the first available tile
-  bool addSummonedUnit(SummonedUnit summon, {required bool isEnemy}) {
+  SummonedUnit? addSummonedUnit(SummonedUnit summon, {required bool isEnemy}) {
     int startRow = isEnemy ? 3 : boardRows;
     int endRow = isEnemy ? 0 : playerStartRow;
     if (isEnemy) {
@@ -944,7 +944,7 @@ class BoardManager extends ChangeNotifier {
     }
 
     if (targetPosition == null) {
-      return false;
+      return null;
     }
 
     summon.isOnBoard = true;
@@ -955,7 +955,7 @@ class BoardManager extends ChangeNotifier {
     _board[targetPosition.row][targetPosition.col] = summon;
 
     notifyListeners();
-    return true;
+    return summon;
   }
 
   // Returns list of units adjacent to a given unit

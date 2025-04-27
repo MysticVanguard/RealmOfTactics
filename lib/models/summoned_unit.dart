@@ -120,7 +120,7 @@ class SummonedUnit extends Unit {
       unitName: unitName ?? this.unitName,
       stats: stats ?? this.stats.copyWith(),
       imagePath: imagePath ?? this.imagePath,
-      summoner: this.summoner,
+      summoner: summoner,
     );
 
     newSummon

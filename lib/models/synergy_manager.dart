@@ -240,13 +240,6 @@ class SynergyManager extends ChangeNotifier {
     } finally {
       _isUpdatingSynergies = false;
     }
-
-    if (!_activeSynergiesSet.contains('Ironvale')) {
-      if (_playerIronvaleSummon != null) {
-        _gameManager!.boardManager!.remove(_playerIronvaleSummon);
-        _playerIronvaleSummon = null;
-      }
-    }
   }
 
   // Returns the synergy tier thresholds for a given synergy
@@ -268,9 +261,7 @@ class SynergyManager extends ChangeNotifier {
       (s) => s.name == synergy,
       orElse: () => const Synergy(name: '', type: '', tiers: []),
     );
-
     final count = _synergyCounts[synergy] ?? 0;
-
     for (int i = synergyObj.tiers.length - 1; i >= 0; i--) {
       if (count >= synergyObj.tiers[i]) {
         return i + 1;
@@ -465,36 +456,6 @@ class SynergyManager extends ChangeNotifier {
         case 'Ironvale':
           if (_gameManager == null) {
             break;
-          }
-
-          Type? targetSummonType;
-          if (tierValue >= 6) {
-            targetSummonType = IronvaleTank;
-          } else if (tierValue >= 4) {
-            targetSummonType = IronvaleTurret;
-          } else if (tierValue >= 2) {
-            targetSummonType = IronvaleDrone;
-          }
-
-          final bool isEnemy = unit.isEnemy;
-          final Unit? currentSummon =
-              isEnemy ? _enemyIronvaleSummon : _playerIronvaleSummon;
-
-          bool shouldCreateSummon = false;
-          if (currentSummon == null) {
-            shouldCreateSummon = true;
-          } else {
-            Type currentType = currentSummon.runtimeType;
-            if (targetSummonType != null && currentType != targetSummonType) {
-              shouldCreateSummon = true;
-            }
-          }
-
-          if (shouldCreateSummon && targetSummonType != null) {
-            _gameManager!.handleIronvaleSummon(
-              targetSummonType,
-              isEnemy: isEnemy,
-            );
           }
 
           if (unit.origins.contains('Ironvale')) {
@@ -935,26 +896,6 @@ class SynergyManager extends ChangeNotifier {
 
   void resetOneTimeBonuses() {
     _appliedOneTimeBonuses.clear();
-  }
-
-  void clearSynergies() {
-    if (_gameManager?.boardManager != null) {
-      for (var unit in _gameManager!.boardManager!.getAllBoardUnits()) {
-        unit.stats.resetStartOfCombatStats();
-      }
-    }
-
-    _playerIronvaleSummon?.stats.resetStartOfCombatStats();
-    _enemyIronvaleSummon?.stats.resetStartOfCombatStats();
-
-    _activeSynergies.clear();
-    _synergyCounts.clear();
-    _activeSynergiesSet.clear();
-    _appliedOneTimeBonuses.clear();
-    _activeSynergyTiers.clear();
-    _enemyIronvaleSummon = null;
-
-    notifyListeners();
   }
 
   // Handles awarding gold for units with the Greendale origin after combat

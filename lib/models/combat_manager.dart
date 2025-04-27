@@ -77,15 +77,31 @@ class CombatManager extends ChangeNotifier {
       boardManager.registerEnemyUnit(unit);
     }
 
+    int ironvaleLevel = synergyManager.getSynergyLevel('Ironvale');
+    SummonedUnit? ironvaleSummon;
+    if (ironvaleLevel == 1) {
+      ironvaleSummon = boardManager.addSummonedUnit(
+        IronvaleDrone(),
+        isEnemy: false,
+      );
+    } else if (ironvaleLevel == 2) {
+      ironvaleSummon = boardManager.addSummonedUnit(
+        IronvaleTurret(),
+        isEnemy: false,
+      );
+    } else if (ironvaleLevel == 3) {
+      ironvaleSummon = boardManager.addSummonedUnit(
+        IronvaleTank(),
+        isEnemy: false,
+      );
+    }
+    synergyManager.setCurrentIronvaleSummon(ironvaleSummon, isEnemy: false);
+    SummonedUnit.setEngineerBonusAlly(
+      synergyManager.getSynergyLevel('Engineer'),
+    );
+    ironvaleSummon?.applyEngineerBonus();
     // Apply all synergy bonuses and start-of-combat buffs
     synergyManager.applyStartOfCombatEffects([..._playerUnits, ..._enemyUnits]);
-
-    // Apply passive engineer bonuses to summons
-    for (var unit in [..._playerUnits, ..._enemyUnits]) {
-      if (unit is SummonedUnit && !unit.hasAppliedEngineerBonus) {
-        unit.applyEngineerBonus();
-      }
-    }
 
     // Reset combat stats and refill HP
     for (var unit in [..._playerUnits, ..._enemyUnits]) {
