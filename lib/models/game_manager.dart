@@ -31,25 +31,25 @@ class StartOption {
 final allStartOptions = [
   StartOption(
     name: "Basic Start",
-    description: "Level 3, 2 XP, 15 gold, 2 basic items",
+    description: "Level 3, 2 XP, 15 gold, 3 items",
   ),
   StartOption(
     name: "High Tier",
-    description: "Level 3, 2 XP, 2x 3-cost units, 1x 2-cost, 3 items",
+    description: "Level 3, 2 XP, 5x 3-cost units, 2 items",
   ),
   StartOption(
     name: "Full Bench",
-    description: "Level 4, 0 XP, 4x 2-cost, 4x 1-cost, 2 items",
+    description: "Level 4, 0 XP, 4x 2-cost, 4x 1-cost, 2 item",
   ),
-  StartOption(name: "Max Gold", description: "Level 1, 0 XP, 33 gold"),
-  StartOption(name: "Equipped", description: "Level 3, 2 XP, 4 items, 5 gold"),
+  StartOption(name: "Max Gold", description: "Level 1, 0 XP, 41 gold"),
+  StartOption(name: "Equipped", description: "Level 3, 2 XP, 5 items, 5 gold"),
   StartOption(
     name: "Champion",
-    description: "Level 1, 0 XP, 1x 4-cost unit, 2 items, 10 gold",
+    description: "Level 3, 0 XP, 1x 4-cost unit, 2 items, 12 gold",
   ),
   StartOption(
     name: "Leveled Up",
-    description: "Level 5, 2 XP, 5x 2-cost units",
+    description: "Level 5, 0 XP, 2x 2-cost units, 3 1-cost units",
   ),
 ];
 
@@ -131,14 +131,14 @@ class GameManager extends ChangeNotifier {
   // How much XP is needed to reach each level
   static const Map<int, int> xpBreakpoints = {
     2: 2,
-    3: 4,
-    4: 6,
-    5: 10,
-    6: 20,
-    7: 36,
-    8: 48,
-    9: 76,
-    10: 84,
+    3: 8,
+    4: 10,
+    5: 14,
+    6: 24,
+    7: 40,
+    8: 52,
+    9: 80,
+    10: 88,
   };
 
   // Various global game getters
@@ -270,15 +270,14 @@ class GameManager extends ChangeNotifier {
         gm._playerLevel = 3;
         gm._playerXp = 2;
         gm.addGold(15);
-        addRandomBasicItems(2);
+        addRandomBasicItems(3);
         break;
       case "High Tier":
         gm._playerLevel = 3;
         gm._playerXp = 2;
         gm.addGold(0);
-        addRandomUnitsToBench(3, 2);
-        addRandomUnitsToBench(2, 1);
-        addRandomBasicItems(3);
+        addRandomUnitsToBench(3, 5);
+        addRandomBasicItems(2);
         break;
       case "Full Bench":
         gm._playerLevel = 4;
@@ -291,26 +290,27 @@ class GameManager extends ChangeNotifier {
       case "Max Gold":
         gm._playerLevel = 1;
         gm._playerXp = 0;
-        gm.addGold(33);
+        gm.addGold(41);
         break;
       case "Equipped":
         gm._playerLevel = 3;
         gm._playerXp = 2;
         gm.addGold(5);
-        addRandomBasicItems(4);
+        addRandomBasicItems(5);
         break;
       case "Champion":
-        gm._playerLevel = 1;
+        gm._playerLevel = 3;
         gm._playerXp = 0;
-        gm.addGold(10);
+        gm.addGold(12);
         addRandomUnitsToBench(4, 1);
         addRandomBasicItems(2);
         break;
       case "Leveled Up":
         gm._playerLevel = 5;
-        gm._playerXp = 2;
+        gm._playerXp = 0;
         gm.addGold(0);
-        addRandomUnitsToBench(2, 5);
+        addRandomUnitsToBench(2, 2);
+        addRandomUnitsToBench(1, 3);
         break;
     }
 
@@ -539,7 +539,6 @@ class GameManager extends ChangeNotifier {
             _originalPlayerUnits,
             _initialPlayerPositions,
           );
-          _shopManager?.resetFreeRefresh();
         } else {
           _currentState = GameState.gameOver;
         }

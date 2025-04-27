@@ -138,7 +138,7 @@ class BoardManager extends ChangeNotifier {
 
   // Calls the check, then if the unit upgrades no need to place,
   // otherwise places the unit on the board or bench spot attempted.
-  bool placeUnit(Unit unit, Position position) {
+  bool placeUnit(Unit unit, Position position, bool playerPlaced) {
     if (!canPlaceUnit(unit, position)) {
       return false;
     }
@@ -178,7 +178,9 @@ class BoardManager extends ChangeNotifier {
       _synergyManager.applyActiveSynergiesToUnit(unitToPlace);
     }
 
-    _synergyManager.updateSynergies();
+    if (playerPlaced) {
+      _synergyManager.updateSynergies();
+    }
 
     notifyListeners();
     return true;

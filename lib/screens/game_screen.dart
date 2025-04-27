@@ -532,7 +532,7 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
                         size: isVerySmallScreen ? 14 : 16,
                       ),
                       label: Text(
-                        shopManager.hasFreeRefresh
+                        (shopManager.freeRefreshAmount > 0)
                             ? 'Free Refresh'
                             : 'Reroll (2)',
                         style: TextStyle(fontSize: isVerySmallScreen ? 10 : 12),

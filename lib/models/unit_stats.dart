@@ -443,7 +443,12 @@ class UnitStats {
 
   // Creates an upgraded version of the stats for a higher-tier unit
   UnitStats upgrade(int newTier) {
-    double multiplier = pow(1.8, newTier - 1).toDouble();
+    double multiplier =
+        newTier == 2
+            ? 1.6
+            : newTier == 3
+            ? 1.6
+            : 1.0;
     var upgraded = UnitStats(
       baseMaxHealth: (baseMaxHealth * multiplier).floor().toInt(),
       baseAttackDamage: (baseAttackDamage * multiplier).floor().toInt(),

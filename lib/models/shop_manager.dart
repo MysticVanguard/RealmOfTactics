@@ -60,7 +60,7 @@ class ShopManager extends ChangeNotifier {
   final GameManager _gameManager;
   final int _shopSize = 5;
   final int _rerollCost = 2;
-  bool _hasFreeRefresh = true;
+  int _freeRefreshAmount = 0;
 
   List<Unit?> _shopUnits = List.generate(5, (_) => null);
   final List<UnitPool> _unitPools = [];
@@ -70,19 +70,19 @@ class ShopManager extends ChangeNotifier {
   List<Unit?> get shopUnits => _shopUnits;
   int get rerollCost => _rerollCost;
   int get shopSize => _shopSize;
-  bool get hasFreeRefresh => _hasFreeRefresh;
+  int get freeRefreshAmount => _freeRefreshAmount;
 
   // Initializes shop by populating the unit pools and performing first refresh
   void initialize() {
     _initializeUnitPool();
-    _hasFreeRefresh = true;
+    _freeRefreshAmount = 0;
     refreshShop();
   }
 
   // Attempts a reroll—free if available, otherwise costs gold
   bool tryReroll() {
-    if (_hasFreeRefresh) {
-      _hasFreeRefresh = false;
+    if (_freeRefreshAmount > 0) {
+      _freeRefreshAmount -= 1;
       refreshShop();
       return true;
     }
@@ -96,8 +96,8 @@ class ShopManager extends ChangeNotifier {
   }
 
   // Resets the free shop refresh (used at start of turn, etc.)
-  void resetFreeRefresh() {
-    _hasFreeRefresh = true;
+  void addFreeRefresh(int x) {
+    _freeRefreshAmount = x;
     notifyListeners();
   }
 
@@ -162,11 +162,12 @@ class ShopManager extends ChangeNotifier {
       [0.70, 0.30, 0.00, 0.00, 0.00],
       [0.60, 0.35, 0.05, 0.00, 0.00],
       [0.50, 0.35, 0.15, 0.00, 0.00],
-      [0.40, 0.35, 0.20, 0.05, 0.00],
-      [0.30, 0.35, 0.25, 0.10, 0.00],
-      [0.20, 0.35, 0.30, 0.15, 0.01],
+      [0.40, 0.35, 0.23, 0.02, 0.00],
+      [0.30, 0.35, 0.30, 0.05, 0.00],
+      [0.20, 0.35, 0.30, 0.14, 0.01],
       [0.15, 0.25, 0.35, 0.20, 0.05],
       [0.10, 0.20, 0.35, 0.25, 0.10],
+      [0.10, 0.15, 0.30, 0.30, 0.15],
     ];
 
     int level = playerLevel.clamp(1, 9);

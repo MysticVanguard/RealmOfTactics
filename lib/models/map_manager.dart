@@ -27,7 +27,7 @@ class MapNode {
 
 class MapManager extends ChangeNotifier {
   // Map dimensions
-  static const int totalFloors = 15;
+  static const int totalFloors = 10;
   static const int nodesPerFloor = 7;
   static const int roundsPerNode = 5;
 
