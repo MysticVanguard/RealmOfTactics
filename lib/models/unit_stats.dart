@@ -55,8 +55,10 @@ class UnitStats {
   OnAttackStats baseOnAttackStats;
 
   // In-combat tracking (damage, healing, etc.)
-  int damageDealt = 0;
-  int damageTaken = 0;
+  int physicalDamageDone = 0;
+  int magicDamageDone = 0;
+  int physicalDamageBlocked = 0;
+  int magicDamageBlocked = 0;
   int healingDone = 0;
   int shieldingDone = 0;
 

@@ -30,7 +30,7 @@ class TutorialPage {
 }
 
 // Enum used to control which stat to display in the stats panel
-enum StatType { damageDealt, damageTaken, healing }
+enum StatType { damageDealt, damageBlocked, healingAndShielding }
 
 // The main screen of the game, managing gameplay interaction and UI state
 class GameScreen extends StatefulWidget {
@@ -1260,7 +1260,7 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
                   draggedUnit.boardX,
                 );
                 boardManager.remove(draggedUnit);
-                boardManager.placeUnit(targetItem, fromBoardPos);
+                boardManager.placeUnit(targetItem, fromBoardPos, true);
                 boardManager.addUnitToBench(draggedUnit, index);
               } else if (sourceIndex != null) {
                 boardManager.swapBenchUnits(sourceIndex, index);

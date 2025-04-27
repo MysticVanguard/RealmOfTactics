@@ -230,10 +230,12 @@ class Unit extends ChangeNotifier {
   }
 
   // Handles applying damage to the unit, considering shields, armor, MR, and reduction
-  void takeDamage(double rawDamage, [DamageType type = DamageType.physical]) {
+  void takeDamage(
+    double rawDamage,
+    Unit? source, [
+    DamageType type = DamageType.physical,
+  ]) {
     if (!isAlive) return;
-
-    stats.damageTaken += rawDamage.floor();
 
     // Handle shields first
     double remainingDamage = rawDamage;
@@ -249,46 +251,81 @@ class Unit extends ChangeNotifier {
 
     if (remainingDamage <= 0) return;
 
-    // Mitigate based on armor or MR
+    double mitigatedAmount = 0;
     double effectiveDamage = remainingDamage;
+
     if (type == DamageType.physical) {
       double mitigation =
           stats.armor <= -100 ? 1.0 : stats.armor / (stats.armor + 100.0);
+      mitigatedAmount = remainingDamage * mitigation;
       effectiveDamage *= (1.0 - mitigation);
     } else if (type == DamageType.magic) {
       double mitigation =
           stats.magicResist <= -100
               ? 1.0
               : stats.magicResist / (stats.magicResist + 100.0);
+      mitigatedAmount = remainingDamage * mitigation;
       effectiveDamage *= (1.0 - mitigation);
     }
 
-    // Apply damage reduction
     effectiveDamage *= (1.0 - stats.damageReduction);
 
     int finalDamage = effectiveDamage.floor();
     if (finalDamage <= 0) return;
 
-    // Apply damage to health
-    int before = stats.currentHealth;
+    int beforeHealth = stats.currentHealth;
     stats.currentHealth -= finalDamage;
-    double applied = (before - max(0, stats.currentHealth)).toDouble();
+    double appliedDamage =
+        (beforeHealth - max(0, stats.currentHealth)).toDouble();
 
-    // Grant mana from damage taken
+    if (source != null) {
+      if (type == DamageType.physical) {
+        source.stats.physicalDamageDone += finalDamage;
+      } else if (type == DamageType.magic) {
+        source.stats.magicDamageDone += finalDamage;
+      }
+    }
+
+    if (type == DamageType.physical) {
+      stats.physicalDamageBlocked += mitigatedAmount.floor();
+    } else if (type == DamageType.magic) {
+      stats.magicDamageBlocked += mitigatedAmount.floor();
+    }
+
+    // Mana gain from damage
     if (stats.maxMana > 0 && rawDamage > 0) {
       double manaFromRaw = rawDamage * 0.01;
-      double manaFromMitigated = applied * 0.07;
+      double manaFromMitigated = appliedDamage * 0.07;
       double totalMana = (manaFromRaw + manaFromMitigated).clamp(0.0, 42.5);
       if (totalMana > 0) {
         gainMana(totalMana.floor());
       }
     }
 
-    // If health drops to zero, kill the unit
+    // Die if health drops to zero
     if (stats.currentHealth <= 0) {
       stats.currentHealth = 0;
       die();
     }
+  }
+
+  // Adds an amount of health to the unit, clamped at the max health
+  void heal(Unit source, int amount) {
+    if (!isAlive || amount <= 0) return;
+
+    stats.currentHealth = (stats.currentHealth + amount).clamp(
+      0,
+      stats.maxHealth,
+    );
+    source.stats.healingDone += amount;
+  }
+
+  // Adds an amount of shield to the unit
+  void shield(Unit source, int amount) {
+    if (!isAlive || amount <= 0) return;
+
+    stats.currentShield += amount;
+    source.stats.shieldingDone += amount;
   }
 
   // Adds mana and checks for ability cast
@@ -572,16 +609,12 @@ class Unit extends ChangeNotifier {
 
       // Apply a shield to the target and track shielding done
       case AbilityEffectType.shield:
-        source.stats.shieldingDone += finalAmount;
-        target.stats.currentShield += finalAmount;
+        target.shield(source, finalAmount);
         break;
 
       // Heal the target, track healing done, and clamp to maxHealth
       case AbilityEffectType.heal:
-        source.stats.healingDone += finalAmount;
-        target.stats.currentHealth = (target.stats.currentHealth + finalAmount)
-            .clamp(0, target.stats.maxHealth);
-        _showEffectVisual(target, effect);
+        target.heal(source, finalAmount);
         break;
 
       // Deal damage to the target, with support for DoT and lifesteal
@@ -601,17 +634,13 @@ class Unit extends ChangeNotifier {
                   ? DamageType.physical
                   : DamageType.magic;
 
-          target.takeDamage(finalAmount.toDouble(), damageType);
-          source.stats.damageDealt += finalAmount.floor();
+          target.takeDamage(finalAmount.toDouble(), source, damageType);
 
           // Apply lifesteal if the source has it
           if (source.stats.lifesteal > 0) {
             int healAmount = (finalAmount * source.stats.lifesteal).floor();
             if (healAmount > 0) {
-              source.stats.currentHealth = (source.stats.currentHealth +
-                      healAmount)
-                  .clamp(0, source.stats.maxHealth);
-              source.stats.healingDone += healAmount.floor();
+              target.heal(source, healAmount);
             }
           }
         }
@@ -719,6 +748,7 @@ class Unit extends ChangeNotifier {
               "summon_${DateTime.now().millisecondsSinceEpoch}_${Random().nextInt(10000)}",
           unitName: effect.summonUnitName!,
           stats: summonStats,
+          summoner: source,
           imagePath: effect.summonImagePath!,
         );
 
@@ -874,10 +904,10 @@ class Unit extends ChangeNotifier {
         sourceId: id,
         targetUnit: target,
         interval: tickInterval,
-        action: (unit) {
+        action: (unit, source) {
           if (!unit.isAlive) return;
 
-          unit.takeDamage(damagePerTick.toDouble(), type);
+          unit.takeDamage(damagePerTick.toDouble(), source, type);
           ticksApplied++;
 
           if (ticksApplied >= tickCount) {
@@ -1061,7 +1091,7 @@ class Unit extends ChangeNotifier {
   }
 
   // Handles executing a basic attack on the given target
-  bool attackTarget(Unit target) {
+  bool attackTarget(Unit target, double damage) {
     if (timeUntilNextAttack > 0) {
       return false;
     }
@@ -1092,6 +1122,7 @@ class Unit extends ChangeNotifier {
       stats.combatStartAttackDamageBonus += stats.riflemanStackAmount;
     }
 
+    target.takeDamage(damage, this, DamageType.physical);
     gainMana(10);
     notifyListeners();
 
@@ -1099,21 +1130,18 @@ class Unit extends ChangeNotifier {
   }
 
   // Performs a special attack with a multiplier, used by things like Scout ult
-  void performSpecialAttack(Unit target, double damageMultiplier) {
+  void performSpecialAttack(Unit target, Unit source, double damageMultiplier) {
     if (!target.isAlive) return;
 
     double baseDamage = stats.attackDamage * damageMultiplier;
 
-    target.takeDamage(baseDamage, DamageType.physical);
+    target.takeDamage(baseDamage, source, DamageType.physical);
 
     // Apply lifesteal if applicable
     if (stats.lifesteal > 0) {
       int healAmount = (baseDamage * stats.lifesteal).floor();
       if (healAmount > 0) {
-        stats.currentHealth = (stats.currentHealth + healAmount).clamp(
-          0,
-          stats.maxHealth,
-        );
+        heal(source, healAmount);
       }
     }
   }
@@ -1353,7 +1381,7 @@ class Unit extends ChangeNotifier {
         );
 
         if (target != null) {
-          performSpecialAttack(target, 1.5);
+          performSpecialAttack(target, this, 1.5);
         }
       }
     }

@@ -6,7 +6,6 @@ import 'package:realm_of_tactics/models/combat_manager.dart';
 import 'package:realm_of_tactics/models/unit.dart';
 import 'package:realm_of_tactics/screens/game_screen.dart';
 
-// Widget for displaying post-combat statistics such as damage dealt, taken, or healing
 class CombatStatsTab extends StatefulWidget {
   final StatType selectedStat;
   final void Function(StatType) onStatSelected;
@@ -24,34 +23,52 @@ class CombatStatsTab extends StatefulWidget {
 class _CombatStatsTabState extends State<CombatStatsTab> {
   @override
   Widget build(BuildContext context) {
-    // Access the CombatManager from the provider
     final combatManager = Provider.of<CombatManager>(context);
+    final List<Unit> playerUnits =
+        combatManager.playerUnits.where((u) => !u.isSummon).toList();
+    final List<Unit> enemyUnits =
+        combatManager.enemyUnits.where((u) => !u.isSummon).toList();
 
-    // Get player and enemy units for this round
-    final List<Unit> playerUnits = combatManager.playerUnits;
-    final List<Unit> enemyUnits = combatManager.enemyUnits;
+    // Chooses which substats we are visualizing
+    double Function(Unit) getFirstStat;
+    double Function(Unit) getSecondStat;
 
-    // Determine which stat to calculate (damage, healing, or taken)
-    double Function(Unit) getStat;
+    Color firstColor;
+    Color secondColor;
+
     switch (widget.selectedStat) {
-      case StatType.damageTaken:
-        getStat = (u) => u.stats.damageTaken.toDouble();
+      case StatType.damageBlocked:
+        getFirstStat = (u) => u.stats.physicalDamageBlocked.toDouble();
+        getSecondStat = (u) => u.stats.magicDamageBlocked.toDouble();
+        firstColor = Colors.orangeAccent;
+        secondColor = Colors.purpleAccent;
         break;
-      case StatType.healing:
-        getStat = (u) => u.stats.healingDone.toDouble();
+      case StatType.healingAndShielding:
+        getFirstStat = (u) => u.stats.healingDone.toDouble();
+        getSecondStat = (u) => u.stats.shieldingDone.toDouble();
+        firstColor = Colors.greenAccent;
+        secondColor = Colors.lightBlueAccent;
         break;
       default:
-        getStat = (u) => u.stats.damageDealt.toDouble();
+        getFirstStat = (u) => u.stats.physicalDamageDone.toDouble();
+        getSecondStat = (u) => u.stats.magicDamageDone.toDouble();
+        firstColor = Colors.redAccent;
+        secondColor = Colors.blueAccent;
     }
 
-    // Find the maximum value for each team to normalize progress bars
-    double maxPlayerStat = playerUnits.map(getStat).fold(0.0, max);
-    double maxEnemyStat = enemyUnits.map(getStat).fold(0.0, max);
+    double maxPlayerStat = playerUnits
+        .map((u) => getFirstStat(u) + getSecondStat(u))
+        .fold(0.0, max);
+    double maxEnemyStat = enemyUnits
+        .map((u) => getFirstStat(u) + getSecondStat(u))
+        .fold(0.0, max);
 
-    // Builds the UI for a single unit's stat bar
     Widget buildUnitBar(Unit unit, double maxTeamStat) {
-      final value = getStat(unit);
-      final percent = (maxTeamStat == 0) ? 0.0 : value / maxTeamStat;
+      final first = getFirstStat(unit);
+      final second = getSecondStat(unit);
+      final total = first + second;
+      final firstPercent = maxTeamStat == 0 ? 0.0 : first / maxTeamStat;
+      final secondPercent = maxTeamStat == 0 ? 0.0 : second / maxTeamStat;
 
       return Padding(
         padding: const EdgeInsets.symmetric(vertical: 6.0, horizontal: 12.0),
@@ -64,7 +81,7 @@ class _CombatStatsTabState extends State<CombatStatsTab> {
               textAlign: TextAlign.center,
             ),
             Text(
-              value.toInt().toString(),
+              total.toInt().toString(),
               style: const TextStyle(
                 color: Colors.amberAccent,
                 fontWeight: FontWeight.bold,
@@ -72,29 +89,43 @@ class _CombatStatsTabState extends State<CombatStatsTab> {
               ),
             ),
             const SizedBox(height: 4),
-            LinearProgressIndicator(
-              value: percent,
-              minHeight: 8,
-              backgroundColor: Colors.grey[700],
-              color: Colors.blueAccent,
+            Stack(
+              children: [
+                LinearProgressIndicator(
+                  value: firstPercent + secondPercent,
+                  minHeight: 8,
+                  backgroundColor: Colors.grey[700],
+                  color: secondColor,
+                ),
+                LinearProgressIndicator(
+                  value: firstPercent,
+                  minHeight: 8,
+                  backgroundColor: Colors.transparent,
+                  color: firstColor,
+                ),
+              ],
             ),
           ],
         ),
       );
     }
 
-    // Sort player and enemy units by the selected stat, descending
-    List<Unit> sortedPlayerUnits = [...playerUnits]
-      ..sort((a, b) => getStat(b).compareTo(getStat(a)));
-    List<Unit> sortedEnemyUnits = [...enemyUnits]
-      ..sort((a, b) => getStat(b).compareTo(getStat(a)));
+    List<Unit> sortedPlayerUnits = [...playerUnits]..sort(
+      (a, b) => (getFirstStat(b) + getSecondStat(b)).compareTo(
+        getFirstStat(a) + getSecondStat(a),
+      ),
+    );
+    List<Unit> sortedEnemyUnits = [...enemyUnits]..sort(
+      (a, b) => (getFirstStat(b) + getSecondStat(b)).compareTo(
+        getFirstStat(a) + getSecondStat(a),
+      ),
+    );
 
     return Container(
       color: Colors.black.withOpacity(0.9),
       padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
       child: Column(
         children: [
-          // Buttons to toggle which stat is being displayed
           Wrap(
             alignment: WrapAlignment.center,
             spacing: 6,
@@ -102,13 +133,16 @@ class _CombatStatsTabState extends State<CombatStatsTab> {
             children:
                 StatType.values.map((type) {
                   final isSelected = widget.selectedStat == type;
-                  final label =
-                      type.name
-                          .replaceAllMapped(
-                            RegExp(r'([A-Z])'),
-                            (m) => ' ${m.group(0)}',
-                          )
-                          .trim();
+                  final label = type.name
+                      .replaceAllMapped(
+                        RegExp(r'([A-Z])'),
+                        (m) => ' ${m.group(0)}',
+                      )
+                      .trim()
+                      .replaceFirstMapped(
+                        RegExp(r'^.'),
+                        (m) => m.group(0)!.toUpperCase(),
+                      );
 
                   return SizedBox(
                     height: 28,
@@ -132,16 +166,13 @@ class _CombatStatsTabState extends State<CombatStatsTab> {
                 }).toList(),
           ),
           const SizedBox(height: 8),
-
-          // Two-column layout showing player and enemy stat bars
           Expanded(
             child: Row(
               children: [
-                // Player units on the left
                 Expanded(
                   child: Column(
                     children: [
-                      const Text(
+                      Text(
                         "Player Units",
                         style: TextStyle(
                           color: Colors.greenAccent,
@@ -160,14 +191,11 @@ class _CombatStatsTabState extends State<CombatStatsTab> {
                     ],
                   ),
                 ),
-
                 const VerticalDivider(color: Colors.white70),
-
-                // Enemy units on the right
                 Expanded(
                   child: Column(
                     children: [
-                      const Text(
+                      Text(
                         "Enemy Units",
                         style: TextStyle(
                           color: Colors.redAccent,

@@ -1,4 +1,6 @@
+import 'package:realm_of_tactics/enums/damage_type.dart';
 import 'package:realm_of_tactics/models/board_position.dart';
+import 'package:realm_of_tactics/models/game_manager.dart';
 import 'package:realm_of_tactics/models/unit.dart';
 import 'package:realm_of_tactics/models/unit_stats.dart';
 import '../enums/item_type.dart';
@@ -11,6 +13,8 @@ class SummonedUnit extends Unit {
 
   // Tracks if Engineer bonuses have already been applied to avoid duplicate stacking
   bool hasAppliedEngineerBonus = false;
+
+  Unit? summoner;
   get getHasAppliedEngineerBonus => hasAppliedEngineerBonus;
 
   // Setter for engineer bonus flag with a notifier trigger
@@ -23,6 +27,7 @@ class SummonedUnit extends Unit {
   SummonedUnit({
     required super.id,
     required super.unitName,
+    required this.summoner,
     required super.stats,
     required super.imagePath,
   }) : super(
@@ -115,6 +120,7 @@ class SummonedUnit extends Unit {
       unitName: unitName ?? this.unitName,
       stats: stats ?? this.stats.copyWith(),
       imagePath: imagePath ?? this.imagePath,
+      summoner: this.summoner,
     );
 
     newSummon
@@ -162,6 +168,54 @@ class SummonedUnit extends Unit {
   List<Item> getEquippedItems() {
     return [];
   }
+
+  @override
+  void takeDamage(
+    double rawDamage,
+    Unit? source, [
+    DamageType type = DamageType.physical,
+  ]) {
+    super.takeDamage(rawDamage, summoner, type);
+  }
+
+  @override
+  bool attackTarget(Unit target, double damage) {
+    if (timeUntilNextAttack > 0) {
+      return false;
+    }
+
+    if (!target.isAlive) {
+      currentTargetId = null;
+      return false;
+    }
+
+    // Play attack animation or effect
+    GameManager.instance!.playAttackEffect(this, target);
+
+    final OnAttackStats totalOnAttack = stats.totalOnAttackStats;
+
+    // Apply on-hit stat bonuses
+    if (totalOnAttack.manaGain > 0) {
+      gainMana(totalOnAttack.manaGain.floor());
+    }
+    if (totalOnAttack.attackDamageStack > 0) {
+      stats.bonusAttackDamage += totalOnAttack.attackDamageStack;
+    }
+    if (totalOnAttack.abilityPowerStack > 0) {
+      stats.bonusAbilityPower += totalOnAttack.abilityPowerStack;
+    }
+
+    // Rifleman stacks
+    if (stats.riflemanStackAmount > 0) {
+      stats.combatStartAttackDamageBonus += stats.riflemanStackAmount;
+    }
+
+    target.takeDamage(damage, summoner, DamageType.physical);
+    gainMana(10);
+    notifyListeners();
+
+    return true;
+  }
 }
 
 // A basic melee summon for Ironvale synergy—low health/damage and short range
@@ -169,6 +223,7 @@ class IronvaleDrone extends SummonedUnit {
   IronvaleDrone({String? id})
     : super(
         id: id ?? 'ironvale_drone_${DateTime.now().millisecondsSinceEpoch}',
+        summoner: null,
         unitName: 'Ironvale Drone',
         stats: UnitStats(
           baseMaxHealth: 200,
@@ -196,6 +251,7 @@ class IronvaleTurret extends SummonedUnit {
   IronvaleTurret({String? id})
     : super(
         id: id ?? 'ironvale_turret_${DateTime.now().millisecondsSinceEpoch}',
+        summoner: null,
         unitName: 'Ironvale Turret',
         stats: UnitStats(
           baseMaxHealth: 400,
@@ -223,6 +279,7 @@ class IronvaleTank extends SummonedUnit {
   IronvaleTank({String? id})
     : super(
         id: id ?? 'ironvale_tank_${DateTime.now().millisecondsSinceEpoch}',
+        summoner: null,
         unitName: 'Ironvale Tank',
         stats: UnitStats(
           baseMaxHealth: 800,

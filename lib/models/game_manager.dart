@@ -725,7 +725,7 @@ class GameManager extends ChangeNotifier {
         unit.isOnBoard = true;
         unit.boardX = position.col;
         unit.boardY = position.row;
-        _boardManager?.placeUnit(unit, position);
+        _boardManager?.placeUnit(unit, position, false);
       }
     }
 

@@ -15,7 +15,7 @@ class CombatEffect {
   final String sourceId;
   final Unit targetUnit;
   final Duration interval;
-  final Function(Unit) action;
+  final Function(Unit, Unit) action;
   Duration timeSinceLastTick = Duration.zero;
 
   CombatEffect({
@@ -94,8 +94,10 @@ class CombatManager extends ChangeNotifier {
         if (healthToAdd > 0) {
           unit.stats.currentHealth += healthToAdd;
         }
-        unit.stats.damageDealt = 0;
-        unit.stats.damageTaken = 0;
+        unit.stats.physicalDamageDone = 0;
+        unit.stats.magicDamageDone = 0;
+        unit.stats.magicDamageBlocked = 0;
+        unit.stats.physicalDamageBlocked = 0;
         unit.stats.healingDone = 0;
         unit.stats.shieldingDone = 0;
       }
@@ -388,10 +390,10 @@ class CombatManager extends ChangeNotifier {
         unit.movementTargetPos = null;
         unit.movementProgress = 0.0;
         if (unit.timeUntilNextAttack <= 0) {
-          bool attackProceeded = unit.attackTarget(currentTarget);
+          double baseDamage = unit.stats.attackDamage.toDouble();
+          bool attackProceeded = unit.attackTarget(currentTarget, baseDamage);
 
           if (attackProceeded) {
-            double baseDamage = unit.stats.attackDamage.toDouble();
             double finalDamage = baseDamage;
             bool isCrit = random.nextDouble() < unit.stats.critChance;
             if (isCrit) {
@@ -433,13 +435,6 @@ class CombatManager extends ChangeNotifier {
                   DamageType.physical,
                 );
               }
-            } else {
-              _applyDamageToTargets(
-                unit,
-                targets,
-                finalDamage,
-                DamageType.physical,
-              );
             }
 
             _handleAttackLanded(unit, currentTarget);
@@ -607,8 +602,7 @@ class CombatManager extends ChangeNotifier {
 
       damageToApply *= (1.0 - target.stats.damageReduction);
 
-      attacker.stats.damageDealt += damageToApply.floor();
-      target.takeDamage(damageToApply, type);
+      target.takeDamage(damageToApply, attacker, type);
 
       totalDamageDealtForLifesteal += damageToApply;
 
@@ -621,8 +615,7 @@ class CombatManager extends ChangeNotifier {
       int healing =
           (totalDamageDealtForLifesteal * attacker.stats.lifesteal).floor();
       if (healing > 0) {
-        attacker.stats.currentHealth = (attacker.stats.currentHealth + healing)
-            .clamp(0, attacker.stats.maxHealth);
+        attacker.heal(attacker, healing);
       }
     }
   }
@@ -672,8 +665,7 @@ class CombatManager extends ChangeNotifier {
     }
 
     for (var enemy in enemiesToHit) {
-      enemy.takeDamage(bonusDamage);
-      attacker.stats.damageDealt += bonusDamage.floor();
+      enemy.takeDamage(bonusDamage, attacker, DamageType.physical);
     }
   }
 
