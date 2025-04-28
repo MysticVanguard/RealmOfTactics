@@ -2,7 +2,6 @@ TODO:
 - Add other combat round sets
 - Possibly add up to 5* units to help lengthen game
     - Also possible to make each combat 3 rounds instead of 5
-- Once you max star a unit, remove from seeing in shop (return if sold)
 - Fix item dupe on bench bug
     - Moving an item from bench to bench duplicates it
 - Add items, implement item effects
@@ -30,3 +29,5 @@ DONE:
     - Summon disappears after a round, maybe after killed
     - When breakpoint changes/is updated, summons all summons up to that
 - Fix bug where summons (when spawned) and sometimes units (related to dashes) have no target in a range and freeze in place
+- Once you max star a unit, remove from seeing in shop (return if sold)
+- Change pool removal and add from being on reroll to being on buy and sell

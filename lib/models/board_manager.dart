@@ -751,6 +751,7 @@ class BoardManager extends ChangeNotifier {
     dynamic removed = remove(unit);
 
     if (removed != null) {
+      _gameManager.shopManager?.returnUnitToPool(unit.unitName);
     } else {
       return 0;
     }

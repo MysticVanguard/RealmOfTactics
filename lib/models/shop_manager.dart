@@ -30,7 +30,6 @@ class UnitPool {
       return throw Exception('No more units available in pool');
     }
 
-    available--;
     Unit newUnit = unitTemplate.copyWith(
       id:
           '${unitTemplate.unitName}_${DateTime.now().millisecondsSinceEpoch}_${Random().nextInt(1000)}',
@@ -113,7 +112,12 @@ class ShopManager extends ChangeNotifier {
 
       List<UnitPool> availablePools =
           _unitPools
-              .where((pool) => pool.cost == unitCost && pool.available > 0)
+              .where(
+                (pool) =>
+                    pool.cost == unitCost &&
+                    pool.available > 0 &&
+                    !_gameManager.hasReachedMaxTier(pool.unitTemplate.unitName),
+              )
               .toList();
 
       if (availablePools.isNotEmpty) {
@@ -146,6 +150,7 @@ class ShopManager extends ChangeNotifier {
       newUnit.gameManager = _gameManager;
 
       if (_gameManager.purchaseUnit(newUnit)) {
+        _decreaseUnitFromPool(unit.unitName);
         _shopUnits[shopIndex] = null;
         notifyListeners();
         return true;
@@ -153,6 +158,22 @@ class ShopManager extends ChangeNotifier {
     }
 
     return false;
+  }
+
+  void returnUnitToPool(String unitName) {
+    final pool = _unitPools.firstWhere(
+      (p) => p.unitTemplate.unitName == unitName,
+      orElse: () => throw Exception('Pool not found'),
+    );
+    pool.returnUnit();
+  }
+
+  void _decreaseUnitFromPool(String unitName) {
+    final pool = _unitPools.firstWhere(
+      (p) => p.unitTemplate.unitName == unitName,
+      orElse: () => throw Exception('Pool not found'),
+    );
+    pool.available--;
   }
 
   // Determines the cost of a unit to roll based on the player’s level and probability table
