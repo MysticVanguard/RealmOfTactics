@@ -7,7 +7,6 @@ TODO:
 - Add items, implement item effects
 - Add items to enemy rounds
     - Will allow for infinitely more uniqueness to rounds
-- Add boss node correctly
 - Add events or change
     - Ideally a game of chance, % chance for combat, reward, or punishment
 - Add merchant or change
@@ -31,3 +30,5 @@ DONE:
 - Fix bug where summons (when spawned) and sometimes units (related to dashes) have no target in a range and freeze in place
 - Once you max star a unit, remove from seeing in shop (return if sold)
 - Change pool removal and add from being on reroll to being on buy and sell
+- Add boss node correctly
+- Make map more fun TM

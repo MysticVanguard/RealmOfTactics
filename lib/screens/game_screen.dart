@@ -325,6 +325,7 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
     final List<Widget> lines = [];
 
     final bool isElite = node.type == MapNodeType.elite;
+    final bool isBoss = node.type == MapNodeType.boss;
 
     for (int i = 0; i < node.rounds.length; i++) {
       final round = node.rounds[i];
@@ -342,9 +343,12 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
       // Add round header
       lines.add(
         Text(
-          "${isElite ? "Elite Round" : "Round"} ${i + 1}:",
+          "${isBoss ? "Boss Round" : (isElite ? "Elite Round" : "Round")} ${i + 1}:",
           style: TextStyle(
-            color: isElite ? Colors.purpleAccent : Colors.white,
+            color:
+                isBoss
+                    ? Colors.redAccent
+                    : (isElite ? Colors.purpleAccent : Colors.white),
             fontWeight: FontWeight.bold,
             fontSize: 13,
           ),

@@ -865,15 +865,21 @@ class GameManager extends ChangeNotifier {
 
   // Finds if the player owns a unit at the max tier
   bool hasReachedMaxTier(String unitName) {
-    int maxTier = 3;
-    for (var unit in [
-      ...boardManager!.getAllBenchUnits(),
-      ...boardManager!.getAllBoardUnits(),
-    ]) {
-      if (unit.unitName == unitName && unit.tier >= maxTier && !unit.isEnemy) {
-        return true;
+    if (boardManager != null) {
+      int maxTier = 3;
+      for (var unit in [
+        ...boardManager!.getAllBenchUnits(),
+        ...boardManager!.getAllBoardUnits(),
+      ]) {
+        if (unit.unitName == unitName &&
+            unit.tier >= maxTier &&
+            !unit.isEnemy) {
+          return true;
+        }
       }
+      return false;
+    } else {
+      return false;
     }
-    return false;
   }
 }

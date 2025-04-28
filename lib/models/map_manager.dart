@@ -27,8 +27,8 @@ class MapNode {
 
 class MapManager extends ChangeNotifier {
   // Map dimensions
-  static const int totalFloors = 10;
-  static const int nodesPerFloor = 7;
+  static const int totalFloors = 15;
+  static const int nodesPerFloor = 9;
   static const int roundsPerNode = 5;
 
   final List<List<MapNode>> _map = List.generate(totalFloors, (_) => []);
@@ -49,8 +49,8 @@ class MapManager extends ChangeNotifier {
 
     final Random random = Random();
     const int minNodesPerFloor = 2;
-    const int maxNodesPerFloor = 3;
-    const int estimatedTotalNodes = 35;
+    const int maxNodesPerFloor = 5;
+    const int estimatedTotalNodes = 60;
 
     // Initialize empty floor structure
     for (int floor = 0; floor < totalFloors; floor++) {
@@ -70,15 +70,15 @@ class MapManager extends ChangeNotifier {
     int totalNodes = 1;
 
     // STEP 2: Generate each floor from 1 to 14 (last floor before boss)
-    for (int floor = 1; floor < totalFloors; floor++) {
+    for (int floor = 1; floor < totalFloors - 1; floor++) {
       final Set<int> candidateIndices = {};
 
       // Let previous nodes each propose 1–2 possible connections
       for (final prev in previousFloorNodes) {
-        final offsets = [-1, 0, 1]..shuffle();
+        final offsets = [-2, -1, 0, 1, 2]..shuffle();
         for (
           int i = 0;
-          i < 2 && candidateIndices.length < maxNodesPerFloor;
+          i < 4 && candidateIndices.length < maxNodesPerFloor;
           i++
         ) {
           int newIndex = prev.index + offsets[i];
@@ -153,11 +153,13 @@ class MapManager extends ChangeNotifier {
 
     // STEP 3: Boss node (final target)
     _bossNode = MapNode(
-      floor: totalFloors,
+      floor: totalFloors - 1,
       index: MapManager.nodesPerFloor ~/ 2,
       type: MapNodeType.boss,
       rounds: _generateRoundsForFloor(totalFloors),
     );
+
+    _map[totalFloors - 1].add(_bossNode!);
 
     for (final node in previousFloorNodes) {
       node.connections.add(_bossNode!);
@@ -201,7 +203,7 @@ class MapManager extends ChangeNotifier {
       node.type = MapNodeType.start;
     }
 
-    for (final node in _map[totalFloors - 1]) {
+    for (final node in _map[totalFloors - 2]) {
       if (node.type != MapNodeType.rest) {
         node.type = MapNodeType.combat;
       }
