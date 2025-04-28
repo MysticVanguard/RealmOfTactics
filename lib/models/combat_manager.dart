@@ -296,10 +296,23 @@ class CombatManager extends ChangeNotifier {
     double dt = timeDelta.inMilliseconds / 1000.0;
 
     _updateTimedEffects();
+    List<Unit> unitsToRemove = [];
+    List<Unit> allUnits = [..._playerUnits, ..._enemyUnits];
 
-    for (var unit in [..._playerUnits, ..._enemyUnits]) {
-      if (!unit.isAlive && unit.isOnBoard) {
-        boardManager.remove(unit);
+    for (var unit in allUnits) {
+      if (!unit.isAlive) {
+        unitsToRemove.add(unit);
+        continue; // skip dead unit updating
+      }
+      if (unit.currentTargetId != null) {
+        Unit? currentTarget = findUnitInstanceById(unit.currentTargetId!);
+        if (currentTarget == null ||
+            !currentTarget.isAlive ||
+            !currentTarget.isOnBoard) {
+          unit.currentTargetId = null;
+          unit.movementTargetPos = null;
+          unit.movementProgress = 0.0;
+        }
       }
       unit.update(timeDelta.inMilliseconds.toDouble() / 1000);
       if (unit.hasSkyguardEvasion && unit.skyguardEvasionTimer > 0) {
@@ -308,18 +321,25 @@ class CombatManager extends ChangeNotifier {
       }
     }
 
+    for (var unit in unitsToRemove) {
+      if (unit.isOnBoard) {
+        boardManager.remove(unit);
+      }
+      _enemyUnits.remove(unit);
+    }
+
     for (var effect in List.from(_activeEffects)) {
       Unit? currentUnitInstance = findUnitInstanceById(effect.targetUnit.id);
+      Unit? applierUnitInstance = findUnitInstanceById(effect.sourceId);
       if (currentUnitInstance == null || !currentUnitInstance.isAlive) continue;
 
       effect.timeSinceLastTick += timeDelta;
       if (effect.timeSinceLastTick >= effect.interval) {
-        effect.action(currentUnitInstance);
+        effect.action(currentUnitInstance, applierUnitInstance);
         effect.timeSinceLastTick -= effect.interval;
       }
     }
 
-    List<Unit> allUnits = [..._playerUnits, ..._enemyUnits];
     Random random = Random();
 
     for (var unit in allUnits) {

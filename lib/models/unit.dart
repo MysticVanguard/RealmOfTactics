@@ -620,7 +620,6 @@ class Unit extends ChangeNotifier {
       // Deal damage to the target, with support for DoT and lifesteal
       case AbilityEffectType.damage:
         _showEffectVisual(target, effect);
-        print("Dealing damage $finalAmount to ${target.unitName}");
 
         if (effect.isDamageOverTime && effect.damageOverTimeDuration != null) {
           source.applyDamageOverTime(
