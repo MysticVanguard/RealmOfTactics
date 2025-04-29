@@ -12,7 +12,7 @@ class BoardManager extends ChangeNotifier {
   // Various variables for board related things
   static const int boardRows = 6;
   static const int boardCols = 8;
-  static const int benchSlots = 10;
+  static const int benchSlots = 12;
   static const int enemyRows = 3;
   static const int playerStartRow = 3;
 
@@ -989,11 +989,11 @@ class BoardManager extends ChangeNotifier {
   // Returns true if all 10 bench slots are occupied
   bool isBenchFull() {
     int occupiedSlots = 0;
-    for (int i = 0; i < 10; i++) {
+    for (int i = 0; i < 12; i++) {
       if (_bench[i] != null) {
         occupiedSlots++;
       }
     }
-    return occupiedSlots >= 10;
+    return occupiedSlots >= 12;
   }
 }

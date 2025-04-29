@@ -2,8 +2,6 @@ TODO:
 - Add other combat round sets
 - Possibly add up to 5* units to help lengthen game
     - Also possible to make each combat 3 rounds instead of 5
-- Fix item dupe on bench bug
-    - Moving an item from bench to bench duplicates it
 - Add items, implement item effects
 - Add items to enemy rounds
     - Will allow for infinitely more uniqueness to rounds
@@ -32,3 +30,6 @@ DONE:
 - Change pool removal and add from being on reroll to being on buy and sell
 - Add boss node correctly
 - Make map more fun TM
+- Fix item dupe on bench bug
+    - Moving an item from bench to bench duplicates it
+    - Fully redo bench to be much more suited for a mobile game

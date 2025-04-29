@@ -33,87 +33,94 @@ class MapWidget extends StatelessWidget {
     return Container(
       color: Colors.black87,
       padding: EdgeInsets.all(12),
-      child: Expanded(
-        child: SingleChildScrollView(
-          scrollDirection: Axis.vertical,
-          physics: BouncingScrollPhysics(),
-          child: ConstrainedBox(
-            constraints: BoxConstraints(
-              minHeight: MediaQuery.of(context).size.height,
-            ),
-            child: Stack(
-              children: [
-                // Connection lines behind
-                CustomPaint(
-                  painter: _ConnectionPainter(_generateConnectionLines(map)),
-                  size: Size(
-                    MapManager.nodesPerFloor * 52.0,
-                    map.length * 52.0,
+      child: Column(
+        children: [
+          Expanded(
+            // <- Expand the scrollable map
+            child: SingleChildScrollView(
+              child: Stack(
+                children: [
+                  // Connection lines behind
+                  CustomPaint(
+                    painter: _ConnectionPainter(_generateConnectionLines(map)),
+                    size: Size(
+                      MapManager.nodesPerFloor * 52.0,
+                      map.length * 52.0,
+                    ),
                   ),
-                ),
-                // Nodes on top
-                Column(
-                  children: List.generate(map.length, (floor) {
-                    final row = map[floor];
-                    return Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: List.generate(MapManager.nodesPerFloor, (i) {
-                        final MapNode? node = _getNodeByIndex(row, i);
-                        if (node == null)
-                          return SizedBox(width: 52, height: 52);
+                  // Nodes on top
+                  Column(
+                    children: List.generate(map.length, (floor) {
+                      final row = map[floor];
+                      return Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: List.generate(MapManager.nodesPerFloor, (i) {
+                          final MapNode? node = _getNodeByIndex(row, i);
+                          if (node == null)
+                            return SizedBox(width: 52, height: 52);
 
-                        final isCurrent = node == mapManager.currentNode;
-                        final isSelectable =
-                            mapManager.currentNode?.connections.contains(
-                              node,
-                            ) ??
-                            false;
-                        final isSelected = node == mapManager.selectedNode;
+                          final isCurrent = node == mapManager.currentNode;
+                          final isSelectable =
+                              mapManager.currentNode?.connections.contains(
+                                node,
+                              ) ??
+                              false;
+                          final isSelected = node == mapManager.selectedNode;
 
-                        return MouseRegion(
-                          onEnter: (_) => onNodeHover(node),
-                          onExit: (_) => onNodeHover(null),
-                          child: GestureDetector(
-                            onTap: () {
-                              if (isSelectable) onNodeSelected(node);
-                            },
-                            child: Container(
-                              margin: EdgeInsets.all(6),
-                              width: 40,
-                              height: 40,
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                color: _getNodeColor(node.type),
-                                border: Border.all(
-                                  color:
-                                      isSelected
-                                          ? Colors.yellow
-                                          : (isCurrent
-                                              ? Colors.cyan
-                                              : Colors.white),
-                                  width: isCurrent || isSelected ? 3 : 1,
+                          return MouseRegion(
+                            onEnter: (_) => onNodeHover(node),
+                            onExit: (_) => onNodeHover(null),
+                            child: GestureDetector(
+                              onTap: () {
+                                if (isSelectable) onNodeSelected(node);
+                              },
+                              child: Container(
+                                margin: EdgeInsets.all(6),
+                                width: 40,
+                                height: 40,
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  color: _getNodeColor(node.type),
+                                  border: Border.all(
+                                    color:
+                                        isSelected
+                                            ? Colors.yellow
+                                            : (isCurrent
+                                                ? Colors.cyan
+                                                : Colors.white),
+                                    width: isCurrent || isSelected ? 3 : 1,
+                                  ),
                                 ),
-                              ),
-                              child: Center(
-                                child: Text(
-                                  _getNodeSymbol(node.type),
-                                  style: TextStyle(
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.bold,
+                                child: Center(
+                                  child: Text(
+                                    _getNodeSymbol(node.type),
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.bold,
+                                    ),
                                   ),
                                 ),
                               ),
                             ),
-                          ),
-                        );
-                      }),
-                    );
-                  }),
-                ),
-              ],
+                          );
+                        }),
+                      );
+                    }),
+                  ),
+                ],
+              ),
             ),
           ),
-        ),
+          if (mapManager.selectedNode !=
+              null) // <- show only if a node is selected
+            Padding(
+              padding: const EdgeInsets.only(top: 8.0),
+              child: ElevatedButton(
+                onPressed: onConfirmSelection,
+                child: Text("Enter"),
+              ),
+            ),
+        ],
       ),
     );
   }

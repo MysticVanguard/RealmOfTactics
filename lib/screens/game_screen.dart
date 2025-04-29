@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:realm_of_tactics/models/board_position.dart';
 import 'package:realm_of_tactics/models/map_manager.dart';
 import 'package:realm_of_tactics/widgets/combat_stats_tab.dart';
 import 'package:realm_of_tactics/widgets/start_choice_ui.dart';
@@ -43,6 +42,9 @@ class GameScreen extends StatefulWidget {
 class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
   // Currently selected unit, used for displaying stats/details
   Unit? selectedUnit;
+
+  // 0 = Units, 1 = Items
+  int _selectedBenchTab = 0;
 
   // Info item displayed in the unit details
   Item? _infoItem;
@@ -1085,25 +1087,40 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
     );
   }
 
-  // Builds the vertical bench on the right side of the screen (2x5 grid)
+  // Builds the vertical bench on the right side of the screen (2x6 grid)
   Widget _buildVerticalBench(
     BoardManager boardManager,
     bool isSmallScreen,
     bool isVerySmallScreen,
     double benchWidthEstimate,
   ) {
-    final double spacing = 4.0;
     final gameManager = Provider.of<GameManager>(context);
-    if (gameManager.currentState == GameState.map ||
-        gameManager.currentState == GameState.chooseStart) {
-      if (_isShopOpen || _isStatsOpen) {
-        _isShopOpen = false;
-        _isStatsOpen = false;
-      }
-    }
     final bool isInCombat = gameManager.currentState == GameState.combat;
 
     final containerWidth = benchWidthEstimate - 8;
+
+    final units =
+        boardManager.getAllBenchUnits()..sort((a, b) {
+          int costCompare = a.cost.compareTo(b.cost);
+          if (costCompare != 0) return costCompare;
+          int nameCompare = a.unitName.compareTo(b.unitName);
+          if (nameCompare != 0) return nameCompare;
+          return b.tier.compareTo(a.tier);
+        });
+    final items =
+        boardManager.getAllBenchItems()..sort((a, b) {
+          int tierCompare = b.tier.compareTo(a.tier);
+          if (tierCompare != 0) return tierCompare;
+          return b.name.compareTo(a.name);
+        });
+
+    // Determine grid content
+    final bool showingUnits = _selectedBenchTab == 0;
+    final int itemCount = items.length;
+    final int itemSlots = ((itemCount / 10).ceil()) * 10;
+
+    final int gridCount = showingUnits ? 12 : itemSlots;
+    final List<dynamic> gridItems = showingUnits ? units : items;
 
     return Container(
       width: containerWidth,
@@ -1113,69 +1130,93 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
         borderRadius: BorderRadius.circular(8),
       ),
       child: Column(
-        mainAxisSize: MainAxisSize.min,
         children: [
-          // Grid layout for 10 bench slots (5 per column)
+          // Tab selector
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              Expanded(
+                child: TextButton(
+                  onPressed: () {
+                    setState(() {
+                      _selectedBenchTab = 0;
+                    });
+                  },
+                  child: AutoSizeText(
+                    "Units",
+                    maxLines: 1,
+                    minFontSize: 8,
+                    style: TextStyle(
+                      color:
+                          _selectedBenchTab == 0
+                              ? Colors.white
+                              : Colors.white70,
+                      fontWeight: FontWeight.bold,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+              ),
+              Expanded(
+                child: TextButton(
+                  onPressed: () {
+                    setState(() {
+                      _selectedBenchTab = 1;
+                    });
+                  },
+                  child: AutoSizeText(
+                    "Items",
+                    maxLines: 1,
+                    minFontSize: 8,
+                    style: TextStyle(
+                      color:
+                          _selectedBenchTab == 1
+                              ? Colors.white
+                              : Colors.white70,
+                      fontWeight: FontWeight.bold,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          SizedBox(height: 6),
+
+          // Grid
           Expanded(
             child: LayoutBuilder(
               builder: (context, constraints) {
-                final double maxTileSize = min(
-                  (constraints.maxHeight - (6 * spacing)) / 5,
+                final double spacing = 4.0;
+                final double tileSize = min(
+                  (constraints.maxHeight - (spacing * 6)) / 6,
                   (containerWidth - (3 * spacing)) / 2,
                 );
 
-                return Center(
-                  child: FittedBox(
-                    fit: BoxFit.scaleDown,
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        // Left column (slots 0-4)
-                        Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: List.generate(
-                            5,
-                            (index) => _buildBenchTile(
-                              boardManager,
-                              isSmallScreen,
-                              isVerySmallScreen,
-                              maxTileSize,
-                              spacing / 2,
-                              index,
-                            ),
-                          ),
-                        ),
-                        SizedBox(width: spacing),
-
-                        // Right column (slots 5-9)
-                        Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: List.generate(
-                            5,
-                            (index) => _buildBenchTile(
-                              boardManager,
-                              isSmallScreen,
-                              isVerySmallScreen,
-                              maxTileSize,
-                              spacing / 2,
-                              index + 5,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
+                return GridView.builder(
+                  physics: AlwaysScrollableScrollPhysics(),
+                  padding: EdgeInsets.zero,
+                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 2,
+                    mainAxisSpacing: spacing,
+                    crossAxisSpacing: spacing,
+                    childAspectRatio: 1,
                   ),
+                  itemCount: gridCount,
+                  itemBuilder: (context, index) {
+                    final content =
+                        (index < gridItems.length) ? gridItems[index] : null;
+                    return _buildBenchTile(content, tileSize, isInCombat);
+                  },
                 );
               },
             ),
           ),
 
           // XP button below bench (only visible outside combat)
-          if (!isInCombat)
+          if (showingUnits && !isInCombat)
             Padding(
-              padding: EdgeInsets.only(top: 8.0),
+              padding: const EdgeInsets.only(top: 8.0),
               child: Container(
                 width: double.infinity,
                 height: 32,
@@ -1200,157 +1241,78 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
 
   // Builds a single bench slot (drag target) which can hold either a unit or an item
   Widget _buildBenchTile(
-    BoardManager boardManager,
-    bool isSmallScreen,
-    bool isVerySmallScreen,
+    dynamic benchContent,
     double tileSize,
-    double tilePadding,
-    int index,
+    bool isInCombat,
   ) {
-    final benchItem = boardManager.getBenchSlotItem(index);
-    final gameManager = Provider.of<GameManager>(context);
-    final bool isInCombat = gameManager.currentState == GameState.combat;
+    final boardManager = Provider.of<BoardManager>(context, listen: false);
 
-    return Container(
-      margin: EdgeInsets.symmetric(
-        vertical: tilePadding,
-        horizontal: tilePadding,
-      ),
-      height: tileSize,
-      width: tileSize,
+    return DragTarget<Map<String, dynamic>>(
+      onWillAccept: (data) {
+        if (data == null) return false;
+        return data['type'] == 'unit' || data['type'] == 'item';
+      },
+      onAccept: (data) {
+        if (data['type'] == 'unit') {
+          final Unit draggedUnit = data['unit'] as Unit;
+          final String sourceType = data['sourceType'];
 
-      // Makes each tile a valid DragTarget
-      child: DragTarget<Map<String, dynamic>>(
-        // Check if the tile can accept a drop
-        onWillAccept: (data) {
-          if (isInCombat || data == null) return false;
-
-          final targetItem = boardManager.getBenchSlotItem(index);
-
-          // Allow unit drops if target is empty or another unit
-          if (data['type'] == 'unit') {
-            return targetItem == null || targetItem is Unit;
+          if (sourceType == 'board') {
+            // Dragged from board to bench
+            boardManager.addUnitToBench(draggedUnit);
+          } else if (sourceType == 'bench') {
+            // Swapping bench units (optional)
           }
-          // Allow item drops if target is empty or combinable
-          else if (data['type'] == 'item') {
-            final Item draggedItem = data['item'];
-            if (targetItem == null) return true;
-            return targetItem is Item && draggedItem.canCombineWith(targetItem);
-          }
+        } else if (data['type'] == 'item') {
+          final Item draggedItem = data['item'] as Item;
 
-          return false;
-        },
-
-        // Handles drop acceptance and applies the swap/move logic
-        onAccept: (data) {
-          if (isInCombat) return;
-
-          final dynamic targetItem = boardManager.getBenchSlotItem(index);
-
-          // Handle dropped unit
-          if (data['type'] == 'unit') {
-            final Unit draggedUnit = data['unit'] as Unit;
-            final int? sourceIndex = draggedUnit.benchIndex;
-
-            if (targetItem == null) {
-              boardManager.remove(draggedUnit);
-              boardManager.addUnitToBench(draggedUnit, index);
-            }
-            // Swapping units
-            else if (targetItem is Unit) {
-              if (draggedUnit.isOnBoard) {
-                final Position fromBoardPos = Position(
-                  draggedUnit.boardY,
-                  draggedUnit.boardX,
-                );
-                boardManager.remove(draggedUnit);
-                boardManager.placeUnit(targetItem, fromBoardPos, true);
-                boardManager.addUnitToBench(draggedUnit, index);
-              } else if (sourceIndex != null) {
-                boardManager.swapBenchUnits(sourceIndex, index);
+          if (benchContent is Item) {
+            // Try to combine if compatible
+            if (draggedItem.canCombineWith(benchContent)) {
+              final Item? combined = draggedItem.combine(benchContent);
+              if (combined != null) {
+                boardManager.remove(draggedItem);
+                boardManager.remove(benchContent);
+                boardManager.addItemToBench(combined);
               }
             }
-            return;
+          } else {
+            // If empty slot
+            boardManager.remove(draggedItem);
+            boardManager.addItemToBench(draggedItem);
           }
+        }
 
-          // Handle dropped item
-          if (data['type'] == 'item') {
-            final Item draggedItem = data['item'] as Item;
-            final int? sourceIndex = data['sourceIndex'];
+        setState(() {});
+      },
+      builder: (context, candidateData, rejectedData) {
+        bool isDropping = candidateData.isNotEmpty;
 
-            if (targetItem == null) {
-              if (sourceIndex != null) {
-                boardManager.remove(targetItem);
-              }
-              boardManager.addItemToBench(draggedItem, index);
-            }
-            // Item-to-item swap
-            else if (targetItem is Item && sourceIndex != null) {
-              boardManager.swapBenchItems(sourceIndex, index);
-            }
-          }
-
-          _deselectUnit();
-        },
-
-        // Builds the visual appearance of the tile
-        builder: (context, candidateData, rejectedData) {
-          bool canAcceptDrop = false;
-
-          // Preview drop feedback logic
-          if (!isInCombat &&
-              candidateData.isNotEmpty &&
-              candidateData.first != null) {
-            final data = candidateData.first!;
-            final targetItem = boardManager.getBenchSlotItem(index);
-
-            if (data['type'] == 'unit') {
-              canAcceptDrop = targetItem == null || targetItem is Unit;
-            } else if (data['type'] == 'item' && targetItem is Item) {
-              final Item draggedItem = data['item'] as Item;
-              canAcceptDrop = draggedItem.canCombineWith(targetItem);
-            }
-          }
-
-          // Final tile container with drop highlighting and item/unit content
-          return Container(
-            decoration: BoxDecoration(
-              color:
-                  isInCombat
-                      ? Colors.grey.withOpacity(0.3)
-                      : (canAcceptDrop
-                          ? Colors.green.withOpacity(0.5)
-                          : Colors.blueGrey[600]),
-              borderRadius: BorderRadius.circular(4),
-              border: Border.all(
-                color:
-                    isInCombat
-                        ? Colors.grey
-                        : (canAcceptDrop
-                            ? Colors.green
-                            : Colors.blueGrey[500]!),
-                width: 1,
-              ),
-            ),
-
-            // Show unit or item widget if there's content in the bench slot
-            child:
-                benchItem != null
-                    ? (benchItem is Unit
-                        ? _buildDraggableUnitWidget(
-                          benchItem,
-                          tileSize,
-                          isInCombat,
-                        )
-                        : _buildDraggableItemWidget(
-                          benchItem,
-                          tileSize,
-                          isInCombat,
-                        ))
-                    : null,
-          );
-        },
-      ),
+        return Container(
+          decoration: BoxDecoration(
+            color:
+                isDropping
+                    ? Colors.green.withOpacity(0.4)
+                    : Colors.blueGrey[600],
+            borderRadius: BorderRadius.circular(4),
+            border: Border.all(color: Colors.blueGrey[500]!),
+          ),
+          child:
+              (benchContent != null)
+                  ? (benchContent is Unit
+                      ? _buildDraggableUnitWidget(
+                        benchContent,
+                        tileSize,
+                        isInCombat,
+                      )
+                      : _buildDraggableItemWidget(
+                        benchContent,
+                        tileSize,
+                        isInCombat,
+                      ))
+                  : null,
+        );
+      },
     );
   }
 
