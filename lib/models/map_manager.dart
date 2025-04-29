@@ -43,6 +43,11 @@ class MapManager extends ChangeNotifier {
   MapNode? get currentNode => _currentNode;
   MapNode? get selectedNode => _selectedNode;
 
+  void selectAnyNode(MapNode node) {
+    _selectedNode = node;
+    notifyListeners();
+  }
+
   // Fully generates the map so that it is different each run
   void generateMap() {
     _map.clear();

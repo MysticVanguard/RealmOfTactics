@@ -57,7 +57,7 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
   // Current selected stat tab in stats panel
   StatType _selectedStat = StatType.damageDealt;
 
-  MapNode? _hoveredMapNode;
+  MapNode? _selectedMapNode;
 
   // Global key used to measure board position for animations
   final GlobalKey boardKey = GlobalKey();
@@ -290,7 +290,7 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
     super.dispose();
   }
 
-  // New tab on the left with node info when the nodes are hovered
+  // New tab on the left with node info when the nodes are selected
   Widget _buildNodeInfoBox(MapNode? node) {
     return Container(
       padding: EdgeInsets.all(8),
@@ -310,13 +310,25 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
             ),
           ),
           SizedBox(height: 8),
-          if (node == null)
-            Text("Nothing hovered", style: TextStyle(color: Colors.white70))
-          else if (node.type == MapNodeType.combat ||
-              node.type == MapNodeType.elite)
-            ..._buildCombatPreviewLines(node)
-          else
-            Text(node.type.name, style: TextStyle(color: Colors.white)),
+          Expanded(
+            child: SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  if (node == null)
+                    Text(
+                      "Nothing selected",
+                      style: TextStyle(color: Colors.white70),
+                    )
+                  else if (node.type == MapNodeType.combat ||
+                      node.type == MapNodeType.elite)
+                    ..._buildCombatPreviewLines(node)
+                  else
+                    Text(node.type.name, style: TextStyle(color: Colors.white)),
+                ],
+              ),
+            ),
+          ),
         ],
       ),
     );
@@ -628,7 +640,7 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
                                     },
                                   )
                                   : gameManager.currentState == GameState.map
-                                  ? _buildNodeInfoBox(_hoveredMapNode)
+                                  ? _buildNodeInfoBox(_selectedMapNode)
                                   : SynergyDisplay(
                                     synergyManager: synergyManager,
                                   ),
@@ -758,15 +770,13 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
                           MapWidget(
                             mapManager: gameManager.mapManager,
                             onNodeSelected: (node) {
-                              gameManager.chooseMapNode(node);
+                              setState(() {
+                                gameManager.mapManager.selectNode(node);
+                                _selectedMapNode = node;
+                              });
                             },
                             onConfirmSelection: () {
                               gameManager.enterSelectedMapNode();
-                            },
-                            onNodeHover: (node) {
-                              setState(() {
-                                _hoveredMapNode = node;
-                              });
                             },
                           ),
 
