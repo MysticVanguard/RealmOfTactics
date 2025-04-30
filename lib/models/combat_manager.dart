@@ -116,6 +116,7 @@ class CombatManager extends ChangeNotifier {
         unit.stats.physicalDamageBlocked = 0;
         unit.stats.healingDone = 0;
         unit.stats.shieldingDone = 0;
+        Unit.handleItemEffectsOnStartCombat(unit);
       }
     }
 
@@ -349,6 +350,8 @@ class CombatManager extends ChangeNotifier {
         unit.timeUntilNextAttack -= dt;
       }
 
+      unit.applyVitalFocusAura(unit);
+
       List<Unit> enemies =
           (_playerUnits.contains(unit)) ? _enemyUnits : _playerUnits;
 
@@ -427,18 +430,19 @@ class CombatManager extends ChangeNotifier {
         unit.movementProgress = 0.0;
         if (unit.timeUntilNextAttack <= 0) {
           double baseDamage = unit.stats.attackDamage.toDouble();
-          bool attackProceeded = unit.attackTarget(currentTarget, baseDamage);
+          double finalDamage = baseDamage;
+          bool isCrit = random.nextDouble() < unit.stats.critChance;
+          if (isCrit) {
+            finalDamage *= unit.stats.critDamage;
+            Unit.handleItemEffectsOnCrit(unit, currentTarget);
+            Unit.handleItemEffectsOnCritted(currentTarget);
+          }
+
+          finalDamage *= unit.stats.damageAmp;
+          if (finalDamage < 0) finalDamage = 0;
+          bool attackProceeded = unit.attackTarget(currentTarget, finalDamage);
 
           if (attackProceeded) {
-            double finalDamage = baseDamage;
-            bool isCrit = random.nextDouble() < unit.stats.critChance;
-            if (isCrit) {
-              finalDamage *= unit.stats.critDamage;
-            }
-
-            finalDamage *= unit.stats.damageAmp;
-            if (finalDamage < 0) finalDamage = 0;
-
             List<Unit> targets = [currentTarget];
 
             if (unit.stats.beastRiderCleavePercent > 0) {
@@ -618,7 +622,6 @@ class CombatManager extends ChangeNotifier {
   ) {
     if (damageAmount <= 0) return;
 
-    double totalDamageDealtForLifesteal = 0;
     Set<String> hitTargetIds = {};
 
     for (var target in targets) {
@@ -640,18 +643,8 @@ class CombatManager extends ChangeNotifier {
 
       target.takeDamage(damageToApply, attacker, type);
 
-      totalDamageDealtForLifesteal += damageToApply;
-
       if (!target.isAlive) {
         boardManager.remove(target);
-      }
-    }
-
-    if (attacker.stats.lifesteal > 0 && totalDamageDealtForLifesteal > 0) {
-      int healing =
-          (totalDamageDealtForLifesteal * attacker.stats.lifesteal).floor();
-      if (healing > 0) {
-        attacker.heal(attacker, healing);
       }
     }
   }

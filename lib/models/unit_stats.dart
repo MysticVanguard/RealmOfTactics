@@ -75,6 +75,7 @@ class UnitStats {
   double itemLifesteal = 0.0;
   double itemDamageAmp = 0.0;
   double itemDamageReduction = 0.0;
+  int itemRange = 0;
   OnAttackStats itemOnAttackStats = OnAttackStats.empty;
 
   // Bonuses applied dynamically (e.g. from synergies)
@@ -104,6 +105,27 @@ class UnitStats {
   bool hasIronhideStun = false;
   bool hasEmberhillMovementBuff = false;
   double emberhillAttackSpeedBonus = 0.0;
+
+  // Effect flags and temporary bonuses (reset each combat)
+  bool physicalAbilitiesCanCrit = false;
+  bool magicAbilitiesCanCrit = false;
+  bool canCriticallyShield = false;
+  bool spikedVisorCritBonusActive = false;
+  double spikedVisorCritBonusAmount = 0.0;
+  bool healingReduced = false;
+  int mysticHarnessBonus = 0;
+  int warlockTalismanBonus = 0;
+  double shadowFangBonus = 0.0;
+  double combatStartCritDamageBonus = 0.0;
+  bool hasWickedBroochCooldown = false;
+  bool hasEternalCharmBonus = false;
+  bool hasBalancedPlateBonus = false;
+  bool hasTitanHideBonus = false;
+  bool hasBattlePlateBonus = false;
+  bool hasBulwarkShield = false;
+  int nullplateBonus = 0;
+  int huntersCoatStacks = 0;
+  bool hasForgedArchmageBuff = false;
 
   // Current in-combat state
   int currentHealth;
@@ -195,6 +217,26 @@ class UnitStats {
     isStunned = false;
     stunDuration = 0.0;
 
+    physicalAbilitiesCanCrit = false;
+    magicAbilitiesCanCrit = false;
+    canCriticallyShield = false;
+    spikedVisorCritBonusActive = false;
+    spikedVisorCritBonusAmount = 0.0;
+    healingReduced = false;
+    mysticHarnessBonus = 0;
+    warlockTalismanBonus = 0;
+    shadowFangBonus = 0;
+    combatStartCritDamageBonus = 0.0;
+    hasWickedBroochCooldown = false;
+    hasEternalCharmBonus = false;
+    hasBalancedPlateBonus = false;
+    hasTitanHideBonus = false;
+    hasBattlePlateBonus = false;
+    hasBulwarkShield = false;
+    nullplateBonus = 0;
+    huntersCoatStacks = 0;
+    hasForgedArchmageBuff = false;
+
     lastPosition = isOnBoard ? Position(boardY, boardX) : null;
   }
 
@@ -217,7 +259,7 @@ class UnitStats {
       itemAbilityPower +
       bonusAbilityPower +
       combatStartAbilityPowerBonus;
-  int get range => baseRange;
+  int get range => baseRange + itemRange;
   double get critChance =>
       (baseCritChance + itemCritChance + bonusCritChance).clamp(0.0, 1.0);
   double get critDamage => baseCritDamage + itemCritDamage + bonusCritDamage;
@@ -321,6 +363,7 @@ class UnitStats {
     newStats.itemDamageAmp = itemDamageAmp;
     newStats.itemDamageReduction = itemDamageReduction;
     newStats.itemOnAttackStats = itemOnAttackStats;
+    newStats.itemRange = itemRange;
 
     newStats._bonusMaxHealth = bonusMaxHealth ?? _bonusMaxHealth;
     newStats.bonusAttackDamage = bonusAttackDamage;
@@ -392,9 +435,11 @@ class UnitStats {
     itemCritChance += bonus.bonusCritChance;
     itemCritDamage += bonus.bonusCritDamage;
     itemStartingMana += bonus.bonusStartingMana;
+    currentMana += bonus.bonusStartingMana;
     itemLifesteal += bonus.bonusLifesteal;
     itemDamageAmp += bonus.bonusDamageAmp;
     itemDamageReduction += bonus.bonusDamageReduction;
+    itemRange += bonus.bonusRange;
 
     // Handle percent-based boosts
     if (bonus.bonusAttackDamagePercent > 0) {
@@ -424,9 +469,11 @@ class UnitStats {
     itemCritChance -= bonus.bonusCritChance;
     itemCritDamage -= bonus.bonusCritDamage;
     itemStartingMana -= bonus.bonusStartingMana;
+    currentMana -= bonus.bonusStartingMana;
     itemLifesteal -= bonus.bonusLifesteal;
     itemDamageAmp -= bonus.bonusDamageAmp;
     itemDamageReduction -= bonus.bonusDamageReduction;
+    itemRange -= bonus.bonusRange;
 
     if (bonus.bonusAttackDamagePercent > 0) {
       itemAttackDamage -=

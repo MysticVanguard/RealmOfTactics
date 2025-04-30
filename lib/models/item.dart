@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import '../enums/item_type.dart';
 import '../game_data/items.dart';
 import 'package:meta/meta.dart';
@@ -15,12 +17,12 @@ class ItemStatsBonus {
   final double bonusCritChance;
   final double bonusCritDamage;
   final double bonusLifesteal;
-  final int bonusManaMax;
   final int bonusStartingMana;
   final double bonusMovementSpeed;
   final OnAttackStats onAttackStats;
   final double bonusDamageAmp;
   final double bonusDamageReduction;
+  final int bonusRange;
 
   final double bonusAttackDamagePercent;
   final double bonusAttackSpeedPercent;
@@ -38,7 +40,6 @@ class ItemStatsBonus {
     this.bonusCritChance = 0,
     this.bonusCritDamage = 0,
     this.bonusLifesteal = 0,
-    this.bonusManaMax = 0,
     this.bonusStartingMana = 0,
     this.bonusMovementSpeed = 0,
     this.onAttackStats = OnAttackStats.empty,
@@ -48,6 +49,7 @@ class ItemStatsBonus {
     this.bonusMovementSpeedPercent = 0,
     this.bonusDamageAmp = 0,
     this.bonusDamageReduction = 0,
+    this.bonusRange = 0,
   });
 }
 
@@ -185,7 +187,8 @@ class Item {
     if (combinedEntry.key == 'not_found') return null;
 
     return combinedEntry.value.copyWith(
-      id: '${combinedEntry.value.id}_${DateTime.now().millisecondsSinceEpoch}',
+      id:
+          '${combinedEntry.value.id}_${DateTime.now().millisecondsSinceEpoch}${Random().nextInt(1000000)}',
     );
   }
 }

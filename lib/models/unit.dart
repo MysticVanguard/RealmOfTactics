@@ -54,6 +54,8 @@ class Unit extends ChangeNotifier {
   Item? get armor => _armor;
   Item? get trinket => _trinket;
 
+  final Map<String, Set<String>> _vitalFocusAuraMap = {};
+
   UnitState state = UnitState.idle;
   Position position = const Position(0, 0);
   int? benchIndex = -1;
@@ -272,7 +274,12 @@ class Unit extends ChangeNotifier {
 
     int finalDamage = effectiveDamage.floor();
     if (finalDamage <= 0) return;
-
+    finalDamage = handleItemEffectsOnTakeDamage(
+      this,
+      finalDamage,
+      type,
+      mitigatedAmount,
+    );
     int beforeHealth = stats.currentHealth;
     stats.currentHealth -= finalDamage;
     double appliedDamage =
@@ -283,6 +290,14 @@ class Unit extends ChangeNotifier {
         source.stats.physicalDamageDone += finalDamage;
       } else if (type == DamageType.magic) {
         source.stats.magicDamageDone += finalDamage;
+      }
+      _handleItemEffectsOnDamageDealt(source, this);
+
+      if (source.stats.lifesteal > 0) {
+        int healAmount = (finalDamage * stats.lifesteal).floor();
+        if (healAmount > 0) {
+          heal(source, healAmount);
+        }
       }
     }
 
@@ -305,6 +320,9 @@ class Unit extends ChangeNotifier {
     // Die if health drops to zero
     if (stats.currentHealth <= 0) {
       stats.currentHealth = 0;
+      if (source != null) {
+        handleItemEffectsOnKill(source);
+      }
       die();
     }
   }
@@ -312,7 +330,8 @@ class Unit extends ChangeNotifier {
   // Adds an amount of health to the unit, clamped at the max health
   void heal(Unit source, int amount) {
     if (!isAlive || amount <= 0) return;
-
+    int overheal = stats.currentHealth - (stats.currentHealth + amount);
+    _handleItemEffectsOnHeal(this, amount, overheal);
     stats.currentHealth = (stats.currentHealth + amount).clamp(
       0,
       stats.maxHealth,
@@ -323,7 +342,16 @@ class Unit extends ChangeNotifier {
   // Adds an amount of shield to the unit
   void shield(Unit source, int amount) {
     if (!isAlive || amount <= 0) return;
-
+    if (source.stats.canCriticallyShield) {
+      double finalShield = amount as double;
+      bool isCrit = Random().nextDouble() < source.stats.critChance;
+      if (isCrit) {
+        finalShield *= source.stats.critDamage;
+        Unit.handleItemEffectsOnCrit(source, this);
+      }
+      if (finalShield < 0) finalShield = 0;
+      amount = finalShield.toInt();
+    }
     stats.currentShield += amount;
     source.stats.shieldingDone += amount;
   }
@@ -333,6 +361,7 @@ class Unit extends ChangeNotifier {
     if (isManaLocked || amount <= 0) return;
 
     stats.currentMana = (stats.currentMana + amount).clamp(0, stats.maxMana);
+    handleItemEffectsOnManaGain(this);
 
     if (stats.currentMana >= stats.maxMana && stats.maxMana > 0) {
       castAbility();
@@ -368,6 +397,8 @@ class Unit extends ChangeNotifier {
     if (abilityName == null || !abilities.containsKey(abilityName)) return;
 
     final ability = abilities[abilityName!]!;
+
+    _handleItemEffectsOnCast(this);
 
     // Apply ability effects to targets
     for (final effect in ability.effects) {
@@ -619,8 +650,41 @@ class Unit extends ChangeNotifier {
 
       // Deal damage to the target, with support for DoT and lifesteal
       case AbilityEffectType.damage:
+        for (final item in source.getEquippedItems()) {
+          if (item.id == "item_magebane_plate") {
+            GameManager.instance?.combatManager?.addTimedEffect(
+              TimedEffect(
+                target: target,
+                stat: "abilityPower",
+                amount: -10,
+                duration: Duration(seconds: 4),
+              ),
+            );
+          }
+        }
         _showEffectVisual(target, effect);
+        bool canCrit = false;
+        if (effect.scalingStat == "attackDamage" &&
+            source.stats.physicalAbilitiesCanCrit) {
+          canCrit = true;
+        } else if (effect.scalingStat == "abilityPower" &&
+            source.stats.magicAbilitiesCanCrit) {
+          canCrit = true;
+        }
 
+        if (canCrit) {
+          double finalDamage = finalAmount as double;
+          bool isCrit = Random().nextDouble() < source.stats.critChance;
+          if (isCrit) {
+            finalDamage *= source.stats.critDamage;
+            Unit.handleItemEffectsOnCrit(source, target);
+            Unit.handleItemEffectsOnCritted(target);
+          }
+
+          finalDamage *= source.stats.damageAmp;
+          if (finalDamage < 0) finalDamage = 0;
+          finalAmount = finalDamage.toInt();
+        }
         if (effect.isDamageOverTime && effect.damageOverTimeDuration != null) {
           source.applyDamageOverTime(
             target,
@@ -634,14 +698,6 @@ class Unit extends ChangeNotifier {
                   : DamageType.magic;
 
           target.takeDamage(finalAmount.toDouble(), source, damageType);
-
-          // Apply lifesteal if the source has it
-          if (source.stats.lifesteal > 0) {
-            int healAmount = (finalAmount * source.stats.lifesteal).floor();
-            if (healAmount > 0) {
-              target.heal(source, healAmount);
-            }
-          }
         }
         break;
 
@@ -1120,7 +1176,7 @@ class Unit extends ChangeNotifier {
     if (stats.riflemanStackAmount > 0) {
       stats.combatStartAttackDamageBonus += stats.riflemanStackAmount;
     }
-
+    _handleItemEffectsOnAttack(this, target);
     target.takeDamage(damage, this, DamageType.physical);
     gainMana(10);
     notifyListeners();
@@ -1135,14 +1191,6 @@ class Unit extends ChangeNotifier {
     double baseDamage = stats.attackDamage * damageMultiplier;
 
     target.takeDamage(baseDamage, source, DamageType.physical);
-
-    // Apply lifesteal if applicable
-    if (stats.lifesteal > 0) {
-      int healAmount = (baseDamage * stats.lifesteal).floor();
-      if (healAmount > 0) {
-        heal(source, healAmount);
-      }
-    }
   }
 
   // Marks this unit as dead
@@ -1502,5 +1550,546 @@ class Unit extends ChangeNotifier {
     cloned.emberhillAttackSpeedBonus = other.emberhillAttackSpeedBonus;
 
     return cloned;
+  }
+
+  void _handleItemEffectsOnAttack(Unit attacker, Unit target) {
+    final items = attacker.getEquippedItems();
+
+    for (var item in items) {
+      print(item.id);
+      if (item.id.startsWith('item_twinfang_blade')) {
+        final adjacentEnemies =
+            attacker.getValidTargets().where((enemy) {
+              return (enemy.boardX - target.boardX).abs() <= 1 &&
+                  (enemy.boardY - target.boardY).abs() <= 1 &&
+                  enemy.id != target.id;
+            }).toList();
+        for (var enemy in adjacentEnemies) {
+          enemy.takeDamage(
+            attacker.stats.attackDamage * 0.15,
+            attacker,
+            DamageType.physical,
+          );
+        }
+      } else if (item.id.startsWith('item_bladed_repeater')) {
+        if (attackCounter % 3 == 0) {
+          target.takeDamage(
+            attacker.stats.attackDamage * .5,
+            attacker,
+            DamageType.physical,
+          );
+        }
+      } else if (item.id.startsWith('item_tempest_string')) {
+        attacker.applyStatModifier("attackSpeed", 3, isPercent: true);
+      } else if (item.id.startsWith('item_spellshot_launcher')) {
+        if (Random().nextDouble() < 0.2) {
+          target.takeDamage(
+            attacker.stats.abilityPower * 0.25,
+            attacker,
+            DamageType.magic,
+          );
+        }
+      } else if (item.id.startsWith('item_channeling_bow')) {
+        final manaDamage = attacker.stats.maxMana * 0.2;
+        target.takeDamage(manaDamage, attacker, DamageType.magic);
+      } else if (item.id.startsWith('item_leeching_arrows')) {
+        final healAmount = (attacker.stats.maxHealth * 0.01).round();
+        attacker.heal(attacker, healAmount);
+      } else if (item.id.startsWith('item_mystic_harness')) {
+        if (attacker.stats.mysticHarnessBonus < 30) {
+          attacker.stats.combatStartArmorBonus += 1;
+          attacker.stats.combatStartMagicResistBonus += 1;
+          attacker.stats.mysticHarnessBonus += 1;
+        }
+      } else if (item.id.startsWith("item_forged_zephyr")) {
+        attacker.stats.combatStartAbilityPowerBonus += 5;
+      }
+    }
+  }
+
+  void _handleItemEffectsOnDamageDealt(Unit attacker, Unit target) {
+    final items = attacker.getEquippedItems();
+
+    for (final item in items) {
+      print(item.id);
+      if (item.id.startsWith('item_arcblade')) {
+        if (!target.stats.healingReduced) {
+          final duration = Duration(seconds: 5);
+          final startTime = DateTime.now();
+
+          target.stats.healingReduced = true;
+          // Apply 40% healing reduction to target (implement as a timed effect or flag)
+          GameManager.instance?.combatManager?.addCombatEffect(
+            CombatEffect(
+              sourceId: attacker.id,
+              targetUnit: target,
+              interval: Duration(milliseconds: 250),
+              action: (unit, source) {
+                final now = DateTime.now();
+                final expired = now.difference(startTime) >= duration;
+                if (expired) {
+                  unit.stats.healingReduced = false;
+                  GameManager.instance?.combatManager?.activeEffects
+                      .removeWhere(
+                        (e) =>
+                            e.sourceId == source.id &&
+                            e.targetUnit.id == unit.id,
+                      );
+                }
+              },
+            ),
+          );
+        }
+      } else if (item.id.startsWith('item_twin_conduits')) {
+        // Reduce damage reduction by 10% temporarily
+        GameManager.instance?.combatManager?.addTimedEffect(
+          TimedEffect(
+            target: target,
+            stat: "damageReduction",
+            amount: -10,
+            duration: Duration(seconds: 4),
+          ),
+        );
+      } else if (item.id.startsWith('item_swift_helm')) {
+        // Remove 20% of Armor for 1 seconds
+        GameManager.instance?.combatManager?.addTimedEffect(
+          TimedEffect(
+            target: target,
+            stat: "armor",
+            amount: (-target.stats.armor * 0.2).toInt(),
+            duration: Duration(seconds: 1),
+          ),
+        );
+      } else if (item.id.startsWith('item_swift_helm')) {
+        // Remove 20% of Magic Resist for 1 seconds
+        GameManager.instance?.combatManager?.addTimedEffect(
+          TimedEffect(
+            target: target,
+            stat: "magicResist",
+            amount: (-target.stats.magicResist * 0.2).toInt(),
+            duration: Duration(seconds: 1),
+          ),
+        );
+      }
+    }
+  }
+
+  static void handleItemEffectsOnStartCombat(Unit unit) {
+    final items = unit.getEquippedItems();
+
+    for (final item in items) {
+      print(item.id);
+      if (item.id.startsWith('item_bloodpiercer')) {
+        // Allow physical ability damage to crit
+        unit.stats.physicalAbilitiesCanCrit = true;
+      } else if (item.id.startsWith('item_chaos_prism') ||
+          item.id.startsWith("item_forged_jeweledscope")) {
+        // Allow magical ability damage to crit
+        unit.stats.magicAbilitiesCanCrit = true;
+      } else if (item.id.startsWith('item_spiked_visor')) {
+        // Enable crit shield flag and apply 25% crit chance buff when shielded (handled elsewhere when shield is applied)
+        unit.stats.canCriticallyShield = true;
+        unit.stats.spikedVisorCritBonusActive = false;
+        unit.stats.spikedVisorCritBonusAmount = 0.25;
+      } else if (item.id.startsWith('item_runed_helm')) {
+        // Grant a 300% AP-based shield at start of combat
+        int shieldAmount = (unit.stats.abilityPower * 3).floor();
+        unit.shield(unit, shieldAmount);
+      } else if (item.id.startsWith("item_forged_guardian")) {
+        int shieldAmount = (unit.stats.abilityPower * 5).floor();
+        unit.shield(unit, shieldAmount);
+      }
+    }
+  }
+
+  void _handleItemEffectsOnHeal(Unit recipient, int healAmount, int overheal) {
+    final healedItems = recipient.getEquippedItems();
+
+    for (final item in healedItems) {
+      print(item.id);
+      if (item.id.startsWith('item_vampiric_blade')) {
+        // Overhealing creates shield (up to 10% max HP)
+        if (overheal > 0) {
+          int maxShield = (recipient.stats.maxHealth * 0.10).floor();
+          int shieldAmount = overheal.clamp(
+            0,
+            max(maxShield - recipient.stats.currentShield, 0),
+          );
+          if (shieldAmount > 0) {
+            recipient.shield(recipient, shieldAmount);
+          }
+        }
+      } else if (item.id.startsWith('item_bloodstaff')) {
+        // Heal lowest health ally 50% of healing done to this unit
+        final allies =
+            GameManager.instance?.allUnitsInCombat
+                .where((u) => u.team == recipient.team && u.isAlive)
+                .toList() ??
+            [];
+        if (allies.isNotEmpty) {
+          allies.sort(
+            (a, b) => a.stats.currentHealth.compareTo(b.stats.currentHealth),
+          );
+          final lowest = allies.first;
+          int bonusHeal = (healAmount * 0.50).floor();
+          if (bonusHeal > 0 && lowest != recipient) {
+            lowest.heal(recipient, bonusHeal);
+          }
+        }
+      } else if (item.id.startsWith('item_resonant_focus')) {
+        // Gain +2 mana when healed (including self-healing)
+        recipient.gainMana(2);
+      } else if (item.id.startsWith('item_warlock_talisman')) {
+        // Gain +1 Armor per 2% Max HP healed (Max 30)
+        if (recipient.stats.warlockTalismanBonus < 30) {
+          int armorGain =
+              (healAmount / (recipient.stats.maxHealth * 0.02)).floor();
+          armorGain = armorGain.clamp(0, 30);
+          if (armorGain > 0) {
+            recipient.applyStatModifier("armor", armorGain);
+            recipient.stats.warlockTalismanBonus += armorGain;
+          }
+        }
+      } else if (item.id.startsWith('item_darkbinding_charm')) {
+        // Heals gain 5 Magic Resist for 1s
+        GameManager.instance?.combatManager?.addTimedEffect(
+          TimedEffect(
+            target: recipient,
+            stat: "magicResist",
+            amount: 5,
+            duration: Duration(seconds: 1),
+          ),
+        );
+      }
+    }
+  }
+
+  static void handleItemEffectsOnCrit(Unit attacker, Unit target) {
+    final items = attacker.getEquippedItems();
+
+    for (final item in items) {
+      print(item.id);
+      if (item.id.startsWith('item_whirlwind_knives')) {
+        // 40% chance to bounce to a nearby enemy
+        final adjacentEnemies =
+            GameManager.instance?.boardManager
+                ?.getAdjacentUnits(target)
+                .where(
+                  (u) =>
+                      u.isAlive && u.team != attacker.team && u.id != target.id,
+                )
+                .toList();
+        if (adjacentEnemies!.isNotEmpty && Random().nextDouble() <= 0.4) {
+          final bounceTarget =
+              adjacentEnemies[Random().nextInt(adjacentEnemies.length)];
+          final damage = attacker.stats.attackDamage.toDouble();
+          bounceTarget.takeDamage(damage, attacker, DamageType.physical);
+        }
+      } else if (item.id.startsWith('item_shadow_fang')) {
+        // Increase crit damage by 1% each time, max 30%
+        if (attacker.stats.shadowFangBonus < 0.3) {
+          attacker.stats.shadowFangBonus =
+              (attacker.stats.shadowFangBonus + 0.01).clamp(0, 0.3);
+          attacker.stats.combatStartCritDamageBonus += 0.01;
+        }
+      } else if (item.id.startsWith('item_blood_charm')) {
+        // Heal 3% of missing HP on crit
+        final missingHP =
+            attacker.stats.maxHealth - attacker.stats.currentHealth;
+        final healAmount = (missingHP * 0.03).floor();
+        attacker.heal(attacker, healAmount);
+      } else if (item.id.startsWith('item_wardbreaker_gem')) {
+        // Apply -10 MR to the target for 3s
+        GameManager.instance?.combatManager?.addTimedEffect(
+          TimedEffect(
+            target: target,
+            stat: "magicResist",
+            amount: -10,
+            duration: Duration(seconds: 3),
+          ),
+        );
+      }
+    }
+  }
+
+  void _handleItemEffectsOnCast(Unit caster) {
+    final items = caster.getEquippedItems();
+
+    for (final item in items) {
+      print(item.id);
+      if (item.id.startsWith('item_focused_mind')) {
+        // Gain 30% max mana on cast
+        int bonusMana = (caster.stats.maxMana * 0.3).round();
+        caster.gainMana(bonusMana);
+      } else if (item.id.startsWith('item_aether_helm')) {
+        // Gain 30 armor for 3s
+        GameManager.instance?.combatManager?.addTimedEffect(
+          TimedEffect(
+            target: caster,
+            stat: "armor",
+            amount: 30,
+            duration: Duration(seconds: 3),
+          ),
+        );
+      } else if (item.id.startsWith('item_mystic_charm')) {
+        // Gain 100 HP shield
+        caster.shield(caster, 100);
+      } else if (item.id.startsWith('item_vital_core')) {
+        // Heal 5% of missing HP
+        final missing = caster.stats.maxHealth - caster.stats.currentHealth;
+        final heal = (missing * 0.05).round();
+        caster.heal(caster, heal);
+      } else if (item.id.startsWith("item_forged_archmage")) {
+        if (caster.stats.hasForgedArchmageBuff) {
+          continue;
+        } else {
+          caster.stats.hasForgedArchmageBuff = true;
+          caster.stats.combatStartAbilityPowerBonus += 100;
+        }
+      } else if (item.id.startsWith("item_forged_spirithelm")) {
+        caster.heal(caster, (caster.stats.maxMana / 2).toInt());
+      }
+    }
+  }
+
+  void handleItemEffectsOnManaGain(Unit unit) {
+    final items = unit.getEquippedItems();
+
+    for (final item in items) {
+      print(item.id);
+      if (item.id.startsWith('item_psychic_edge')) {
+        unit.stats.combatStartCritDamageBonus += 0.03;
+        GameManager.instance?.combatManager?.addTimedEffect(
+          TimedEffect(
+            target: unit,
+            stat: "critDamage",
+            amount: -3,
+            duration: Duration(seconds: 3),
+          ),
+        );
+      }
+    }
+  }
+
+  static void handleItemEffectsOnCritted(Unit target) {
+    if (target.stats.hasWickedBroochCooldown == true) return;
+
+    final items = target.getEquippedItems();
+    for (final item in items) {
+      print(item.id);
+      if (item.id.startsWith('item_wicked_brooch')) {
+        final shield = (target.stats.maxHealth * 0.05).round();
+        target.shield(target, shield);
+
+        // Prevent re-triggering for 3s
+        target.stats.hasWickedBroochCooldown = true;
+
+        GameManager.instance?.combatManager?.addCombatEffect(
+          CombatEffect(
+            sourceId: target.id,
+            targetUnit: target,
+            interval: Duration(seconds: 3),
+            action: (unit, _) {
+              unit.stats.hasWickedBroochCooldown = false;
+              GameManager.instance?.combatManager?.activeEffects.removeWhere(
+                (e) =>
+                    e.sourceId == unit.id &&
+                    e.targetUnit.id == unit.id &&
+                    e.interval == Duration(seconds: 3),
+              );
+            },
+          ),
+        );
+      }
+    }
+  }
+
+  void handleItemEffectsOnKill(Unit killer) {
+    final items = killer.getEquippedItems();
+
+    for (final item in items) {
+      print(item.id);
+      if (item.id.startsWith('item_overflow_core')) {
+        killer.gainMana(10);
+        GameManager.instance?.combatManager?.addTimedEffect(
+          TimedEffect(
+            target: killer,
+            stat: "damageAmp",
+            amount: 5,
+            duration: Duration(seconds: 6),
+          ),
+        );
+      } else if (item.id.startsWith("item_forged_bloodlocket")) {
+        killer.stats.combatStartHealthBonus += 100;
+        killer.stats.currentHealth += 100;
+      }
+    }
+  }
+
+  void applyHealthStateEffects(Unit unit) {
+    final items = unit.getEquippedItems();
+    final healthPercent = unit.stats.currentHealth / unit.stats.maxHealth;
+
+    for (final item in items) {
+      print(item.id);
+      if (item.id.startsWith('item_eternal_charm')) {
+        if (healthPercent < 0.3 && !unit.stats.hasEternalCharmBonus) {
+          unit.stats.combatStartLifestealBonus +=
+              unit.stats.baseLifesteal; // Double it
+          unit.stats.hasEternalCharmBonus = true;
+        } else if (healthPercent >= 0.3 && unit.stats.hasEternalCharmBonus) {
+          unit.stats.combatStartLifestealBonus -= unit.stats.baseLifesteal;
+          unit.stats.hasEternalCharmBonus = false;
+        }
+      }
+      if (item.id.startsWith('item_blood_vessel')) {
+        if (healthPercent > 0.6) {
+          GameManager.instance?.combatManager?.addCombatEffect(
+            CombatEffect(
+              sourceId: unit.id,
+              targetUnit: unit,
+              interval: Duration(seconds: 2),
+              action: (u, _) {
+                if (u.stats.currentHealth / u.stats.maxHealth <= 0.6) return;
+                final healAmount = (u.stats.maxHealth * 0.03).round();
+                u.heal(u, healAmount);
+              },
+            ),
+          );
+        }
+      }
+      if (item.id.startsWith('item_balanced_plate')) {
+        if (healthPercent < 0.5 && !unit.stats.hasBalancedPlateBonus) {
+          unit.stats.combatStartArmorBonus += 50;
+          unit.stats.combatStartMagicResistBonus += 50;
+          unit.stats.hasBalancedPlateBonus = true;
+        }
+      }
+      if (item.id.startsWith('item_titan_hide')) {
+        if (healthPercent > 0.6 && !unit.stats.hasTitanHideBonus) {
+          unit.stats.combatStartDamageResistanceBonus += 0.10;
+          unit.stats.hasTitanHideBonus = true;
+        } else if (healthPercent <= 0.6 && unit.stats.hasTitanHideBonus) {
+          unit.stats.combatStartDamageResistanceBonus -= 0.10;
+          unit.stats.hasTitanHideBonus = false;
+        }
+      }
+      if (item.id.startsWith('item_battle_plate')) {
+        if (healthPercent < 0.5 && !unit.stats.hasBattlePlateBonus) {
+          unit.stats.combatStartLifestealBonus += 0.10;
+          unit.stats.hasBattlePlateBonus = true;
+        } else if (healthPercent >= 0.5 && unit.stats.hasBattlePlateBonus) {
+          unit.stats.combatStartLifestealBonus -= 0.10;
+          unit.stats.hasBattlePlateBonus = false;
+        }
+      }
+    }
+  }
+
+  int handleItemEffectsOnTakeDamage(
+    Unit unit,
+    int damage,
+    DamageType type,
+    double mitigated,
+  ) {
+    final items = unit.getEquippedItems();
+    double modifiedDamage = damage.toDouble();
+
+    for (final item in items) {
+      if (item.id.startsWith('item_iron_dome')) {
+        if (type == DamageType.physical) {
+          modifiedDamage *= 0.9;
+        }
+      }
+      if (item.id.startsWith('item_bulwarks_crown')) {
+        if (!unit.stats.hasBulwarkShield) {
+          final shieldAmount = 400;
+          unit.shield(unit, shieldAmount);
+          unit.stats.hasBulwarkShield = true;
+
+          GameManager.instance?.combatManager?.addCombatEffect(
+            CombatEffect(
+              sourceId: unit.id,
+              targetUnit: unit,
+              interval: Duration(seconds: 5),
+              action: (u, _) {
+                u.stats.hasBulwarkShield = false;
+                GameManager.instance?.combatManager?.activeEffects.removeWhere(
+                  (e) =>
+                      e.sourceId == u.id &&
+                      e.targetUnit.id == u.id &&
+                      e.interval == Duration(seconds: 5),
+                );
+              },
+            ),
+          );
+        }
+      }
+      if (item.id.startsWith('item_bladed_helm')) {
+        final reflectAmount = (damage * 0.15).floor();
+        final attacker = GameManager.instance?.findUnitById(
+          unit.currentTargetId ?? "",
+        );
+        if (attacker != null && attacker.isAlive) {
+          attacker.takeDamage(reflectAmount.toDouble(), unit, type);
+        }
+      }
+      if (item.id.startsWith('item_nullplate')) {
+        if (unit.stats.nullplateBonus < 60) {
+          unit.stats.nullplateBonus += 1;
+          unit.stats.combatStartMagicResistBonus += 1;
+        }
+      }
+      if (item.id.startsWith('item_mystic_wrap')) {
+        final heal = (mitigated * 0.15).floor();
+        unit.heal(unit, heal);
+      }
+      if (item.id.startsWith('item_hunters_coat')) {
+        if (unit.stats.huntersCoatStacks < 50) {
+          unit.stats.huntersCoatStacks += 1;
+          unit.stats.combatStartAttackSpeedBonus += 0.01;
+        }
+      }
+    }
+
+    return modifiedDamage.toInt();
+  }
+
+  void applyVitalFocusAura(Unit unit) {
+    final items = unit.getEquippedItems();
+    final hasVitalFocus = items.any(
+      (item) => item.id.startsWith('item_vital_focus'),
+    );
+
+    if (!hasVitalFocus || !unit.isAlive) {
+      return;
+    }
+
+    final currentAdjacent =
+        unit
+            .getAdjacentUnits()
+            .where((u) => u.team != unit.team && u.isAlive)
+            .toSet();
+
+    final currentIds = currentAdjacent.map((u) => u.id).toSet();
+    final lastIds = _vitalFocusAuraMap[unit.id] ?? {};
+
+    // Enemies that were affected last tick but are no longer adjacent
+    final noLongerAdjacentIds = lastIds.difference(currentIds);
+    for (final id in noLongerAdjacentIds) {
+      final target = GameManager.instance?.findUnitById(id);
+      if (target != null && target.isAlive) {
+        target.stats.healingReduced = false;
+      }
+    }
+
+    // New enemies that became adjacent this tick
+    final newlyAdjacent = currentAdjacent.where((u) => !lastIds.contains(u.id));
+    for (final enemy in newlyAdjacent) {
+      enemy.stats.healingReduced = true;
+    }
+
+    // Save current state for next tick
+    _vitalFocusAuraMap[unit.id] = currentIds;
   }
 }

@@ -169,10 +169,9 @@ class ItemInfoBox extends StatelessWidget {
     addStat("AP", stats.bonusAbilityPowerPercent, isPercent: true);
     addStat("Armor", stats.bonusArmor);
     addStat("Magic Resist", stats.bonusMagicResist);
-    addStat("Crit Chance", stats.bonusCritChance * 100, isPercent: true);
-    addStat("Crit Damage", stats.bonusCritDamage * 100, isPercent: true);
-    addStat("Lifesteal", stats.bonusLifesteal * 100, isPercent: true);
-    addStat("Max Mana", stats.bonusManaMax.toDouble());
+    addStat("Crit Chance", stats.bonusCritChance, isPercent: true);
+    addStat("Crit Damage", stats.bonusCritDamage, isPercent: true);
+    addStat("Lifesteal", stats.bonusLifesteal, isPercent: true);
     addStat("Starting Mana", stats.bonusStartingMana.toDouble());
 
     if (statWidgets.isEmpty) {
