@@ -6,7 +6,6 @@ import 'synergy_manager.dart';
 import 'combat_manager.dart';
 import 'unit.dart';
 import 'item.dart';
-import '../enums/item_type.dart';
 import 'shop_manager.dart';
 import 'board_position.dart';
 import 'package:flutter/material.dart';
@@ -89,6 +88,17 @@ class GameManager extends ChangeNotifier {
   void setTileSize(double size) {
     _tileSize = size;
   }
+
+  void initializeItemPool() {
+    for (final item in allItems.values) {
+      if (item.isComponent) {
+        itemPool[item.id] = maxPerItem;
+      }
+    }
+  }
+
+  final Map<String, int> itemPool = {};
+  final int maxPerItem = 4;
 
   // Optional tile size for rendering the board/grid
   void setBoardKey(GlobalKey key) {
@@ -228,6 +238,8 @@ class GameManager extends ChangeNotifier {
       );
     }
 
+    initializeItemPool();
+
     _opponentManager = OpponentManager();
     _mapManager = MapManager()..generateMap();
 
@@ -346,11 +358,30 @@ class GameManager extends ChangeNotifier {
 
   // Selects a random base-level item from the component list
   Item getRandomBasicItem() {
-    final basicItems = getBasicItems();
-    if (basicItems.isEmpty) throw Exception("No tier 1 items found");
+    print(itemPool.entries);
+    final poolEntries =
+        itemPool.entries
+            .where((e) => allItems.containsKey(e.key) && e.value > 0)
+            .toList();
+    print(poolEntries);
+    if (poolEntries.isEmpty) {
+      final basicItems = getBasicItems();
+      if (basicItems.isEmpty) throw Exception("No tier 1 items found");
 
-    final randomItem = basicItems[Random().nextInt(basicItems.length)];
-    return randomItem.copyWith();
+      final randomItem = basicItems[Random().nextInt(basicItems.length)];
+      return randomItem.copyWith();
+    }
+
+    final weightedList = <String>[];
+    for (final entry in poolEntries) {
+      weightedList.addAll(List.filled(entry.value, entry.key));
+    }
+    final rand = Random();
+    final selectedItemId = weightedList[rand.nextInt(weightedList.length)];
+
+    itemPool[selectedItemId] = itemPool[selectedItemId]! - 1;
+
+    return allItems[selectedItemId]!.copyWith();
   }
 
   Item getRandomItemByTier(int tier) {
@@ -526,6 +557,12 @@ class GameManager extends ChangeNotifier {
 
     for (var unit in _boardManager!.getAllBoardUnits()) {
       unit.stats.resetStartOfCombatStats();
+      final equippedItems = unit.getEquippedItems();
+      for (final item in equippedItems) {
+        if (item.tier == 3) {
+          unit.unequipItem(item.type);
+        }
+      }
       if (unit.isAlive) {
         unit.stats.currentHealth = unit.stats.maxHealth;
       }
@@ -643,47 +680,6 @@ class GameManager extends ChangeNotifier {
     _combatManager?.reset();
 
     notifyListeners();
-  }
-
-  // Adds a forged item to the bench if space exists
-  bool addForgedItemToBench(Item item) {
-    bool success = false;
-    if (!item.isForged) {
-      return false;
-    }
-    if (_boardManager != null) {
-      success = _boardManager!.addItemToBench(item);
-    }
-
-    return success;
-  }
-
-  // Unequips a forged item from a unit and removes it from the board
-  void removeForgedItemFromUnit(Unit unit, Item item) {
-    if (!item.isForged || _boardManager == null) return;
-
-    bool itemRemoved = false;
-
-    if (unit.weapon?.id == item.id) {
-      unit.unequipItem(ItemType.weapon);
-      itemRemoved = true;
-    }
-    if (unit.armor?.id == item.id) {
-      unit.unequipItem(ItemType.armor);
-      itemRemoved = true;
-    }
-    if (unit.trinket?.id == item.id) {
-      unit.unequipItem(ItemType.trinket);
-      itemRemoved = true;
-    }
-
-    if (_boardManager!.remove(item) != null) {
-      itemRemoved = true;
-    }
-
-    if (itemRemoved) {
-      notifyListeners();
-    }
   }
 
   // Called at the end of post-combat to prepare units and shop for next round

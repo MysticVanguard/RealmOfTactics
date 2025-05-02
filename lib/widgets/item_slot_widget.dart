@@ -56,12 +56,9 @@ class ItemSlotWidget extends StatelessWidget {
               unit.unequipItem(itemBeingDragged.type);
             },
 
-            // Place unequipped item back on bench if it's not forged
+            // Place unequipped item back on bench
             onDraggableCanceled: (velocity, offset) {
-              if (currentEquippedItem.isForged) {
-              } else {
-                boardManager.addItemToBench(currentEquippedItem);
-              }
+              boardManager.addItemToBench(currentEquippedItem);
             },
 
             // Tapping the item will open its info

@@ -4,7 +4,7 @@ import 'package:realm_of_tactics/models/unit_stats.dart';
 
 // All items so that random items can be acquired throughout the game and items can be combined
 final Map<String, Item> allItems = {
-  'basic_sword': Item(
+  'item_basic_sword': Item(
     id: 'item_basic_sword',
     name: 'Basic Sword',
     type: ItemType.weapon,
@@ -13,7 +13,7 @@ final Map<String, Item> allItems = {
     statsBonus: const ItemStatsBonus(bonusAttackDamagePercent: 0.10),
   ),
 
-  'basic_tunic': Item(
+  'item_basic_tunic': Item(
     id: 'item_basic_tunic',
     name: 'Basic Tunic',
     type: ItemType.armor,
@@ -22,7 +22,7 @@ final Map<String, Item> allItems = {
     statsBonus: const ItemStatsBonus(bonusMaxHealth: 150),
   ),
 
-  'basic_bow': Item(
+  'item_basic_bow': Item(
     id: 'item_basic_bow',
     name: 'Basic Bow',
     type: ItemType.weapon,
@@ -31,7 +31,7 @@ final Map<String, Item> allItems = {
     statsBonus: const ItemStatsBonus(bonusAttackSpeedPercent: 0.10),
   ),
 
-  'basic_wand': Item(
+  'item_basic_wand': Item(
     id: 'item_basic_wand',
     name: 'Basic Wand',
     type: ItemType.weapon,
@@ -40,7 +40,7 @@ final Map<String, Item> allItems = {
     statsBonus: const ItemStatsBonus(bonusAbilityPower: 10),
   ),
 
-  'basic_dagger': Item(
+  'item_basic_dagger': Item(
     id: 'item_basic_dagger',
     name: 'Basic Dagger',
     type: ItemType.trinket,
@@ -49,7 +49,7 @@ final Map<String, Item> allItems = {
     statsBonus: const ItemStatsBonus(bonusCritChance: 0.15),
   ),
 
-  'basic_orb': Item(
+  'item_basic_orb': Item(
     id: 'item_basic_orb',
     name: 'Basic Orb',
     type: ItemType.trinket,
@@ -58,7 +58,7 @@ final Map<String, Item> allItems = {
     statsBonus: const ItemStatsBonus(bonusStartingMana: 10),
   ),
 
-  'basic_locket': Item(
+  'item_basic_locket': Item(
     id: 'item_basic_locket',
     name: 'Basic Locket',
     type: ItemType.trinket,
@@ -67,7 +67,7 @@ final Map<String, Item> allItems = {
     statsBonus: const ItemStatsBonus(bonusLifesteal: 0.10),
   ),
 
-  'basic_helmet': Item(
+  'item_basic_helmet': Item(
     id: 'item_basic_helmet',
     name: 'Basic Helmet',
     type: ItemType.armor,
@@ -76,7 +76,7 @@ final Map<String, Item> allItems = {
     statsBonus: const ItemStatsBonus(bonusArmor: 10),
   ),
 
-  'basic_armguard': Item(
+  'item_basic_armguard': Item(
     id: 'item_basic_armguard',
     name: 'Basic Armguard',
     type: ItemType.armor,

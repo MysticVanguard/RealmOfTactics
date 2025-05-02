@@ -92,7 +92,7 @@ class SynergyManager extends ChangeNotifier {
   Set<String> get activeSynergiesSet => _activeSynergiesSet;
   Map<String, int> get synergyCounts => Map.unmodifiable(_synergyCounts);
 
-  // Initializes all synergy definitions and prepares forged item pool
+  // Initializes all synergy definitions
   void initialize() {
     _initializeSynergies();
   }

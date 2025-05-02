@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:realm_of_tactics/models/summoned_unit.dart';
 import '../models/unit.dart';
-import '../models/item.dart';
 
 // A widget representing a drop zone where units can be sold.
 class SellZone extends StatelessWidget {
@@ -39,8 +38,7 @@ class SellZone extends StatelessWidget {
         }
 
         if (data['type'] == 'item') {
-          final Item item = data['item'] as Item;
-          return !item.isForged; // Forged items can't be sold
+          return false;
         }
 
         return false;
