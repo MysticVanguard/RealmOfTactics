@@ -91,8 +91,6 @@ class Item {
   bool canCombineWith(Item other) {
     if (isForged || other.isForged) return false;
     if (!isComponent || !other.isComponent) return false;
-    print(id);
-    print(other.id);
     return id != other.id;
   }
 

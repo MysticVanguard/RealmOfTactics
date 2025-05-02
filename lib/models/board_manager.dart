@@ -842,7 +842,6 @@ class BoardManager extends ChangeNotifier {
     List<Unit> result = [];
 
     for (final unit in candidates) {
-      print(" Unit Name: ${unit.unitName} Unit is Enemy?: ${unit.isEnemy}");
       final dx = (unit.boardX - center.col).abs();
       final dy = (unit.boardY - center.row).abs();
 

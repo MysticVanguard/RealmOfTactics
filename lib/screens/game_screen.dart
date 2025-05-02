@@ -470,6 +470,11 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
 
     // Hide stats panel if shop is opened
     if (_isShopOpen && _isStatsOpen) _isStatsOpen = false;
+    // Hide shop and stats if opened during map
+    if (gameManager.currentState == GameState.map) {
+      _isStatsOpen = false;
+      _isShopOpen = false;
+    }
 
     return Stack(
       children: [

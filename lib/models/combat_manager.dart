@@ -431,9 +431,6 @@ class CombatManager extends ChangeNotifier {
           double finalDamage = baseDamage;
           double randDouble = random.nextDouble();
           bool isCrit = randDouble < unit.stats.critChance;
-          print(
-            "Random double: $randDouble , Crit chance: ${unit.stats.critChance}",
-          );
           if (isCrit) {
             finalDamage *= unit.stats.critDamage;
             Unit.handleItemEffectsOnCrit(unit, currentTarget);

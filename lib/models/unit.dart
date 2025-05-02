@@ -479,9 +479,6 @@ class Unit extends ChangeNotifier {
     final all = GameManager.instance!.allUnitsInCombat;
     return all.where((u) {
       if (!u.isAlive) return false;
-      print(
-        "(getunitsbyteam) Unit Name: ${u.unitName} Unit team: ${u.team} Wanted team: $team",
-      );
       if (teamFilter == TargetTeam.allies) return u.team == team;
       if (teamFilter == TargetTeam.enemies) return u.team != team;
       return true;
@@ -655,9 +652,6 @@ class Unit extends ChangeNotifier {
           double finalDamage = finalAmount as double;
           double randDouble = Random().nextDouble();
           bool isCrit = randDouble < source.stats.critChance;
-          print(
-            "Random double: $randDouble , Crit chance: ${source.stats.critChance}",
-          );
           if (isCrit) {
             finalDamage *= source.stats.critDamage;
             Unit.handleItemEffectsOnCrit(source, target);

@@ -298,7 +298,6 @@ class SynergyManager extends ChangeNotifier {
             playerActiveTier = tier;
           }
         }
-        print(playerActiveTier);
 
         if (playerActiveTier != null) {
           _applyStartOfCombatEffect(playerUnits, synergyName, playerActiveTier);
@@ -340,9 +339,6 @@ class SynergyManager extends ChangeNotifier {
     String synergyName,
     int tierValue,
   ) {
-    for (final unit in units) {
-      print("Checking unit: ${unit.unitName}, origins: ${unit.origins}");
-    }
     switch (synergyName) {
       case 'Battlemage':
         for (final unit in units) {
@@ -374,9 +370,7 @@ class SynergyManager extends ChangeNotifier {
 
       case 'Greendale':
         for (final unit in units) {
-          print(unit.origins);
           if (unit.origins.contains('Greendale')) {
-            print(unit.unitName);
             unit.stats.combatStartDamageAmp += max(
               (_gameManager!.playerGold - 50) /
                   (tierValue == 2 ? 3 : (tierValue == 4 ? 2 : 1)) /
@@ -408,14 +402,11 @@ class SynergyManager extends ChangeNotifier {
 
         forgeheartUnits.shuffle();
         final selected = forgeheartUnits.take(numItemsToGive);
-        print(selected);
         for (final unit in selected) {
-          print(unit.unitName);
           final itemKey = signatureForgeheartItems[unit.unitName]!;
           final item = allItems[itemKey]?.copyWith();
 
           if (item != null) {
-            print(item.name);
             unit.equipItem(item);
           }
         }
