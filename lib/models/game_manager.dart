@@ -353,6 +353,17 @@ class GameManager extends ChangeNotifier {
     return randomItem.copyWith();
   }
 
+  Item getRandomItemByTier(int tier) {
+    final matchingItems =
+        allItems.values
+            .where((item) => item.tier == tier && !item.isForged)
+            .toList();
+    if (matchingItems.isEmpty) throw Exception("No tier $tier items found");
+
+    final rand = Random();
+    return matchingItems[rand.nextInt(matchingItems.length)].copyWith();
+  }
+
   // Adds random basic (tier 1) items to the bench
   void addRandomBasicItems(int count) {
     for (int i = 0; i < count; i++) {
@@ -514,6 +525,7 @@ class GameManager extends ChangeNotifier {
     _handlePostCombat(playerWon);
 
     for (var unit in _boardManager!.getAllBoardUnits()) {
+      unit.stats.resetStartOfCombatStats();
       if (unit.isAlive) {
         unit.stats.currentHealth = unit.stats.maxHealth;
       }
@@ -528,6 +540,23 @@ class GameManager extends ChangeNotifier {
             _prepareNextRound();
             _currentState = GameState.shopping;
           } else {
+            if (currentNode != null) {
+              if (currentNode.rewardGold > 0) {
+                GameManager.instance!.addGold(currentNode.rewardGold);
+              }
+
+              for (final item in currentNode.rewardItems) {
+                GameManager.instance!.boardManager!.addItemToBench(
+                  item.copyWith(),
+                );
+              }
+
+              for (final unit in currentNode.rewardUnits) {
+                GameManager.instance!.boardManager!.addUnitToBench(
+                  unit.copyWith(),
+                );
+              }
+            }
             _currentState = GameState.map;
           }
 
@@ -648,7 +677,7 @@ class GameManager extends ChangeNotifier {
       itemRemoved = true;
     }
 
-    if (_boardManager!.remove(item)) {
+    if (_boardManager!.remove(item) != null) {
       itemRemoved = true;
     }
 
@@ -669,7 +698,7 @@ class GameManager extends ChangeNotifier {
         unit.isOnBoard = true;
         unit.boardX = position.col;
         unit.boardY = position.row;
-        _boardManager?.placeUnit(unit, position, false);
+        _boardManager?.placeUnit(unit, position);
       }
     }
 
@@ -705,7 +734,7 @@ class GameManager extends ChangeNotifier {
       int scrapGained = 0;
       List<Unit> boardUnits = _boardManager!.getAllBoardUnits();
       for (var unit in boardUnits) {
-        if (unit.origins.contains('Ironvale') && unit.generateScrap) {
+        if (unit.origins.contains('Ironvale') && unit.stats.generateScrap) {
           scrapGained += unit.tier;
         }
       }
@@ -725,6 +754,10 @@ class GameManager extends ChangeNotifier {
       units.addAll(_combatManager!.enemyUnits);
     }
     return units;
+  }
+
+  set ironvaleScrap(int newScrap) {
+    _ironvaleScrap = newScrap;
   }
 
   // Searches combat units by ID

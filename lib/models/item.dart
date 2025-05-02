@@ -91,6 +91,8 @@ class Item {
   bool canCombineWith(Item other) {
     if (isForged || other.isForged) return false;
     if (!isComponent || !other.isComponent) return false;
+    print(id);
+    print(other.id);
     return id != other.id;
   }
 
@@ -119,7 +121,8 @@ class Item {
         requiredOrigin == null && this.requiredOrigin != null;
 
     return Item(
-      id: id ?? this.id,
+      id:
+          '${this.id}_${DateTime.now().millisecondsSinceEpoch}${Random().nextInt(1000000)}',
       name: name ?? this.name,
       type: type ?? this.type,
       tier: tier ?? this.tier,
@@ -158,7 +161,8 @@ class Item {
     if (itemEntry.key == 'not_found') return null;
 
     return itemEntry.value.copyWith(
-      id: '${itemEntry.value.id}_${DateTime.now().millisecondsSinceEpoch}',
+      id:
+          '${itemEntry.value.id}_${DateTime.now().millisecondsSinceEpoch}${Random().nextInt(1000000)}',
     );
   }
 
@@ -166,11 +170,17 @@ class Item {
   Item? getCombinedItem(Item item1, Item item2) {
     if (!item1.isComponent || !item2.isComponent) return null;
 
+    // Create a sorted list of component names to match against
+    final pair = [item1.name, item2.name]..sort();
+
     final combinedEntry = allItems.entries.firstWhere(
-      (entry) =>
-          entry.value.tier == 2 &&
-          entry.value.componentNames.contains(item1.name) &&
-          entry.value.componentNames.contains(item2.name),
+      (entry) {
+        final item = entry.value;
+        if (item.tier != 2 || item.componentNames.length != 2) return false;
+
+        final comps = [...item.componentNames]..sort();
+        return pair[0] == comps[0] && pair[1] == comps[1];
+      },
       orElse:
           () => MapEntry(
             'not_found',

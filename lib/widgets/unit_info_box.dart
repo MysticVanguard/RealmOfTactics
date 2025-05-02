@@ -282,7 +282,7 @@ class UnitInfoBox extends StatelessWidget {
         ),
         _buildStatItem(
           "Crit Damage",
-          "${(displayUnit.stats.critDamage * 100 - 100).toInt()}%",
+          "${(displayUnit.stats.critDamage * 100).toInt()}%",
           Icons.flash_on,
           Colors.yellow,
         ),
@@ -291,6 +291,24 @@ class UnitInfoBox extends StatelessWidget {
           displayUnit.stats.movementSpeed.toStringAsFixed(1),
           Icons.directions_run,
           Colors.lime,
+        ),
+        _buildStatItem(
+          "Lifesteal",
+          "${(displayUnit.stats.lifesteal * 100).toInt()}%",
+          Icons.bloodtype,
+          Colors.pink,
+        ),
+        _buildStatItem(
+          "Damage Amp",
+          "${(displayUnit.stats.damageAmp * 100).toInt()}%",
+          Icons.speaker,
+          Colors.greenAccent,
+        ),
+        _buildStatItem(
+          "Resistance",
+          "${(displayUnit.stats.damageReduction * 100).toInt()}%",
+          Icons.shield_moon,
+          Colors.greenAccent,
         ),
       ],
     );

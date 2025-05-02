@@ -185,7 +185,7 @@ class _GameBoardState extends State<GameBoard> {
           if (benchIndex != null && benchIndex >= 0) {
             boardManager.remove(draggedUnit);
             boardManager.addUnitToBench(targetUnit, benchIndex);
-            boardManager.placeUnit(draggedUnit, targetPosition, true);
+            boardManager.placeUnit(draggedUnit, targetPosition);
           } else {
             final Position? sourcePosition = draggedUnit.getBoardPosition();
             if (sourcePosition != null) {
@@ -193,7 +193,7 @@ class _GameBoardState extends State<GameBoard> {
             }
           }
         } else {
-          boardManager.placeUnit(draggedUnit, targetPosition, true);
+          boardManager.placeUnit(draggedUnit, targetPosition);
         }
       },
       builder: (context, candidateData, rejectedData) {

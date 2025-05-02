@@ -2,7 +2,6 @@ TODO:
 - Add other combat round sets
 - Possibly add up to 5* units to help lengthen game
     - Also possible to make each combat 3 rounds instead of 5
-- Add items, implement item effects
 - Add items to enemy rounds
     - Will allow for infinitely more uniqueness to rounds
 - Add events or change
@@ -33,3 +32,4 @@ DONE:
 - Fix item dupe on bench bug
     - Moving an item from bench to bench duplicates it
     - Fully redo bench to be much more suited for a mobile game
+- Add items, implement item effects

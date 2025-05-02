@@ -1,6 +1,9 @@
 import 'dart:math';
 import 'package:flutter/foundation.dart';
+import 'package:realm_of_tactics/models/game_manager.dart';
+import 'package:realm_of_tactics/models/item.dart';
 import 'package:realm_of_tactics/models/round_data.dart';
+import 'package:realm_of_tactics/models/unit.dart';
 
 // Types of nodes on the map
 enum MapNodeType { start, combat, elite, rest, merchant, event, boss }
@@ -14,6 +17,10 @@ class MapNode {
   MapNodeType type;
   final List<MapNode> connections = [];
   List<List<UnitData>> rounds;
+  String rewardDescription = '';
+  int rewardGold = 0;
+  List<Item> rewardItems = [];
+  List<Unit> rewardUnits = [];
 
   MapNode({
     required this.floor,
@@ -176,6 +183,7 @@ class MapManager extends ChangeNotifier {
     _selectedNode = null;
 
     _assignNodeTypes();
+    assignRewardsToNodes(GameManager.instance!);
     notifyListeners();
   }
 
@@ -277,5 +285,101 @@ class MapManager extends ChangeNotifier {
     return globalRoundSets.first.rounds
         .map((r) => List<UnitData>.from(r))
         .toList();
+  }
+
+  void assignRewardsToNodes(GameManager gameManager) {
+    for (var floorNodes in _map) {
+      for (var node in floorNodes) {
+        if (node.type != MapNodeType.combat && node.type != MapNodeType.elite) {
+          continue;
+        }
+
+        int rewardFloor = node.floor;
+        if (node.type == MapNodeType.elite) {
+          rewardFloor = min(rewardFloor + 2, totalFloors - 1);
+        }
+
+        final items = <Item>[];
+        final units = <Unit>[];
+        int gold = 0;
+
+        switch (rewardFloor) {
+          case 0:
+          case 1:
+            gold = 5;
+            items.add(gameManager.getRandomBasicItem());
+            break;
+          case 2:
+            gold = 5;
+            items.add(gameManager.getRandomBasicItem());
+            units.add(gameManager.getRandomUnitByCost(2));
+            break;
+          case 3:
+            gold = 15;
+            break;
+          case 4:
+            gold = 10;
+            items.add(gameManager.getRandomBasicItem());
+            break;
+          case 5:
+            items.addAll([
+              gameManager.getRandomBasicItem(),
+              gameManager.getRandomBasicItem(),
+            ]);
+            break;
+          case 6:
+            items.add(gameManager.getRandomItemByTier(2));
+            break;
+          case 7:
+            gold = 20;
+            break;
+          case 8:
+            units.add(gameManager.getRandomUnitByCost(3));
+            units.add(gameManager.getRandomUnitByCost(2));
+            break;
+          case 9:
+            gold = 10;
+            items.addAll([
+              gameManager.getRandomBasicItem(),
+              gameManager.getRandomBasicItem(),
+            ]);
+            break;
+          case 10:
+            items.add(gameManager.getRandomItemByTier(2));
+            gold = 5;
+            break;
+          case 11:
+            gold = 25;
+            break;
+          case 12:
+            units.add(gameManager.getRandomUnitByCost(4));
+            units.add(gameManager.getRandomUnitByCost(3));
+            break;
+          case 13:
+            gold = 15;
+            items.add(gameManager.getRandomItemByTier(2));
+            break;
+          case 14:
+            items.addAll([
+              gameManager.getRandomItemByTier(2),
+              gameManager.getRandomItemByTier(2),
+            ]);
+            break;
+        }
+
+        // Set rewards
+        node.rewardGold = gold;
+        node.rewardItems = items;
+        node.rewardUnits = units;
+
+        // Build display string
+        final parts = <String>[];
+        if (gold > 0) parts.add('$gold Gold');
+        parts.addAll(items.map((item) => 'Item: ${item.name}'));
+        parts.addAll(units.map((unit) => 'Unit: Tier 2 ${unit.unitName}'));
+
+        node.rewardDescription = parts.join('\n');
+      }
+    }
   }
 }

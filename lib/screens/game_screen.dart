@@ -235,7 +235,7 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            'Bench is full! Sell or combine units to make space.',
+            'Bench is full! Sell units to make space.',
             textAlign: TextAlign.center,
             style: TextStyle(fontWeight: FontWeight.bold),
           ),
@@ -292,6 +292,9 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
 
   // New tab on the left with node info when the nodes are selected
   Widget _buildNodeInfoBox(MapNode? node) {
+    if (node != null && node.rewardDescription.isEmpty) {
+      node.rewardDescription = "💡 DEBUG: No reward found!";
+    }
     return Container(
       padding: EdgeInsets.all(8),
       decoration: BoxDecoration(
@@ -325,6 +328,21 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
                     ..._buildCombatPreviewLines(node)
                   else
                     Text(node.type.name, style: TextStyle(color: Colors.white)),
+                  if (node != null && node.rewardDescription.isNotEmpty) ...[
+                    Text(
+                      "Rewards:",
+                      style: TextStyle(
+                        color: Colors.amber,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    SizedBox(height: 4),
+                    Text(
+                      node.rewardDescription,
+                      style: TextStyle(color: Colors.white70, fontSize: 11),
+                    ),
+                    SizedBox(height: 8),
+                  ],
                 ],
               ),
             ),
@@ -772,7 +790,10 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
                             onNodeSelected: (node) {
                               setState(() {
                                 gameManager.mapManager.selectNode(node);
-                                _selectedMapNode = node;
+                                _selectedMapNode = gameManager
+                                    .mapManager
+                                    .map[node.floor]
+                                    .firstWhere((n) => n.index == node.index);
                               });
                             },
                             onConfirmSelection: () {
@@ -1278,13 +1299,11 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
 
           if (benchContent is Item) {
             // Try to combine if compatible
-            if (draggedItem.canCombineWith(benchContent)) {
-              final Item? combined = draggedItem.combine(benchContent);
-              if (combined != null) {
-                boardManager.remove(draggedItem);
-                boardManager.remove(benchContent);
-                boardManager.addItemToBench(combined);
-              }
+            final Item? combined = draggedItem.combine(benchContent);
+            if (combined != null) {
+              boardManager.remove(draggedItem);
+              boardManager.remove(benchContent);
+              boardManager.addItemToBench(combined);
             }
           } else {
             // If empty slot

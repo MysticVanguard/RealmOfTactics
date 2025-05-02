@@ -105,6 +105,16 @@ class UnitStats {
   bool hasIronhideStun = false;
   bool hasEmberhillMovementBuff = false;
   double emberhillAttackSpeedBonus = 0.0;
+  bool appliesChronosparkHeal = false;
+  bool appliesGreendaleGold = false;
+  bool generateScrap = false;
+  bool hasSkyguardBuff = false;
+  double skyGuardBuffChance = 0.0;
+  bool hasDeepRockStrike = false;
+  int deeprockReductionAmount = 0;
+  double chronosparkHealTimer = 0.0;
+  double chronosparkHealInterval = 0;
+  double chronosparkHealPercent = 0;
 
   // Effect flags and temporary bonuses (reset each combat)
   bool physicalAbilitiesCanCrit = false;
@@ -146,6 +156,8 @@ class UnitStats {
   double combatStartManaOnAttackBonus = 0.0;
   int combatStartShieldBonus = 0;
   double combatStartLifestealBonus = 0.0;
+  double combatStartDamageAmp = 0.0;
+  double combatStartCritChance = 0.0;
 
   String mainSpellScaling = 'AD';
   bool isStunned = false;
@@ -209,13 +221,29 @@ class UnitStats {
     combatStartManaOnAttackBonus = 0.0;
     combatStartShieldBonus = 0;
     combatStartLifestealBonus = 0.0;
+    combatStartDamageAmp = 0.0;
+    combatStartCritChance = 0.0;
+    spellbladeBonusAttackDamage = 0;
+    artilleristBonusDamagePercent = 0.0;
     riflemanStackAmount = 0;
     beastRiderCleavePercent = 0.0;
-
+    hasScoutSpecialAttack = false;
+    scoutSpecialAttackInterval = 0;
     scoutSpecialAttackTimer = 0.0;
     hasClericBuff = false;
-    isStunned = false;
-    stunDuration = 0.0;
+    hasIronhideStun = false;
+    hasEmberhillMovementBuff = false;
+    emberhillAttackSpeedBonus = 0.0;
+    appliesChronosparkHeal = false;
+    appliesGreendaleGold = false;
+    generateScrap = false;
+    hasSkyguardBuff = false;
+    skyGuardBuffChance = 0.0;
+    hasDeepRockStrike = false;
+    deeprockReductionAmount = 0;
+    chronosparkHealTimer = 0.0;
+    chronosparkHealInterval = 0;
+    chronosparkHealPercent = 0;
 
     physicalAbilitiesCanCrit = false;
     magicAbilitiesCanCrit = false;
@@ -273,7 +301,8 @@ class UnitStats {
   int get startingMana =>
       baseStartingMana + bonusStartingMana + itemStartingMana;
   int get maxMana => baseMaxMana;
-  double get damageAmp => baseDamageAmp + itemDamageAmp + bonusDamageAmp;
+  double get damageAmp =>
+      baseDamageAmp + itemDamageAmp + bonusDamageAmp + combatStartDamageAmp;
   double get damageReduction => (baseDamageReduction +
           itemDamageReduction +
           bonusDamageReduction +
@@ -378,18 +407,6 @@ class UnitStats {
     newStats.bonusStartingMana = bonusStartingMana;
     newStats.bonusDamageAmp = bonusDamageAmp;
     newStats.bonusDamageReduction = bonusDamageReduction;
-    newStats.spellbladeBonusAttackDamage = spellbladeBonusAttackDamage;
-    newStats.artilleristBonusDamagePercent = artilleristBonusDamagePercent;
-    newStats.riflemanStackAmount = riflemanStackAmount;
-    newStats.beastRiderCleavePercent = beastRiderCleavePercent;
-    newStats.scoutSpecialAttackTimer = scoutSpecialAttackTimer;
-    newStats.hasClericBuff = hasClericBuff;
-    newStats.hasScoutSpecialAttack = hasScoutSpecialAttack;
-    newStats.scoutSpecialAttackInterval = scoutSpecialAttackInterval;
-    newStats.hasIronhideStun = hasIronhideStun;
-    newStats.hasEmberhillMovementBuff = hasEmberhillMovementBuff;
-    newStats.emberhillAttackSpeedBonus = emberhillAttackSpeedBonus;
-
     newStats.currentHealth = currentHealth ?? this.currentHealth;
     newStats.currentMana = currentMana ?? this.currentMana;
     newStats.currentShield = currentShield ?? this.currentShield;

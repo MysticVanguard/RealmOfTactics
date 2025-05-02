@@ -712,22 +712,6 @@ final Map<String, Item> allItems = {
     uniqueAbilityDescription: 'On attack, gain 5 Ability Power.',
   ),
 
-  'forged_archmage_staff': Item(
-    id: 'item_forged_archmage',
-    name: 'Archmage Staff',
-    type: ItemType.weapon,
-    tier: 3,
-    isForged: true,
-    requiredOrigin: 'Forgeheart',
-    imagePath: 'assets/images/items/forged_archmage_staff.png',
-    statsBonus: const ItemStatsBonus(
-      bonusAbilityPower: 20,
-      onAttackStats: OnAttackStats(manaGain: 10),
-    ),
-    uniqueAbilityDescription:
-        'After using an ability for the first time, gain 100 Ability Power.',
-  ),
-
   'forged_spirit_helm': Item(
     id: 'item_forged_spirithelm',
     name: 'Spirit Helm',
@@ -736,38 +720,13 @@ final Map<String, Item> allItems = {
     isForged: true,
     requiredOrigin: 'Forgeheart',
     imagePath: 'assets/images/items/forged_spirit_helm.png',
-    statsBonus: const ItemStatsBonus(bonusMaxHealth: 400, bonusMagicResist: 50),
-    uniqueAbilityDescription: 'After using an ability, Heal for 50% Mana Spent',
-  ),
-
-  'forged_guardian_plate': Item(
-    id: 'item_forged_guardian',
-    name: 'Guardian Plate',
-    type: ItemType.armor,
-    tier: 3,
-    isForged: true,
-    requiredOrigin: 'Forgeheart',
-    imagePath: 'assets/images/items/forged_guardian_plate.png',
     statsBonus: const ItemStatsBonus(
-      bonusArmor: 50,
-      bonusMaxHealth: 100,
-      bonusDamageReduction: 0.10,
+      bonusMaxHealth: 300,
+      bonusMagicResist: 30,
+      bonusArmor: 30,
+      bonusAbilityPower: 30,
     ),
-    uniqueAbilityDescription:
-        'Combat Start - gain a shield equal to 5 times your Ability Power (Not Implemented)',
-  ),
-
-  'forged_bloodthirst_locket': Item(
-    id: 'item_forged_bloodlocket',
-    name: 'Bloodthirst Locket',
-    type: ItemType.trinket,
-    tier: 3,
-    isForged: true,
-    requiredOrigin: 'Forgeheart',
-    imagePath: 'assets/images/items/forged_bloodthirst_locket.png',
-    statsBonus: const ItemStatsBonus(bonusLifesteal: 0.10, bonusMaxHealth: 200),
-    uniqueAbilityDescription:
-        'After killing an enemy, gain 100 Max Health for this combat',
+    uniqueAbilityDescription: 'After using an ability, Heal for 50% Mana Spent',
   ),
 
   'forged_jeweled_scope': Item(
@@ -779,8 +738,8 @@ final Map<String, Item> allItems = {
     requiredOrigin: 'Forgeheart',
     imagePath: 'assets/images/items/forged_jeweled_scope.png',
     statsBonus: const ItemStatsBonus(
-      bonusAbilityPower: 30,
-      bonusCritChance: 0.25,
+      bonusAbilityPower: 60,
+      bonusCritChance: 0.50,
       bonusRange: 1,
     ),
     uniqueAbilityDescription: '+1 Range. Your Ability can critically strike',

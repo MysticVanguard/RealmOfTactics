@@ -66,30 +66,14 @@ class Unit extends ChangeNotifier {
   double timeUntilNextAttack = 0.0;
   double movementProgress = 0.0;
 
-  // Buff/debuff effect flags
-  bool appliesChronosparkHeal = false;
-  bool appliesGreendaleGold = false;
-  bool generateScrap = false;
-  bool hasSkyguardEvasion = false;
-  double skyguardEvasionDuration = 0.0;
-  double skyguardEvasionTimer = 0.0;
-  bool hasDeepRockStrike = false;
-  int deeprockReductionAmount = 0;
-
-  bool hasIronhideStun = false;
   bool isStunned = false;
   double stunDuration = 0.0;
 
-  bool hasEmberhillMovementBuff = false;
-  double emberhillAttackSpeedBonus = 0.0;
   Position? lastPosition;
 
   final String? abilityName;
 
   // Timers for effects
-  double _chronosparkHealTimer = 0.0;
-  double chronosparkHealInterval = 10.0;
-  double chronosparkHealPercent = 0.05;
 
   // Whether this unit belongs to the enemy team
   bool _isEnemy = false;
@@ -136,13 +120,6 @@ class Unit extends ChangeNotifier {
 
     if (isEnemy) {
       return false;
-    }
-
-    // Check for origin requirement on forged items
-    if (item.isForged && item.requiredOrigin != null) {
-      if (!origins.contains(item.requiredOrigin)) {
-        return false;
-      }
     }
 
     // Check slot availability
@@ -294,7 +271,7 @@ class Unit extends ChangeNotifier {
       _handleItemEffectsOnDamageDealt(source, this);
 
       if (source.stats.lifesteal > 0) {
-        int healAmount = (finalDamage * stats.lifesteal).floor();
+        int healAmount = (finalDamage * source.stats.lifesteal).floor();
         if (healAmount > 0) {
           heal(source, healAmount);
         }
@@ -376,15 +353,15 @@ class Unit extends ChangeNotifier {
     Unit? target = GameManager.instance?.findUnitById(currentTargetId!);
 
     // Deeprock armor/mr shred
-    if (hasDeepRockStrike && target != null && target.isAlive) {
-      int armorRed = min(deeprockReductionAmount, target.stats.armor);
-      int mrRed = min(deeprockReductionAmount, target.stats.magicResist);
+    if (stats.hasDeepRockStrike && target != null && target.isAlive) {
+      int armorRed = min(stats.deeprockReductionAmount, target.stats.armor);
+      int mrRed = min(stats.deeprockReductionAmount, target.stats.magicResist);
       target.stats.bonusArmor -= armorRed;
       target.stats.bonusMagicResist -= mrRed;
     }
 
     // Ironhide adjacent stun
-    if (hasIronhideStun) {
+    if (stats.hasIronhideStun) {
       final adjacentEnemies = getAdjacentUnits().where(
         (u) => u.team != team && u.isAlive,
       );
@@ -397,8 +374,6 @@ class Unit extends ChangeNotifier {
     if (abilityName == null || !abilities.containsKey(abilityName)) return;
 
     final ability = abilities[abilityName!]!;
-
-    _handleItemEffectsOnCast(this);
 
     // Apply ability effects to targets
     for (final effect in ability.effects) {
@@ -414,7 +389,7 @@ class Unit extends ChangeNotifier {
           final tier = GameManager.instance!.synergyManager!.getSynergyLevel(
             "Cleric",
           );
-          final bonus = tier == 2 ? 30 : (tier == 4 ? 60 : 0);
+          final bonus = tier == 2 ? 10 : (tier == 4 ? 20 : 0);
           target.applyStatModifier("attackDamage", bonus);
           target.applyStatModifier("abilityPower", bonus);
         }
@@ -423,6 +398,7 @@ class Unit extends ChangeNotifier {
 
     // Reset mana and lock casting temporarily
     stats.currentMana = 0;
+    _handleItemEffectsOnCast(this);
     isManaLocked = true;
     _startManaLockTimer(duration: ability.manaLockDuration);
   }
@@ -503,6 +479,9 @@ class Unit extends ChangeNotifier {
     final all = GameManager.instance!.allUnitsInCombat;
     return all.where((u) {
       if (!u.isAlive) return false;
+      print(
+        "(getunitsbyteam) Unit Name: ${u.unitName} Unit team: ${u.team} Wanted team: $team",
+      );
       if (teamFilter == TargetTeam.allies) return u.team == team;
       if (teamFilter == TargetTeam.enemies) return u.team != team;
       return true;
@@ -674,7 +653,11 @@ class Unit extends ChangeNotifier {
 
         if (canCrit) {
           double finalDamage = finalAmount as double;
-          bool isCrit = Random().nextDouble() < source.stats.critChance;
+          double randDouble = Random().nextDouble();
+          bool isCrit = randDouble < source.stats.critChance;
+          print(
+            "Random double: $randDouble , Crit chance: ${source.stats.critChance}",
+          );
           if (isCrit) {
             finalDamage *= source.stats.critDamage;
             Unit.handleItemEffectsOnCrit(source, target);
@@ -685,18 +668,18 @@ class Unit extends ChangeNotifier {
           if (finalDamage < 0) finalDamage = 0;
           finalAmount = finalDamage.toInt();
         }
+        final damageType =
+            effect.scalingStat == "attackDamage"
+                ? DamageType.physical
+                : DamageType.magic;
         if (effect.isDamageOverTime && effect.damageOverTimeDuration != null) {
           source.applyDamageOverTime(
             target,
             finalAmount,
             effect.damageOverTimeDuration!,
+            type: damageType,
           );
         } else {
-          final damageType =
-              effect.scalingStat == "attackDamage"
-                  ? DamageType.physical
-                  : DamageType.magic;
-
           target.takeDamage(finalAmount.toDouble(), source, damageType);
         }
         break;
@@ -1434,12 +1417,12 @@ class Unit extends ChangeNotifier {
     }
 
     // Handle Chronospark periodic healing
-    if (appliesChronosparkHeal) {
-      _chronosparkHealTimer += deltaTime;
-      if (_chronosparkHealTimer >= chronosparkHealInterval) {
-        _chronosparkHealTimer = 0.0;
+    if (stats.appliesChronosparkHeal) {
+      stats.chronosparkHealTimer += deltaTime;
+      if (stats.chronosparkHealTimer >= stats.chronosparkHealInterval) {
+        stats.chronosparkHealTimer = 0.0;
 
-        final percentHeal = chronosparkHealPercent;
+        final percentHeal = stats.chronosparkHealPercent;
         final healAmount = (stats.maxHealth * percentHeal).round();
         stats.currentHealth = (stats.currentHealth + healAmount).clamp(
           0,
@@ -1468,7 +1451,7 @@ class Unit extends ChangeNotifier {
 
   // Handles bonus Emberhill attack speed after movement
   void checkEmberhillMovement() {
-    if (!hasEmberhillMovementBuff || !isOnBoard) {
+    if (!stats.hasEmberhillMovementBuff || !isOnBoard) {
       return;
     }
 
@@ -1477,7 +1460,7 @@ class Unit extends ChangeNotifier {
     if (lastPosition != null &&
         (currentPos.row != lastPosition!.row ||
             currentPos.col != lastPosition!.col)) {
-      stats.combatStartAttackSpeedBonus += emberhillAttackSpeedBonus;
+      stats.combatStartAttackSpeedBonus += stats.emberhillAttackSpeedBonus;
     }
     lastPosition = currentPos;
   }
@@ -1535,19 +1518,8 @@ class Unit extends ChangeNotifier {
     cloned.timeUntilNextAttack = other.timeUntilNextAttack;
     cloned.movementProgress = other.movementProgress;
 
-    cloned.appliesChronosparkHeal = other.appliesChronosparkHeal;
-    cloned.appliesGreendaleGold = other.appliesGreendaleGold;
-    cloned.generateScrap = other.generateScrap;
-    cloned.hasSkyguardEvasion = other.hasSkyguardEvasion;
-    cloned.skyguardEvasionDuration = other.skyguardEvasionDuration;
-    cloned.skyguardEvasionTimer = other.skyguardEvasionTimer;
-    cloned.hasDeepRockStrike = other.hasDeepRockStrike;
-    cloned.deeprockReductionAmount = other.deeprockReductionAmount;
-    cloned.hasIronhideStun = other.hasIronhideStun;
     cloned.isStunned = other.isStunned;
     cloned.stunDuration = other.stunDuration;
-    cloned.hasEmberhillMovementBuff = other.hasEmberhillMovementBuff;
-    cloned.emberhillAttackSpeedBonus = other.emberhillAttackSpeedBonus;
 
     return cloned;
   }
@@ -1556,7 +1528,6 @@ class Unit extends ChangeNotifier {
     final items = attacker.getEquippedItems();
 
     for (var item in items) {
-      print(item.id);
       if (item.id.startsWith('item_twinfang_blade')) {
         final adjacentEnemies =
             attacker.getValidTargets().where((enemy) {
@@ -1611,7 +1582,6 @@ class Unit extends ChangeNotifier {
     final items = attacker.getEquippedItems();
 
     for (final item in items) {
-      print(item.id);
       if (item.id.startsWith('item_arcblade')) {
         if (!target.stats.healingReduced) {
           final duration = Duration(seconds: 5);
@@ -1678,7 +1648,6 @@ class Unit extends ChangeNotifier {
     final items = unit.getEquippedItems();
 
     for (final item in items) {
-      print(item.id);
       if (item.id.startsWith('item_bloodpiercer')) {
         // Allow physical ability damage to crit
         unit.stats.physicalAbilitiesCanCrit = true;
@@ -1706,7 +1675,6 @@ class Unit extends ChangeNotifier {
     final healedItems = recipient.getEquippedItems();
 
     for (final item in healedItems) {
-      print(item.id);
       if (item.id.startsWith('item_vampiric_blade')) {
         // Overhealing creates shield (up to 10% max HP)
         if (overheal > 0) {
@@ -1768,7 +1736,6 @@ class Unit extends ChangeNotifier {
     final items = attacker.getEquippedItems();
 
     for (final item in items) {
-      print(item.id);
       if (item.id.startsWith('item_whirlwind_knives')) {
         // 40% chance to bounce to a nearby enemy
         final adjacentEnemies =
@@ -1816,7 +1783,6 @@ class Unit extends ChangeNotifier {
     final items = caster.getEquippedItems();
 
     for (final item in items) {
-      print(item.id);
       if (item.id.startsWith('item_focused_mind')) {
         // Gain 30% max mana on cast
         int bonusMana = (caster.stats.maxMana * 0.3).round();
@@ -1856,7 +1822,6 @@ class Unit extends ChangeNotifier {
     final items = unit.getEquippedItems();
 
     for (final item in items) {
-      print(item.id);
       if (item.id.startsWith('item_psychic_edge')) {
         unit.stats.combatStartCritDamageBonus += 0.03;
         GameManager.instance?.combatManager?.addTimedEffect(
@@ -1876,7 +1841,6 @@ class Unit extends ChangeNotifier {
 
     final items = target.getEquippedItems();
     for (final item in items) {
-      print(item.id);
       if (item.id.startsWith('item_wicked_brooch')) {
         final shield = (target.stats.maxHealth * 0.05).round();
         target.shield(target, shield);
@@ -1908,7 +1872,6 @@ class Unit extends ChangeNotifier {
     final items = killer.getEquippedItems();
 
     for (final item in items) {
-      print(item.id);
       if (item.id.startsWith('item_overflow_core')) {
         killer.gainMana(10);
         GameManager.instance?.combatManager?.addTimedEffect(
@@ -1931,14 +1894,13 @@ class Unit extends ChangeNotifier {
     final healthPercent = unit.stats.currentHealth / unit.stats.maxHealth;
 
     for (final item in items) {
-      print(item.id);
       if (item.id.startsWith('item_eternal_charm')) {
         if (healthPercent < 0.3 && !unit.stats.hasEternalCharmBonus) {
           unit.stats.combatStartLifestealBonus +=
-              unit.stats.baseLifesteal; // Double it
+              unit.stats.lifesteal; // Double it
           unit.stats.hasEternalCharmBonus = true;
         } else if (healthPercent >= 0.3 && unit.stats.hasEternalCharmBonus) {
-          unit.stats.combatStartLifestealBonus -= unit.stats.baseLifesteal;
+          unit.stats.combatStartLifestealBonus -= unit.stats.lifesteal;
           unit.stats.hasEternalCharmBonus = false;
         }
       }

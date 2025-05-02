@@ -330,11 +330,11 @@ class SynergyDisplay extends StatelessWidget {
       return [_buildFormattedLine(combinedDescription, activeLevel, fontSize)];
     } else if (synergy == 'Greendale') {
       String combinedDescription =
-          "Greendale units generate 1 gold per round at the start of planning. Gain an additional 1/2/3 gold if you lost last combat.";
+          "Greendale units gain 1% Damage Amp for each 3/2/1 gold above 50 gold you have.";
       return [_buildFormattedLine(combinedDescription, activeLevel, fontSize)];
     } else if (synergy == 'Forgeheart') {
       String combinedDescription =
-          "Forgeheart units gain 1/2/3 unique Forged items and 10/20/30 Armor/Magic Resist.";
+          "1/2 Forgeheart Units equip special items at the start of combat.";
       return [_buildFormattedLine(combinedDescription, activeLevel, fontSize)];
     } else if (synergy == 'Defender') {
       String combinedDescription =
@@ -369,7 +369,7 @@ class SynergyDisplay extends StatelessWidget {
       return [_buildFormattedLine(combinedDescription, activeLevel, fontSize)];
     } else if (synergy == 'Skyguard') {
       String combinedDescription =
-          "Skyguard units gain 5/10/15s evasion after being hit by a melee attack.";
+          "Skyguard units have a 20/30/50% chance to attack again after attacking.";
       return [_buildFormattedLine(combinedDescription, activeLevel, fontSize)];
     } else if (synergy == 'Deeprock') {
       String combinedDescription =
@@ -397,7 +397,7 @@ class SynergyDisplay extends StatelessWidget {
       return [_buildFormattedLine(combinedDescription, activeLevel, fontSize)];
     } else if (synergy == 'Cleric') {
       String combinedDescription =
-          "Cleric units provide healed units with either 20/40/60% Attack Damage or 20/40/60% Ability Power.";
+          "Cleric units provide healed units with 10/20% Attack Damage and 10/20 Ability Power.";
       return [_buildFormattedLine(combinedDescription, activeLevel, fontSize)];
     }
 

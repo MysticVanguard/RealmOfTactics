@@ -39,6 +39,7 @@ class CombatManager extends ChangeNotifier {
   // The two sides of the battle
   List<Unit> _playerUnits = [];
   List<Unit> _enemyUnits = [];
+  List<Unit> _enemyCombatUnits = [];
 
   // Periodic effects like damage over time, etc
   final List<CombatEffect> _activeEffects = [];
@@ -72,6 +73,7 @@ class CombatManager extends ChangeNotifier {
 
     _playerUnits = playerUnitsFromBoard;
     _enemyUnits = enemyUnits;
+    _enemyCombatUnits = [...enemyUnits];
 
     for (var unit in enemyUnits) {
       boardManager.registerEnemyUnit(unit);
@@ -316,17 +318,13 @@ class CombatManager extends ChangeNotifier {
         }
       }
       unit.update(timeDelta.inMilliseconds.toDouble() / 1000);
-      if (unit.hasSkyguardEvasion && unit.skyguardEvasionTimer > 0) {
-        unit.skyguardEvasionTimer = max(0, unit.skyguardEvasionTimer - dt);
-        if (unit.skyguardEvasionTimer <= 0) {}
-      }
     }
 
     for (var unit in unitsToRemove) {
       if (unit.isOnBoard) {
         boardManager.remove(unit);
       }
-      _enemyUnits.remove(unit);
+      _enemyCombatUnits.remove(unit);
     }
 
     for (var effect in List.from(_activeEffects)) {
@@ -353,7 +351,7 @@ class CombatManager extends ChangeNotifier {
       unit.applyVitalFocusAura(unit);
 
       List<Unit> enemies =
-          (_playerUnits.contains(unit)) ? _enemyUnits : _playerUnits;
+          (_playerUnits.contains(unit)) ? _enemyCombatUnits : _playerUnits;
 
       enemies = enemies.where((e) => e.isAlive && e.isOnBoard).toList();
 
@@ -431,7 +429,11 @@ class CombatManager extends ChangeNotifier {
         if (unit.timeUntilNextAttack <= 0) {
           double baseDamage = unit.stats.attackDamage.toDouble();
           double finalDamage = baseDamage;
-          bool isCrit = random.nextDouble() < unit.stats.critChance;
+          double randDouble = random.nextDouble();
+          bool isCrit = randDouble < unit.stats.critChance;
+          print(
+            "Random double: $randDouble , Crit chance: ${unit.stats.critChance}",
+          );
           if (isCrit) {
             finalDamage *= unit.stats.critDamage;
             Unit.handleItemEffectsOnCrit(unit, currentTarget);
@@ -441,6 +443,11 @@ class CombatManager extends ChangeNotifier {
           finalDamage *= unit.stats.damageAmp;
           if (finalDamage < 0) finalDamage = 0;
           bool attackProceeded = unit.attackTarget(currentTarget, finalDamage);
+          if (unit.stats.hasSkyguardBuff) {
+            if (Random().nextDouble() < unit.stats.skyGuardBuffChance) {
+              attackProceeded = unit.attackTarget(currentTarget, finalDamage);
+            }
+          }
 
           if (attackProceeded) {
             List<Unit> targets = [currentTarget];
@@ -492,7 +499,7 @@ class CombatManager extends ChangeNotifier {
     }
 
     bool playerTeamAlive = _playerUnits.any((u) => u.isAlive);
-    bool enemyTeamAlive = _enemyUnits.any((u) => u.isAlive);
+    bool enemyTeamAlive = _enemyCombatUnits.any((u) => u.isAlive);
 
     if (!playerTeamAlive || !enemyTeamAlive) {
       finishCombat(playerTeamAlive);
@@ -628,12 +635,6 @@ class CombatManager extends ChangeNotifier {
       if (!target.isAlive || hitTargetIds.contains(target.id)) continue;
       hitTargetIds.add(target.id);
 
-      if (target.hasSkyguardEvasion && target.skyguardEvasionTimer > 0) {
-        if (attacker.stats.range <= 1) {
-          continue;
-        }
-      }
-
       double damageToApply = damageAmount;
       if (target.appliesBattlemageDebuff) {
         damageToApply *= 0.7;
@@ -718,6 +719,7 @@ class CombatManager extends ChangeNotifier {
     _activeTimedEffects.clear();
     _state = CombatState.finished;
     _activeEffects.clear();
+    notifyListeners();
 
     _playerUnits.removeWhere((u) {
       if (u is SummonedUnit) {
@@ -734,8 +736,6 @@ class CombatManager extends ChangeNotifier {
       }
       return false;
     });
-
-    notifyListeners();
   }
 
   // Resets all combat state for a fresh round

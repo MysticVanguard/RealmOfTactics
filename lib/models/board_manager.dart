@@ -138,7 +138,7 @@ class BoardManager extends ChangeNotifier {
 
   // Calls the check, then if the unit upgrades no need to place,
   // otherwise places the unit on the board or bench spot attempted.
-  bool placeUnit(Unit unit, Position position, bool playerPlaced) {
+  bool placeUnit(Unit unit, Position position) {
     if (!canPlaceUnit(unit, position)) {
       return false;
     }
@@ -148,7 +148,6 @@ class BoardManager extends ChangeNotifier {
     }
 
     Unit unitToPlace = unit;
-    bool wasOnBench = false;
 
     int? currentBenchIndex = unit.benchIndex;
     if (currentBenchIndex != null &&
@@ -157,7 +156,6 @@ class BoardManager extends ChangeNotifier {
       if (_bench[currentBenchIndex] is Unit &&
           (_bench[currentBenchIndex] as Unit).id == unit.id) {
         _bench[currentBenchIndex] = null;
-        wasOnBench = true;
       }
     } else if (unit.isOnBoard && unit.boardX >= 0 && unit.boardY >= 0) {
       Position oldPos = Position(unit.boardY, unit.boardX);
@@ -174,13 +172,7 @@ class BoardManager extends ChangeNotifier {
 
     _board[position.row][position.col] = unitToPlace;
 
-    if (wasOnBench && !unit.isSummon) {
-      _synergyManager.applyActiveSynergiesToUnit(unitToPlace);
-    }
-
-    if (playerPlaced) {
-      _synergyManager.updateSynergies();
-    }
+    _synergyManager.updateSynergies();
 
     notifyListeners();
     return true;
@@ -250,7 +242,6 @@ class BoardManager extends ChangeNotifier {
       Position oldPos = Position(unit.boardY, unit.boardX);
       if (isValidBoardPosition(oldPos) &&
           _board[oldPos.row][oldPos.col]?.id == unit.id) {
-        _synergyManager.unapplySynergyEffectsFromUnit(unit);
         _board[oldPos.row][oldPos.col] = null;
         removedFromBoard = true;
       }
@@ -747,7 +738,6 @@ class BoardManager extends ChangeNotifier {
     }
 
     int sellValue = calculateSellValue(unit);
-    _synergyManager.unapplySynergyEffectsFromUnit(unit);
     dynamic removed = remove(unit);
 
     if (removed != null) {
@@ -811,8 +801,6 @@ class BoardManager extends ChangeNotifier {
 
     unit.checkEmberhillMovement();
 
-    _synergyManager.updateSynergies();
-
     notifyListeners();
     return true;
   }
@@ -854,6 +842,7 @@ class BoardManager extends ChangeNotifier {
     List<Unit> result = [];
 
     for (final unit in candidates) {
+      print(" Unit Name: ${unit.unitName} Unit is Enemy?: ${unit.isEnemy}");
       final dx = (unit.boardX - center.col).abs();
       final dy = (unit.boardY - center.row).abs();
 
