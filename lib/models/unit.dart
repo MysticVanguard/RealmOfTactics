@@ -356,6 +356,7 @@ class Unit extends ChangeNotifier {
   void castAbility() {
     if (isStunned || stats.currentMana < stats.maxMana) return;
     if (GameManager.instance == null) return;
+    if (currentTargetId == null) return;
 
     Unit? target = GameManager.instance?.findUnitById(currentTargetId!);
 

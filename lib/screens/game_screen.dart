@@ -295,9 +295,6 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
 
   // New tab on the left with node info when the nodes are selected
   Widget _buildNodeInfoBox(MapNode? node) {
-    if (node != null && node.rewardDescription.isEmpty) {
-      node.rewardDescription = "💡 DEBUG: No reward found!";
-    }
     return Container(
       padding: EdgeInsets.all(8),
       decoration: BoxDecoration(
@@ -330,7 +327,10 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
                       node.type == MapNodeType.elite)
                     ..._buildCombatPreviewLines(node)
                   else
-                    Text(node.type.name, style: TextStyle(color: Colors.white)),
+                    Text(
+                      node.type.name.toUpperCase(),
+                      style: TextStyle(color: Colors.white),
+                    ),
                   if (node != null && node.rewardDescription.isNotEmpty) ...[
                     Text(
                       "Rewards:",
@@ -346,6 +346,16 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
                     ),
                     SizedBox(height: 8),
                   ],
+                  if (node != null && node.type == MapNodeType.blessing)
+                    Text(
+                      "Choose a Blessing",
+                      style: TextStyle(color: Colors.white70, fontSize: 11),
+                    ),
+                  if (node != null && node.type == MapNodeType.rest)
+                    Text(
+                      "Heal 25 Player Health",
+                      style: TextStyle(color: Colors.white70, fontSize: 11),
+                    ),
                 ],
               ),
             ),

@@ -264,6 +264,8 @@ class MapManager extends ChangeNotifier {
       if (currentNode!.type == MapNodeType.blessing) {
         GameManager.instance!.setCurrentState(GameState.map);
         offerBlessings();
+      } else if (currentNode!.type == MapNodeType.rest) {
+        GameManager.instance!.addHealth(25);
       } else {
         // Default to normal handling
         GameManager.instance!.setCurrentState(GameState.shopping);

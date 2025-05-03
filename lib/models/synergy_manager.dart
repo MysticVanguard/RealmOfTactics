@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import 'package:flutter/foundation.dart';
+import 'package:realm_of_tactics/models/item.dart';
 import 'unit.dart';
 import 'game_manager.dart';
 import '../game_data/items.dart';
@@ -53,6 +54,8 @@ class SynergyManager extends ChangeNotifier {
   final Map<String, int> _activeClassCounts = {};
   final Map<String, int> _activeOriginCounts = {};
   Set<String> _activeSynergiesSet = {};
+
+  List<Item> forgedItems = [];
 
   final Map<String, (int count, int nextThreshold)> _activeSynergies = {};
 
@@ -407,6 +410,7 @@ class SynergyManager extends ChangeNotifier {
           final item = allItems[itemKey]?.copyWith();
 
           if (item != null) {
+            forgedItems.add(item);
             unit.equipItem(item);
           }
         }

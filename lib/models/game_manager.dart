@@ -421,6 +421,10 @@ class GameManager extends ChangeNotifier {
     notifyListeners();
   }
 
+  void addHealth(int amount) {
+    _playerHealth += amount;
+  }
+
   // Tries to spend gold; returns true if successful
   bool spendGold(int amount) {
     if (_gold >= amount) {
@@ -572,7 +576,7 @@ class GameManager extends ChangeNotifier {
       unit.stats.resetStartOfCombatStats();
       final equippedItems = unit.getEquippedItems();
       for (final item in equippedItems) {
-        if (item.tier == 3) {
+        if (item.tier == 3 && synergyManager!.forgedItems.contains(item)) {
           unit.unequipItem(item.type);
         }
       }
@@ -634,9 +638,9 @@ class GameManager extends ChangeNotifier {
     if (playerWon) {
       _gold += 1;
     } else {
-      int damage = 5 + (_currentStage ~/ 5);
+      int damage = 2 + (_currentStage ~/ 3) + max(5 * _currentStage - 55, 0);
       if (mapManager.currentNode?.type == MapNodeType.elite) {
-        damage += 2;
+        damage *= 2;
       }
       _playerHealth -= damage;
     }
