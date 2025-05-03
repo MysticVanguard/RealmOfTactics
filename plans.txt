@@ -1,21 +1,11 @@
 TODO:
 - Add other combat round sets
-- Possibly add up to 5* units to help lengthen game
-    - Also possible to make each combat 3 rounds instead of 5
 - Add items to enemy rounds
     - Will allow for infinitely more uniqueness to rounds
-- Add events or change
-    - Ideally a game of chance, % chance for combat, reward, or punishment
-- Add merchant or change
-    - Don't want players to have to stay above 50 gold to prep for it
-    - Don't want players to ruin their econ for it
 - Add rest or change
     - Heals some of players health
     - Player health needs balanced more, round damage should scale, but might be too little currently
 - Possible other node ideas: blessing, unit duplicator
-- Each noncombat node currently needs to be worth ~50 gold to be worth
-    - Might lower gold gain at end of round, and add gold gain at end of node
-    - Ideally players want to pick noncombat nodes and feel excited doing so
 - Fix how units are displayed so they work with their new sprites
     - Maybe also add a size stat for units that can be changed
 
@@ -33,3 +23,8 @@ DONE:
     - Moving an item from bench to bench duplicates it
     - Fully redo bench to be much more suited for a mobile game
 - Add items, implement item effects
+- Add events or change
+    - Ideally a game of chance, % chance for combat, reward, or punishment
+- Each noncombat node currently needs to be worth ~50 gold to be worth
+    - Might lower gold gain at end of round, and add gold gain at end of node
+    - Ideally players want to pick noncombat nodes and feel excited doing so

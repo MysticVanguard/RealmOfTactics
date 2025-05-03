@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:realm_of_tactics/models/map_manager.dart';
+import 'package:realm_of_tactics/widgets/blessing_widget.dart';
+import 'package:realm_of_tactics/widgets/blessings_tab.dart';
 import 'package:realm_of_tactics/widgets/combat_stats_tab.dart';
 import 'package:realm_of_tactics/widgets/start_choice_ui.dart';
 import 'package:realm_of_tactics/widgets/unit_info_box.dart';
@@ -116,6 +118,7 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
 
   // Whether or not the tutorial modal is open
   bool _showTutorial = false;
+  bool _isBlessingTabOpen = false;
 
   // Select a unit on the board or bench
   void _selectUnit(Unit unit) {
@@ -491,9 +494,11 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
                 // Shop toggle button
                 IconButton(
                   icon: Icon(
-                    _isShopOpen ? Icons.store_outlined : Icons.store,
+                    _isShopOpen ? Icons.store : Icons.store_outlined,
                     color:
-                        (isInCombat ||
+                        _isShopOpen
+                            ? Colors.amber
+                            : (isInCombat ||
                                 gameManager.currentState == GameState.map ||
                                 gameManager.currentState ==
                                     GameState.chooseStart)
@@ -517,7 +522,10 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
                 // Help and Stats toggle
                 if (!_isShopOpen)
                   IconButton(
-                    icon: Icon(Icons.help_outline, color: Colors.white),
+                    icon: Icon(
+                      Icons.help_outline,
+                      color: _showTutorial ? Colors.amber : Colors.white,
+                    ),
                     tooltip: "How to Play",
                     onPressed: () {
                       setState(() {
@@ -530,7 +538,9 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
                     icon: Icon(
                       Icons.bar_chart,
                       color:
-                          (gameManager.currentState == GameState.map ||
+                          _isStatsOpen
+                              ? Colors.amber
+                              : (gameManager.currentState == GameState.map ||
                                   gameManager.currentState ==
                                       GameState.chooseStart)
                               ? Colors.grey
@@ -552,6 +562,19 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
                                 _isStatsOpen = !_isStatsOpen;
                               });
                             },
+                  ),
+                if (!_isShopOpen)
+                  IconButton(
+                    icon: Icon(
+                      Icons.auto_awesome,
+                      color: _isBlessingTabOpen ? Colors.amber : Colors.white,
+                    ),
+                    tooltip: "Blessings",
+                    onPressed: () {
+                      setState(() {
+                        _isBlessingTabOpen = !_isBlessingTabOpen;
+                      });
+                    },
                   ),
 
                 // Reroll button when shop is open
@@ -662,6 +685,8 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
                                       });
                                     },
                                   )
+                                  : _isBlessingTabOpen
+                                  ? BlessingsTab()
                                   : gameManager.currentState == GameState.map
                                   ? _buildNodeInfoBox(_selectedMapNode)
                                   : SynergyDisplay(
@@ -804,6 +829,30 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
                             onConfirmSelection: () {
                               gameManager.enterSelectedMapNode();
                             },
+                          ),
+                        if ((gameManager.mapManager.currentNode?.type ==
+                                    MapNodeType.blessing ||
+                                (gameManager.mapManager.currentNode?.type ==
+                                        MapNodeType.start &&
+                                    gameManager.currentState !=
+                                        GameState.chooseStart)) &&
+                            gameManager
+                                .mapManager
+                                .currentBlessingOptions
+                                .isNotEmpty)
+                          BlessingWidget(
+                            blessings:
+                                gameManager.mapManager.currentBlessingOptions,
+                            onClose: () {
+                              setState(() {});
+                            },
+                            onReroll: () {
+                              setState(() {
+                                gameManager.mapManager.useBlessingReroll();
+                              });
+                            },
+                            canReroll:
+                                gameManager.mapManager.blessingRerolls > 0,
                           ),
 
                         // Item info overlay

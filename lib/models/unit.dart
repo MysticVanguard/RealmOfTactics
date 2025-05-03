@@ -299,6 +299,9 @@ class Unit extends ChangeNotifier {
       stats.currentHealth = 0;
       if (source != null) {
         handleItemEffectsOnKill(source);
+        if (gameManager!.mapManager.playerBlessings.contains("Vampiric Bite")) {
+          source.heal(source, 200);
+        }
       }
       die();
     }
@@ -318,6 +321,10 @@ class Unit extends ChangeNotifier {
 
   // Adds an amount of shield to the unit
   void shield(Unit source, int amount) {
+    if (gameManager!.mapManager.playerBlessings.contains("Shields Up") &&
+        !source._isEnemy) {
+      amount *= 2;
+    }
     if (!isAlive || amount <= 0) return;
     if (source.stats.canCriticallyShield) {
       double finalShield = amount as double;

@@ -189,9 +189,7 @@ class MapWidget extends StatelessWidget {
         return Colors.purple[800]!;
       case MapNodeType.rest:
         return Colors.green[700]!;
-      case MapNodeType.merchant:
-        return Colors.orange[700]!;
-      case MapNodeType.event:
+      case MapNodeType.blessing:
         return Colors.teal[700]!;
       case MapNodeType.boss:
         return Colors.black;
@@ -209,9 +207,7 @@ class MapWidget extends StatelessWidget {
         return "E";
       case MapNodeType.rest:
         return "R";
-      case MapNodeType.merchant:
-        return "M";
-      case MapNodeType.event:
+      case MapNodeType.blessing:
         return "?";
       case MapNodeType.boss:
         return "B";

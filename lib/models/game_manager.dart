@@ -53,6 +53,21 @@ final allStartOptions = [
 
 // Singleton GameManager class – oversees game lifecycle, economy, board, shop, and combat flow
 class GameManager extends ChangeNotifier {
+  int overallMaxHealth = 0;
+  int overallAttackDamage = 0;
+  double overallAttackSpeed = 0.0;
+  int overallArmor = 0;
+  int overallMagicResist = 0;
+  int overallAbilityPower = 0;
+  int overallRange = 0;
+  double overallCritChance = 0.0;
+  double overallCritDamage = 0.0;
+  double overallLifesteal = 0.0;
+  double overallMovementSpeed = 0.0;
+  int overallStartingMana = 0;
+  double overallDamageAmp = 0.0;
+  double overallDamageReduction = 0.0;
+
   // UI reference for board layout positioning
   GlobalKey? boardKey;
   // Board/bench/unit logic
@@ -125,8 +140,6 @@ class GameManager extends ChangeNotifier {
   int _playerHealth = 100;
   int _playerXp = 0;
   int _currentStage = 0;
-  int _roundsWon = 0;
-  int _roundsLost = 0;
   int _ironvaleScrap = 0;
 
   // UI and round transition helpers
@@ -151,6 +164,10 @@ class GameManager extends ChangeNotifier {
 
   // Various global game getters
   GameState get currentState => _currentState;
+  void setCurrentState(GameState state) {
+    _currentState = state;
+  }
+
   int get gold => _gold;
   int get playerGold => _gold;
   int get playerLevel => _playerLevel;
@@ -216,8 +233,6 @@ class GameManager extends ChangeNotifier {
     _playerLevel = 1;
     _playerHealth = 100;
     _currentStage = 1;
-    _roundsWon = 0;
-    _roundsLost = 0;
     _ironvaleScrap = 0;
     _nextRoundEnemies.clear();
 
@@ -246,7 +261,7 @@ class GameManager extends ChangeNotifier {
     _currentState = GameState.chooseStart;
     startRerolls = 1;
     offerStartOptions();
-
+    mapManager.offerBlessings();
     notifyListeners();
   }
 
@@ -386,9 +401,7 @@ class GameManager extends ChangeNotifier {
 
   Item getRandomItemByTier(int tier) {
     final matchingItems =
-        allItems.values
-            .where((item) => item.tier == tier && !item.isForged)
-            .toList();
+        allItems.values.where((item) => item.tier == tier).toList();
     if (matchingItems.isEmpty) throw Exception("No tier $tier items found");
 
     final rand = Random();
@@ -619,31 +632,12 @@ class GameManager extends ChangeNotifier {
     addXp(2);
 
     if (playerWon) {
-      _roundsWon++;
-      _roundsLost = 0;
-
-      int streakBonus = 0;
-      if (_roundsWon >= 5) {
-        streakBonus = 2;
-      } else if (_roundsWon >= 3) {
-        streakBonus = 1;
-      }
-
-      _gold += 1 + streakBonus;
+      _gold += 1;
     } else {
-      _roundsLost++;
-      _roundsWon = 0;
-
-      int streakBonus = 0;
-      if (_roundsLost >= 5) {
-        streakBonus = 2;
-      } else if (_roundsLost >= 3) {
-        streakBonus = 1;
+      int damage = 5 + (_currentStage ~/ 5);
+      if (mapManager.currentNode?.type == MapNodeType.elite) {
+        damage += 2;
       }
-
-      _gold += streakBonus;
-
-      int damage = 2 + (_currentStage ~/ 2);
       _playerHealth -= damage;
     }
 
@@ -653,12 +647,13 @@ class GameManager extends ChangeNotifier {
     }
   }
 
+  int maxInterest = 5;
   // Adds base round income and interest from banked gold
   void _addRoundIncome() {
     int income = 5;
 
     int interest = (_gold / 10).floor();
-    if (interest > 5) interest = 5;
+    if (interest > maxInterest) interest = maxInterest;
 
     _gold += income + interest;
   }
@@ -910,5 +905,23 @@ class GameManager extends ChangeNotifier {
     } else {
       return false;
     }
+  }
+
+  void applyItemBonus(ItemStatsBonus bonus) {
+    overallMaxHealth += bonus.bonusMaxHealth.floor();
+
+    overallAttackDamage += bonus.bonusAttackDamage.floor();
+    overallAttackSpeed += bonus.bonusAttackSpeed;
+    overallArmor += bonus.bonusArmor.floor();
+    overallMagicResist += bonus.bonusMagicResist.floor();
+    overallAbilityPower += bonus.bonusAbilityPower.floor();
+    overallCritChance += bonus.bonusCritChance;
+    overallCritDamage += bonus.bonusCritDamage;
+    overallStartingMana += bonus.bonusStartingMana;
+    overallLifesteal += bonus.bonusLifesteal;
+    overallDamageAmp += bonus.bonusDamageAmp;
+    overallDamageReduction += bonus.bonusDamageReduction;
+    overallRange += bonus.bonusRange;
+    overallAttackSpeed += bonus.bonusAttackSpeedPercent;
   }
 }

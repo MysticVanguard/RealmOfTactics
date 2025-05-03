@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:realm_of_tactics/models/game_manager.dart';
 import 'dart:math';
 import 'item.dart';
 import 'board_position.dart';
@@ -158,6 +159,7 @@ class UnitStats {
   double combatStartLifestealBonus = 0.0;
   double combatStartDamageAmp = 0.0;
   double combatStartCritChance = 0.0;
+  int combatStartStartingMana = 0;
 
   String mainSpellScaling = 'AD';
   bool isStunned = false;
@@ -223,6 +225,7 @@ class UnitStats {
     combatStartLifestealBonus = 0.0;
     combatStartDamageAmp = 0.0;
     combatStartCritChance = 0.0;
+    combatStartStartingMana = 0;
     spellbladeBonusAttackDamage = 0;
     artilleristBonusDamagePercent = 0.0;
     riflemanStackAmount = 0;
@@ -270,51 +273,82 @@ class UnitStats {
 
   // Computed stat accessors (final values)
   int get maxHealth =>
-      baseMaxHealth + itemMaxHealth + _bonusMaxHealth + combatStartHealthBonus;
+      baseMaxHealth +
+      itemMaxHealth +
+      _bonusMaxHealth +
+      combatStartHealthBonus +
+      GameManager.instance!.overallMaxHealth;
   int get attackDamage =>
       baseAttackDamage +
       itemAttackDamage +
       bonusAttackDamage +
-      combatStartAttackDamageBonus;
-  int get armor => baseArmor + itemArmor + bonusArmor + combatStartArmorBonus;
+      combatStartAttackDamageBonus +
+      GameManager.instance!.overallAttackDamage;
+  int get armor =>
+      baseArmor +
+      itemArmor +
+      bonusArmor +
+      combatStartArmorBonus +
+      GameManager.instance!.overallArmor;
   int get magicResist =>
       baseMagicResist +
       itemMagicResist +
       bonusMagicResist +
-      combatStartMagicResistBonus;
+      combatStartMagicResistBonus +
+      GameManager.instance!.overallMagicResist;
   int get abilityPower =>
       baseAbilityPower +
       itemAbilityPower +
       bonusAbilityPower +
-      combatStartAbilityPowerBonus;
+      combatStartAbilityPowerBonus +
+      GameManager.instance!.overallAbilityPower;
   int get range => baseRange + itemRange;
-  double get critChance =>
-      (baseCritChance + itemCritChance + bonusCritChance).clamp(0.0, 1.0);
-  double get critDamage => baseCritDamage + itemCritDamage + bonusCritDamage;
+  double get critChance => (baseCritChance +
+          itemCritChance +
+          bonusCritChance +
+          combatStartCritChance +
+          GameManager.instance!.overallCritChance)
+      .clamp(0.0, 1.0);
+  double get critDamage =>
+      baseCritDamage +
+      itemCritDamage +
+      bonusCritDamage +
+      combatStartCritDamageBonus +
+      GameManager.instance!.overallCritDamage;
   double get lifesteal => (baseLifesteal +
           itemLifesteal +
           bonusLifesteal +
-          combatStartLifestealBonus)
+          combatStartLifestealBonus +
+          GameManager.instance!.overallLifesteal)
       .clamp(0.0, 1.0);
   double get movementSpeed =>
       baseMovementSpeed * (1 + bonusMovementSpeedPercent);
   int get startingMana =>
-      baseStartingMana + bonusStartingMana + itemStartingMana;
+      baseStartingMana +
+      bonusStartingMana +
+      itemStartingMana +
+      GameManager.instance!.overallStartingMana;
   int get maxMana => baseMaxMana;
   double get damageAmp =>
-      baseDamageAmp + itemDamageAmp + bonusDamageAmp + combatStartDamageAmp;
+      baseDamageAmp +
+      itemDamageAmp +
+      bonusDamageAmp +
+      combatStartDamageAmp +
+      GameManager.instance!.overallMaxHealth;
   double get damageReduction => (baseDamageReduction +
           itemDamageReduction +
           bonusDamageReduction +
-          combatStartDamageResistanceBonus)
+          combatStartDamageResistanceBonus +
+          GameManager.instance!.overallDamageReduction)
       .clamp(0.0, 0.75);
   OnAttackStats get totalOnAttackStats =>
       baseOnAttackStats.combine(itemOnAttackStats).combine(bonusOnAttackStats);
   double get attackSpeed =>
       baseAttackSpeed +
-      itemAttackSpeed +
-      bonusAttackSpeed +
-      combatStartAttackSpeedBonus;
+      (itemAttackSpeed * baseAttackSpeed) +
+      (bonusAttackSpeed * baseAttackSpeed) +
+      (combatStartAttackSpeedBonus * baseAttackSpeed +
+          GameManager.instance!.overallAttackSpeed);
 
   // Constructor initializes core stats and sets current health/mana
   UnitStats({
@@ -457,14 +491,11 @@ class UnitStats {
     itemDamageAmp += bonus.bonusDamageAmp;
     itemDamageReduction += bonus.bonusDamageReduction;
     itemRange += bonus.bonusRange;
-
+    itemAttackSpeed += bonus.bonusAttackSpeedPercent;
     // Handle percent-based boosts
     if (bonus.bonusAttackDamagePercent > 0) {
       itemAttackDamage +=
           (baseAttackDamage * bonus.bonusAttackDamagePercent).floor();
-    }
-    if (bonus.bonusAttackSpeedPercent > 0) {
-      itemAttackSpeed += bonus.bonusAttackSpeedPercent;
     }
     if (bonus.bonusAbilityPowerPercent > 0) {
       itemAbilityPower +=
@@ -472,6 +503,31 @@ class UnitStats {
     }
 
     itemOnAttackStats = itemOnAttackStats.combine(bonus.onAttackStats);
+  }
+
+  // Applies an item's stat bonuses to the unit only for the combat
+  void applyItemBonusToCombatStart(ItemStatsBonus bonus) {
+    combatStartHealthBonus += bonus.bonusMaxHealth.floor();
+    combatStartAttackSpeedBonus += bonus.bonusAttackSpeed;
+    combatStartArmorBonus += bonus.bonusArmor.floor();
+    combatStartMagicResistBonus += bonus.bonusMagicResist.floor();
+    combatStartAbilityPowerBonus += bonus.bonusAbilityPower.floor();
+    combatStartCritChance += bonus.bonusCritChance;
+    combatStartCritDamageBonus += bonus.bonusCritDamage;
+    combatStartStartingMana += bonus.bonusStartingMana;
+    currentMana += bonus.bonusStartingMana;
+    combatStartLifestealBonus += bonus.bonusLifesteal;
+    combatStartDamageAmp += bonus.bonusDamageAmp;
+    combatStartDamageResistanceBonus += bonus.bonusDamageReduction;
+    combatStartAttackSpeedBonus += bonus.bonusAttackSpeedPercent;
+    if (bonus.bonusAttackDamagePercent > 0) {
+      combatStartAttackDamageBonus +=
+          (baseAttackDamage * bonus.bonusAttackDamagePercent).floor();
+    }
+    if (bonus.bonusAbilityPowerPercent > 0) {
+      combatStartAbilityPowerBonus +=
+          (baseAbilityPower * bonus.bonusAbilityPowerPercent).floor();
+    }
   }
 
   // Reverses a previously applied item bonus

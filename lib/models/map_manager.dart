@@ -1,12 +1,13 @@
 import 'dart:math';
 import 'package:flutter/foundation.dart';
+import 'package:realm_of_tactics/models/blessing_data.dart';
 import 'package:realm_of_tactics/models/game_manager.dart';
 import 'package:realm_of_tactics/models/item.dart';
 import 'package:realm_of_tactics/models/round_data.dart';
 import 'package:realm_of_tactics/models/unit.dart';
 
 // Types of nodes on the map
-enum MapNodeType { start, combat, elite, rest, merchant, event, boss }
+enum MapNodeType { start, combat, elite, rest, blessing, boss }
 
 // A map node for the displayed map, has the level of the map
 // as the floor, the index as the x, it's type, what it's connected
@@ -34,9 +35,16 @@ class MapNode {
 
 class MapManager extends ChangeNotifier {
   // Map dimensions
-  static const int totalFloors = 15;
+  static const int totalFloors = 16;
   static const int nodesPerFloor = 9;
   static const int roundsPerNode = 5;
+
+  List<String> playerBlessings = [];
+  int _blessingRerolls = 1;
+  int get blessingRerolls => _blessingRerolls;
+  int _blessingsChosen = 0;
+  List<String> currentBlessingOptions = [];
+  List<int> tierOrder = [1, 2, 3]..shuffle();
 
   final List<List<MapNode>> _map = List.generate(totalFloors, (_) => []);
 
@@ -189,21 +197,37 @@ class MapManager extends ChangeNotifier {
 
   // Assigns the node types and any other unique info
   void _assignNodeTypes() {
+    int restFloor = 0;
     for (int floor = 1; floor < totalFloors - 1; floor++) {
+      if (floor >= 6 &&
+          restFloor == 0 &&
+          floor != 10 &&
+          (Random().nextDouble() < 0.10 || (restFloor == 0 && floor == 14))) {
+        restFloor = floor;
+      }
+      int elitesOnFloor = 0;
       for (final node in _map[floor]) {
-        if (floor >= 2 && Random().nextDouble() < 0.15) {
+        if (floor == 5 || floor == 10) {
+          node.type = MapNodeType.blessing;
+          node.rounds.clear();
+        } else if (restFloor == floor) {
+          node.type = MapNodeType.rest;
+          node.rounds.clear();
+        } else if (floor >= 2 &&
+            floor <= 10 &&
+            elitesOnFloor < 2 &&
+            Random().nextDouble() < 0.2) {
+          elitesOnFloor += 1;
           node.type = MapNodeType.elite;
           node.rounds.clear();
           node.rounds = _generateRoundsForFloor(floor, isElite: true);
-        } else if (floor >= 6 && Random().nextDouble() < 0.10) {
-          node.type = MapNodeType.rest;
-          node.rounds.clear(); // no rounds needed
-        } else if (Random().nextDouble() < 0.05) {
-          node.type = MapNodeType.merchant;
-          node.rounds.clear(); // no rounds
-        } else if (Random().nextDouble() < 0.22) {
-          node.type = MapNodeType.event;
-          node.rounds.clear(); // no rounds
+        } else if (floor >= 10 &&
+            elitesOnFloor < 4 &&
+            Random().nextDouble() < 0.4) {
+          elitesOnFloor += 1;
+          node.type = MapNodeType.elite;
+          node.rounds.clear();
+          node.rounds = _generateRoundsForFloor(floor, isElite: true);
         } else {
           node.type = MapNodeType.combat;
           node.rounds.clear();
@@ -237,7 +261,58 @@ class MapManager extends ChangeNotifier {
     if (_selectedNode != null) {
       _currentNode = _selectedNode;
       _selectedNode = null;
+      if (currentNode!.type == MapNodeType.blessing) {
+        GameManager.instance!.setCurrentState(GameState.map);
+        offerBlessings();
+      } else {
+        // Default to normal handling
+        GameManager.instance!.setCurrentState(GameState.shopping);
+      }
       notifyListeners();
+    }
+  }
+
+  // Finds three possible options to offer to the player
+  void offerBlessings() {
+    final int currentTier = tierOrder[_blessingsChosen];
+    final int choiceNumber = _blessingsChosen + 1;
+
+    final possible = BlessingData.getBlessingsForTierAndChoice(
+      currentTier,
+      choiceNumber,
+    );
+    possible.shuffle();
+    currentBlessingOptions = possible.take(3).toList();
+
+    GameManager.instance!.notifyListeners();
+  }
+
+  // Makes a blessing chosen from the widget
+  void chooseBlessing(String blessingName) {
+    playerBlessings.add(blessingName);
+    _blessingsChosen++;
+
+    BlessingData.applyImmediateBlessing(blessingName);
+    if ((playerBlessings[0] == "Processed Forging" && _blessingsChosen == 2)) {
+      GameManager.instance!.boardManager?.addItemToBench(
+        GameManager.instance!.getRandomItemByTier(3),
+      );
+    } else if (_blessingsChosen == 3) {
+      if (playerBlessings[1] == "Processed Forging") {
+        GameManager.instance!.boardManager?.addItemToBench(
+          GameManager.instance!.getRandomItemByTier(3),
+        );
+      }
+    }
+    currentBlessingOptions = [];
+    GameManager.instance!.notifyListeners();
+  }
+
+  // Rerolls the offered blessings
+  void useBlessingReroll() {
+    if (_blessingRerolls > 0) {
+      _blessingRerolls--;
+      offerBlessings();
     }
   }
 
@@ -367,6 +442,11 @@ class MapManager extends ChangeNotifier {
             break;
         }
 
+        for (final unit in units) {
+          units.remove(unit);
+          final newUnit = unit.upgrade();
+          units.add(newUnit);
+        }
         // Set rewards
         node.rewardGold = gold;
         node.rewardItems = items;

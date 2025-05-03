@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'dart:math';
 import 'package:flutter/foundation.dart';
+import 'package:realm_of_tactics/models/blessing_data.dart';
+import 'package:realm_of_tactics/models/game_manager.dart';
 import 'unit.dart';
 import 'board_manager.dart';
 import 'synergy_manager.dart';
@@ -61,6 +63,8 @@ class CombatManager extends ChangeNotifier {
   List<Unit> get enemyUnits => _enemyUnits;
   List<CombatEffect> get activeEffects => _activeEffects;
 
+  bool speedItUpBonusApplied = false;
+
   // Called each time a combat round starts
   void startCombat(List<Unit> playerUnitsFromBoard, List<Unit> enemyUnits) {
     if (_state == CombatState.running) {
@@ -104,7 +108,7 @@ class CombatManager extends ChangeNotifier {
     ironvaleSummon?.applyEngineerBonus();
     // Apply all synergy bonuses and start-of-combat buffs
     synergyManager.applyStartOfCombatEffects([..._playerUnits, ..._enemyUnits]);
-
+    BlessingData.applyCombatStartBlessings(playerUnits, enemyUnits);
     // Reset combat stats and refill HP
     for (var unit in [..._playerUnits, ..._enemyUnits]) {
       if (unit.isAlive) {
@@ -498,6 +502,36 @@ class CombatManager extends ChangeNotifier {
     bool playerTeamAlive = _playerUnits.any((u) => u.isAlive);
     bool enemyTeamAlive = _enemyCombatUnits.any((u) => u.isAlive);
 
+    if (GameManager.instance!.mapManager.playerBlessings.contains("Divinify") &&
+        _playerUnits.where((unit) => unit.isAlive).length == 1) {
+      final aliveUnit = _playerUnits.where((unit) => unit.isAlive).first;
+      aliveUnit.stats.combatStartHealthBonus +=
+          (aliveUnit.stats.maxHealth * .50).floor();
+      aliveUnit.stats.currentHealth +=
+          (aliveUnit.stats.maxHealth * .50).floor();
+      aliveUnit.stats.combatStartLifestealBonus += .3;
+      aliveUnit.stats.combatStartArmorBonus += 50;
+      aliveUnit.stats.combatStartMagicResistBonus += 50;
+      aliveUnit.stats.combatStartAttackSpeedBonus += 1.0;
+      aliveUnit.stats.combatStartDamageAmp += .5;
+    }
+    if (!speedItUpBonusApplied && combatTime > Duration(seconds: 15)) {
+      double bonus = 0.0;
+      if (GameManager.instance!.mapManager.playerBlessings.contains(
+        "Speed It Up",
+      )) {
+        bonus = 1.5;
+      }
+      if (GameManager.instance!.mapManager.playerBlessings.contains("End It")) {
+        bonus = 3.0;
+      }
+      if (bonus != 0.0) {
+        for (final unit in _playerUnits) {
+          unit.stats.combatStartAttackSpeedBonus += bonus;
+        }
+        speedItUpBonusApplied = true;
+      }
+    }
     if (!playerTeamAlive || !enemyTeamAlive) {
       finishCombat(playerTeamAlive);
     }
