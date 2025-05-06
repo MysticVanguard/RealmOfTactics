@@ -352,8 +352,6 @@ class CombatManager extends ChangeNotifier {
         unit.timeUntilNextAttack -= dt;
       }
 
-      unit.applyVitalFocusAura(unit);
-
       List<Unit> enemies =
           (_playerUnits.contains(unit)) ? _enemyCombatUnits : _playerUnits;
 

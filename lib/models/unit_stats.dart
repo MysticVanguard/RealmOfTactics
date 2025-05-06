@@ -118,15 +118,16 @@ class UnitStats {
   double chronosparkHealPercent = 0;
 
   // Effect flags and temporary bonuses (reset each combat)
-  bool physicalAbilitiesCanCrit = false;
-  bool magicAbilitiesCanCrit = false;
+  bool abilitiesCanCrit = false;
   bool canCriticallyShield = false;
   bool spikedVisorCritBonusActive = false;
   double spikedVisorCritBonusAmount = 0.0;
   bool healingReduced = false;
+  bool hasArmorReduced = false;
+  bool hasMRReduced = false;
+  bool stunImmune = false;
+  double channelingBowTimer = 0.0;
   int mysticHarnessBonus = 0;
-  int warlockTalismanBonus = 0;
-  double shadowFangBonus = 0.0;
   double combatStartCritDamageBonus = 0.0;
   bool hasWickedBroochCooldown = false;
   bool hasEternalCharmBonus = false;
@@ -248,15 +249,16 @@ class UnitStats {
     chronosparkHealInterval = 0;
     chronosparkHealPercent = 0;
 
-    physicalAbilitiesCanCrit = false;
-    magicAbilitiesCanCrit = false;
+    abilitiesCanCrit = false;
     canCriticallyShield = false;
     spikedVisorCritBonusActive = false;
     spikedVisorCritBonusAmount = 0.0;
     healingReduced = false;
+    hasArmorReduced = false;
+    hasMRReduced = false;
+    stunImmune = false;
+    channelingBowTimer = 0.0;
     mysticHarnessBonus = 0;
-    warlockTalismanBonus = 0;
-    shadowFangBonus = 0;
     combatStartCritDamageBonus = 0.0;
     hasWickedBroochCooldown = false;
     hasEternalCharmBonus = false;
@@ -282,7 +284,7 @@ class UnitStats {
       baseAttackDamage +
       itemAttackDamage +
       bonusAttackDamage +
-      combatStartAttackDamageBonus +
+      (combatStartAttackDamageBonus / 100 * baseAttackDamage).floor() +
       GameManager.instance!.overallAttackDamage;
   int get armor =>
       baseArmor +
@@ -347,8 +349,8 @@ class UnitStats {
       baseAttackSpeed +
       (itemAttackSpeed * baseAttackSpeed) +
       (bonusAttackSpeed * baseAttackSpeed) +
-      (combatStartAttackSpeedBonus * baseAttackSpeed +
-          GameManager.instance!.overallAttackSpeed);
+      (combatStartAttackSpeedBonus * baseAttackSpeed) +
+      (GameManager.instance!.overallAttackSpeed * baseAttackSpeed);
 
   // Constructor initializes core stats and sets current health/mana
   UnitStats({

@@ -1,6 +1,5 @@
 import '../models/item.dart';
 import '../enums/item_type.dart';
-import 'package:realm_of_tactics/models/unit_stats.dart';
 
 // All items so that random items can be acquired throughout the game and items can be combined
 final Map<String, Item> allItems = {
@@ -119,11 +118,12 @@ final Map<String, Item> allItems = {
     imagePath: 'assets/images/items/basic_vest.png',
     componentNames: ['Basic Sword', 'Basic Wand'],
     statsBonus: const ItemStatsBonus(
-      bonusAttackDamagePercent: 0.20,
-      bonusAbilityPower: 20,
+      bonusAttackDamagePercent: 0.10,
+      bonusAbilityPower: 10,
+      bonusMagicResist: 40,
     ),
     uniqueAbilityDescription:
-        'Attacks and abilities reduce healing of enemies hit by 40%.',
+        'Attacks and abilities reduce healing of enemies hit.',
   ),
 
   'bloodpiercer': Item(
@@ -137,8 +137,7 @@ final Map<String, Item> allItems = {
       bonusAttackDamagePercent: 0.25,
       bonusCritChance: 0.50,
     ),
-    uniqueAbilityDescription:
-        'Physical Damage from abilities can critically strike.',
+    uniqueAbilityDescription: 'Ability damage can critically strike.',
   ),
 
   'runed_sabre': Item(
@@ -149,11 +148,11 @@ final Map<String, Item> allItems = {
     imagePath: 'assets/images/items/basic_vest.png',
     componentNames: ['Basic Sword', 'Basic Orb'],
     statsBonus: const ItemStatsBonus(
-      bonusAttackDamagePercent: 0.45,
+      bonusAttackDamagePercent: 0.20,
       bonusStartingMana: 20,
-      onAttackStats: OnAttackStats(manaGain: 5.0),
+      bonusArmor: 20,
     ),
-    uniqueAbilityDescription: 'Attacks grant 5 mana.',
+    uniqueAbilityDescription: 'Gain 20% extra mana.',
   ),
 
   'vampiric_blade': Item(
@@ -166,6 +165,7 @@ final Map<String, Item> allItems = {
     statsBonus: const ItemStatsBonus(
       bonusAttackDamagePercent: 0.25,
       bonusLifesteal: 0.20,
+      bonusMagicResist: 20,
     ),
     uniqueAbilityDescription:
         'Overhealing creates a temporary shield (up to 10% max HP).',
@@ -190,11 +190,11 @@ final Map<String, Item> allItems = {
     imagePath: 'assets/images/items/basic_vest.png',
     componentNames: ['Basic Bow', 'Basic Wand'],
     statsBonus: const ItemStatsBonus(
-      bonusAttackSpeedPercent: 0.40,
-      bonusAbilityPower: 25,
+      bonusAttackSpeedPercent: 0.30,
+      bonusAbilityPower: 30,
     ),
     uniqueAbilityDescription:
-        'Each attack has a 20% chance to fire a magic bolt dealing 25% AP damage.',
+        'Each attack has a 50% chance to fire a magic bolt dealing 33% AP damage.',
   ),
 
   'whirlwind_knives': Item(
@@ -205,12 +205,10 @@ final Map<String, Item> allItems = {
     imagePath: 'assets/images/items/basic_vest.png',
     componentNames: ['Basic Bow', 'Basic Dagger'],
     statsBonus: const ItemStatsBonus(
-      bonusAttackDamagePercent: 0.20,
-      bonusAttackSpeedPercent: 0.20,
-      bonusCritChance: 0.25,
+      bonusAttackSpeedPercent: 0.50,
+      bonusCritChance: 0.50,
     ),
-    uniqueAbilityDescription:
-        'Crits have a 40% chance to bounce to a nearby enemy.',
+    uniqueAbilityDescription: 'Ability damage can critically strike.',
   ),
 
   'channeling_bow': Item(
@@ -221,11 +219,11 @@ final Map<String, Item> allItems = {
     imagePath: 'assets/images/items/basic_vest.png',
     componentNames: ['Basic Bow', 'Basic Orb'],
     statsBonus: const ItemStatsBonus(
-      bonusAttackSpeedPercent: 0.30,
-      bonusStartingMana: 30,
+      bonusAttackSpeedPercent: 0.20,
+      bonusStartingMana: 20,
+      bonusMaxHealth: 300,
     ),
-    uniqueAbilityDescription:
-        'Basic attacks deal 20% Max Mana as bonus magic damage.',
+    uniqueAbilityDescription: 'Heal for 500% of Attack Speed every second.',
   ),
 
   'leeching_arrows': Item(
@@ -237,9 +235,10 @@ final Map<String, Item> allItems = {
     componentNames: ['Basic Bow', 'Basic Locket'],
     statsBonus: const ItemStatsBonus(
       bonusAttackSpeedPercent: 0.40,
-      bonusLifesteal: 0.10,
+      bonusLifesteal: 0.20,
     ),
-    uniqueAbilityDescription: 'Heal for 1% of max HP on attack.',
+    uniqueAbilityDescription:
+        'Heal lowest health ally for 1% of max HP on attack.',
   ),
   'twin_conduits': Item(
     id: 'item_twin_conduits',
@@ -264,8 +263,7 @@ final Map<String, Item> allItems = {
       bonusAbilityPower: 25,
       bonusCritChance: 0.50,
     ),
-    uniqueAbilityDescription:
-        'Magic damage from abilities can critically strike.',
+    uniqueAbilityDescription: 'Ability damage can critically strike.',
   ),
 
   'focused_mind': Item(
@@ -294,7 +292,7 @@ final Map<String, Item> allItems = {
       bonusLifesteal: 0.20,
     ),
     uniqueAbilityDescription:
-        'Heal lowest health ally for 50% of heals to this unit.',
+        'Heal lowest health ally for Lifesteal% of Damage dealt.',
   ),
 
   'shadow_fang': Item(
@@ -306,9 +304,9 @@ final Map<String, Item> allItems = {
     componentNames: ['Basic Dagger', 'Basic Dagger'],
     statsBonus: const ItemStatsBonus(
       bonusCritChance: 0.25,
-      bonusCritDamage: 0.20,
+      bonusCritDamage: 0.30,
     ),
-    uniqueAbilityDescription: 'Gain +1% Crit Damage when you crit, up to 30%.',
+    uniqueAbilityDescription: 'Gain 5% Crit Damage after casting your ability.',
   ),
 
   'psychic_edge': Item(
@@ -322,7 +320,7 @@ final Map<String, Item> allItems = {
       bonusCritChance: 0.25,
       bonusStartingMana: 20,
     ),
-    uniqueAbilityDescription: 'Gaining mana boosts Crit Damage by 3% for 3s.',
+    uniqueAbilityDescription: 'Gain 5 mana on crit (Cooldown 1s).',
   ),
 
   'blood_charm': Item(
@@ -360,7 +358,8 @@ final Map<String, Item> allItems = {
     componentNames: ['Basic Dagger', 'Basic Armguard'],
     statsBonus: const ItemStatsBonus(
       bonusCritChance: 0.25,
-      bonusMagicResist: 30,
+      bonusMagicResist: 10,
+      bonusAbilityPower: 35,
     ),
     uniqueAbilityDescription: 'Crits remove 10 MR from enemies hit for 3s.',
   ),
@@ -398,9 +397,10 @@ final Map<String, Item> allItems = {
     componentNames: ['Basic Orb', 'Basic Locket'],
     statsBonus: const ItemStatsBonus(
       bonusStartingMana: 20,
-      bonusLifesteal: 0.20,
+      bonusMaxHealth: 100,
+      bonusAbilityPower: 40,
     ),
-    uniqueAbilityDescription: 'Gain +2 Mana when healed.',
+    uniqueAbilityDescription: 'Heal the lowest health ally for 50% AP on cast.',
   ),
 
   'aether_helm': Item(
@@ -424,7 +424,8 @@ final Map<String, Item> allItems = {
     componentNames: ['Basic Orb', 'Basic Armguard'],
     statsBonus: const ItemStatsBonus(
       bonusStartingMana: 20,
-      bonusMagicResist: 40,
+      bonusMagicResist: 15,
+      bonusAttackDamagePercent: 30,
     ),
     uniqueAbilityDescription: 'Casting abilities gives a 100 Health shield.',
   ),
@@ -438,7 +439,8 @@ final Map<String, Item> allItems = {
     componentNames: ['Basic Orb', 'Basic Tunic'],
     statsBonus: const ItemStatsBonus(
       bonusStartingMana: 20,
-      bonusMaxHealth: 300,
+      bonusMaxHealth: 150,
+      bonusMagicResist: 30,
     ),
     uniqueAbilityDescription:
         'Heal 5% of missing HP after casting your ability.',
@@ -451,7 +453,10 @@ final Map<String, Item> allItems = {
     tier: 2,
     imagePath: 'assets/images/items/basic_vest.png',
     componentNames: ['Basic Locket', 'Basic Locket'],
-    statsBonus: const ItemStatsBonus(bonusLifesteal: 0.30),
+    statsBonus: const ItemStatsBonus(
+      bonusLifesteal: 0.30,
+      bonusDamageAmp: 0.10,
+    ),
     uniqueAbilityDescription: 'Lifesteal is doubled below 30% HP.',
   ),
 
@@ -462,9 +467,12 @@ final Map<String, Item> allItems = {
     tier: 2,
     imagePath: 'assets/images/items/basic_vest.png',
     componentNames: ['Basic Locket', 'Basic Helmet'],
-    statsBonus: const ItemStatsBonus(bonusLifesteal: 0.10, bonusArmor: 30),
-    uniqueAbilityDescription:
-        'Gain +1 Armor for every 2% Current Max Health healed (Max 30).',
+    statsBonus: const ItemStatsBonus(
+      bonusLifesteal: 0.20,
+      bonusArmor: 20,
+      bonusAttackDamagePercent: .20,
+    ),
+    uniqueAbilityDescription: 'Deal 50% of heals to the current target.',
   ),
 
   'darkbinding_charm': Item(
@@ -476,9 +484,10 @@ final Map<String, Item> allItems = {
     componentNames: ['Basic Locket', 'Basic Armguard'],
     statsBonus: const ItemStatsBonus(
       bonusLifesteal: 0.10,
-      bonusMagicResist: 40,
+      bonusMagicResist: 10,
+      bonusAbilityPower: 30,
     ),
-    uniqueAbilityDescription: 'Heals gain 5 magic resist for 1s.',
+    uniqueAbilityDescription: 'Heals gain 5 AP for 2s.',
   ),
 
   'blood_vessel': Item(
@@ -535,11 +544,11 @@ final Map<String, Item> allItems = {
     imagePath: 'assets/images/items/basic_vest.png',
     componentNames: ['Basic Helmet', 'Basic Sword'],
     statsBonus: const ItemStatsBonus(
-      bonusArmor: 30,
-      bonusAttackDamagePercent: 0.20,
-      bonusMaxHealth: 100,
+      bonusArmor: 20,
+      bonusAttackDamagePercent: 0.40,
     ),
-    uniqueAbilityDescription: 'Reflects 15% of damage back to attacker.',
+    uniqueAbilityDescription:
+        'Gain Immunity to Stuns for 10 seconds at the start of combat.',
   ),
 
   'swift_helm': Item(
@@ -551,11 +560,10 @@ final Map<String, Item> allItems = {
     componentNames: ['Basic Helmet', 'Basic Bow'],
     statsBonus: const ItemStatsBonus(
       bonusArmor: 30,
-      bonusAttackSpeedPercent: 0.20,
-      bonusMaxHealth: 100,
+      bonusAttackSpeedPercent: 0.30,
     ),
     uniqueAbilityDescription:
-        'Remove 20% Armor from enemies hit by attacks and abilities.',
+        'Remove 20% Armor from enemies hit by attacks and abilities (Does not stack).',
   ),
 
   'runed_helm': Item(
@@ -565,11 +573,7 @@ final Map<String, Item> allItems = {
     tier: 2,
     imagePath: 'assets/images/items/basic_vest.png',
     componentNames: ['Basic Helmet', 'Basic Wand'],
-    statsBonus: const ItemStatsBonus(
-      bonusArmor: 40,
-      bonusAbilityPower: 20,
-      bonusMaxHealth: 100,
-    ),
+    statsBonus: const ItemStatsBonus(bonusArmor: 30, bonusAbilityPower: 40),
     uniqueAbilityDescription:
         'Gain a 300% AP Health shield at the start of combat.',
   ),
@@ -604,11 +608,10 @@ final Map<String, Item> allItems = {
     imagePath: 'assets/images/items/basic_vest.png',
     componentNames: ['Basic Armguard', 'Basic Sword'],
     statsBonus: const ItemStatsBonus(
-      bonusMagicResist: 40,
-      bonusAttackDamagePercent: 0.20,
-      bonusMaxHealth: 100,
+      bonusMagicResist: 20,
+      bonusAttackDamagePercent: 0.40,
     ),
-    uniqueAbilityDescription: 'Remove 20% MR from adjacent enemies.',
+    uniqueAbilityDescription: 'Gain 10% AD at the start of combat.',
   ),
 
   'mystic_harness': Item(
@@ -619,11 +622,10 @@ final Map<String, Item> allItems = {
     imagePath: 'assets/images/items/basic_vest.png',
     componentNames: ['Basic Armguard', 'Basic Bow'],
     statsBonus: const ItemStatsBonus(
-      bonusMagicResist: 20,
+      bonusMagicResist: 30,
       bonusAttackSpeedPercent: 0.20,
-      bonusMaxHealth: 100,
     ),
-    uniqueAbilityDescription: 'Attacks grant 1 MR and 1 Armor (Max 30).',
+    uniqueAbilityDescription: 'Attacks grant 5 MR and 5 Armor (Max 50).',
   ),
 
   'magebane_plate': Item(
@@ -639,7 +641,7 @@ final Map<String, Item> allItems = {
       bonusMaxHealth: 100,
     ),
     uniqueAbilityDescription:
-        'After casting, reduce hit enemies\' AP by 10 for 4s.',
+        "Attacks and abilities reduce hit enemies' MR by 20%. (Does Not Stack)",
   ),
 
   'titan_hide': Item(
@@ -663,7 +665,7 @@ final Map<String, Item> allItems = {
     componentNames: ['Basic Tunic', 'Basic Sword'],
     statsBonus: const ItemStatsBonus(
       bonusMaxHealth: 300,
-      bonusAttackDamagePercent: 0.20,
+      bonusAttackDamagePercent: 0.30,
       bonusArmor: 10,
     ),
     uniqueAbilityDescription: 'Gain 10% lifesteal while below 50% HP.',
@@ -677,12 +679,11 @@ final Map<String, Item> allItems = {
     imagePath: 'assets/images/items/basic_vest.png',
     componentNames: ['Basic Tunic', 'Basic Bow'],
     statsBonus: const ItemStatsBonus(
-      bonusMaxHealth: 300,
+      bonusMaxHealth: 400,
       bonusAttackSpeedPercent: 0.20,
-      bonusMagicResist: 10,
     ),
     uniqueAbilityDescription:
-        'Gain 1% Attack Speed when taking damage (up to 50%).',
+        'Gain 1% Attack Speed, 1% Attack Damage, and 1 AP when taking damage (up to 20%).',
   ),
 
   'vital_focus': Item(
@@ -693,11 +694,10 @@ final Map<String, Item> allItems = {
     imagePath: 'assets/images/items/basic_vest.png',
     componentNames: ['Basic Tunic', 'Basic Wand'],
     statsBonus: const ItemStatsBonus(
-      bonusMaxHealth: 300,
-      bonusAbilityPower: 20,
-      bonusArmor: 20,
+      bonusMaxHealth: 200,
+      bonusAbilityPower: 40,
     ),
-    uniqueAbilityDescription: 'Reduce healing of adjacent units by 40%.',
+    uniqueAbilityDescription: 'Gain 10 AP after casting your ability.',
   ),
 
   'forged_zephyr_blade': Item(

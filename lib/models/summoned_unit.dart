@@ -174,8 +174,9 @@ class SummonedUnit extends Unit {
     double rawDamage,
     Unit? source, [
     DamageType type = DamageType.physical,
+    bool fromItem = false,
   ]) {
-    super.takeDamage(rawDamage, summoner, type);
+    super.takeDamage(rawDamage, summoner, type, fromItem);
   }
 
   @override
