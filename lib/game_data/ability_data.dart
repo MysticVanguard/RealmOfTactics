@@ -203,7 +203,7 @@ final Map<String, Ability> abilities = {
           targetTeam: TargetTeam.enemies,
         ),
         stat: "damageAmp",
-        scalingPercentByTier: [0.1, 0.1, 0.1],
+        baseAmountByTier: [10, 10, 10],
         duration: Duration(seconds: 5),
       ),
     ],

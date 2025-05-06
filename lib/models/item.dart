@@ -57,7 +57,7 @@ class ItemStatsBonus {
 class Item {
   final String id;
   final String name;
-  final ItemType type;
+  ItemType type;
   final int tier;
   final ItemStatsBonus statsBonus;
   final String? uniqueAbilityDescription;

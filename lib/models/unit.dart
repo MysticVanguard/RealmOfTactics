@@ -134,8 +134,8 @@ class Unit extends ChangeNotifier {
   }
 
   // Equips an item to the appropriate slot if possible
-  bool equipItem(Item item) {
-    if (!canEquipItem(item)) {
+  bool equipItem(Item item, {bool? enemyEquip = false}) {
+    if (!enemyEquip! && !canEquipItem(item)) {
       return false;
     }
 
@@ -1948,6 +1948,7 @@ class Unit extends ChangeNotifier {
         }
       }
     }
+    notifyListeners();
   }
 
   int handleItemEffectsOnTakeDamage(

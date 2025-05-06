@@ -572,7 +572,7 @@ class GameManager extends ChangeNotifier {
 
     _handlePostCombat(playerWon);
 
-    for (var unit in _boardManager!.getAllBoardUnits()) {
+    for (var unit in _originalPlayerUnits) {
       unit.stats.resetStartOfCombatStats();
       final equippedItems = unit.getEquippedItems();
       for (final item in equippedItems) {
@@ -580,9 +580,7 @@ class GameManager extends ChangeNotifier {
           unit.unequipItem(item.type);
         }
       }
-      if (unit.isAlive) {
-        unit.stats.currentHealth = unit.stats.maxHealth;
-      }
+      unit.stats.currentHealth = unit.stats.maxHealth;
     }
 
     Future.delayed(Duration(seconds: 1), () {
@@ -638,7 +636,7 @@ class GameManager extends ChangeNotifier {
     if (playerWon) {
       _gold += 1;
     } else {
-      int damage = 2 + (_currentStage ~/ 3) + max(5 * _currentStage - 55, 0);
+      int damage = 2 + (_currentStage ~/ 3) + max(5 * (_currentStage - 55), 0);
       if (mapManager.currentNode?.type == MapNodeType.elite) {
         damage *= 2;
       }

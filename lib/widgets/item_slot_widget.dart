@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:realm_of_tactics/models/game_manager.dart';
 import '../models/item.dart';
 import '../models/unit.dart';
 import '../enums/item_type.dart';
@@ -38,36 +39,35 @@ class ItemSlotWidget extends StatelessWidget {
         // If an item is already equipped in this slot
         if (item != null) {
           final currentEquippedItem = item!;
-          slotContent = Draggable<Map<String, dynamic>>(
-            data: {
-              'type': 'item',
-              'item': currentEquippedItem,
-              'sourceIndex': -1,
-              'sourceType': 'equipment',
+          slotContent = GestureDetector(
+            onTap: () {
+              onItemTapped(currentEquippedItem);
             },
-            feedback: _buildItemIcon(currentEquippedItem, isDragging: true),
-            childWhenDragging: _buildPlaceholder(
-              isDraggingOver: candidateData.isNotEmpty,
-            ),
-
-            // Unequip item when dragging begins
-            onDragStarted: () {
-              final itemBeingDragged = currentEquippedItem;
-              unit.unequipItem(itemBeingDragged.type);
-            },
-
-            // Place unequipped item back on bench
-            onDraggableCanceled: (velocity, offset) {
-              boardManager.addItemToBench(currentEquippedItem);
-            },
-
-            // Tapping the item will open its info
-            child: GestureDetector(
-              onTap: () {
-                onItemTapped(currentEquippedItem);
-              },
-              child: _buildItemIcon(currentEquippedItem),
-            ),
+            child:
+                GameManager.instance!.currentState == GameState.combat
+                    ? _buildItemIcon(currentEquippedItem)
+                    : Draggable<Map<String, dynamic>>(
+                      data: {
+                        'type': 'item',
+                        'item': currentEquippedItem,
+                        'sourceIndex': -1,
+                        'sourceType': 'equipment',
+                      },
+                      feedback: _buildItemIcon(
+                        currentEquippedItem,
+                        isDragging: true,
+                      ),
+                      childWhenDragging: _buildPlaceholder(
+                        isDraggingOver: candidateData.isNotEmpty,
+                      ),
+                      onDragStarted: () {
+                        unit.unequipItem(currentEquippedItem.type);
+                      },
+                      onDraggableCanceled: (velocity, offset) {
+                        boardManager.addItemToBench(currentEquippedItem);
+                      },
+                      child: _buildItemIcon(currentEquippedItem),
+                    ),
           );
         } else {
           // If no item is equipped, show a placeholder slot icon

@@ -865,17 +865,6 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
                                 gameManager.mapManager.blessingRerolls > 0,
                           ),
 
-                        // Item info overlay
-                        if (_infoItem != null)
-                          ItemInfoBox(
-                            item: _infoItem!,
-                            onClose: () {
-                              setState(() {
-                                _infoItem = null;
-                              });
-                            },
-                          ),
-
                         // Unit info overlay
                         if (selectedUnit != null)
                           UnitInfoBox(
@@ -883,6 +872,22 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
                             onClose: () {
                               setState(() {
                                 selectedUnit = null;
+                              });
+                            },
+                            onItemTapped: (item) {
+                              setState(() {
+                                _infoItem = item;
+                              });
+                            },
+                          ),
+
+                        // Item info overlay
+                        if (_infoItem != null)
+                          ItemInfoBox(
+                            item: _infoItem!,
+                            onClose: () {
+                              setState(() {
+                                _infoItem = null;
                               });
                             },
                           ),

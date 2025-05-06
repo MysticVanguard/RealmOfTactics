@@ -444,21 +444,21 @@ class MapManager extends ChangeNotifier {
             break;
         }
 
+        List<Unit> newUnits = [];
         for (final unit in units) {
-          units.remove(unit);
           final newUnit = unit.upgrade();
-          units.add(newUnit);
+          newUnits.add(newUnit);
         }
         // Set rewards
         node.rewardGold = gold;
         node.rewardItems = items;
-        node.rewardUnits = units;
+        node.rewardUnits = newUnits;
 
         // Build display string
         final parts = <String>[];
         if (gold > 0) parts.add('$gold Gold');
         parts.addAll(items.map((item) => 'Item: ${item.name}'));
-        parts.addAll(units.map((unit) => 'Unit: Tier 2 ${unit.unitName}'));
+        parts.addAll(newUnits.map((unit) => 'Unit: Tier 2 ${unit.unitName}'));
 
         node.rewardDescription = parts.join('\n');
       }

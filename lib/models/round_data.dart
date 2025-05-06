@@ -1,5 +1,8 @@
+import 'package:realm_of_tactics/enums/item_type.dart';
+import 'package:realm_of_tactics/game_data/items.dart';
 import 'package:realm_of_tactics/game_data/units.dart' as game_units;
 import 'package:realm_of_tactics/models/board_position.dart';
+import 'package:realm_of_tactics/models/item.dart';
 import 'package:realm_of_tactics/models/unit.dart';
 
 // Unit data bundled into a class
@@ -7,8 +10,9 @@ class UnitData {
   final String name;
   final Position position;
   final int tier;
+  final List<Item>? items;
 
-  UnitData(this.name, this.position, this.tier);
+  UnitData(this.name, this.position, this.tier, this.items);
 }
 
 class OpponentManager {
@@ -19,6 +23,7 @@ class OpponentManager {
     required String unitName,
     required Position position,
     int tier = 1,
+    List<Item>? items,
   }) {
     final base = game_units.unitData[unitName];
     if (base == null) {
@@ -32,6 +37,16 @@ class OpponentManager {
 
     for (int i = 1; i < tier; i++) {
       unit = unit.upgrade();
+    }
+    List<ItemType> types = [ItemType.weapon, ItemType.armor, ItemType.trinket];
+    print(items);
+    if (items != null) {
+      for (final item in items) {
+        print(item.name);
+        item.type = types.removeAt(0);
+        bool equipped = unit.equipItem(item, enemyEquip: true);
+        print(equipped);
+      }
     }
 
     unit.isEnemy = true;
@@ -52,6 +67,7 @@ class OpponentManager {
             unitName: data.name,
             position: data.position,
             tier: data.tier,
+            items: data.items,
           ),
         )
         .toList();
@@ -70,497 +86,352 @@ class RoundSet {
 final List<RoundSet> globalRoundSets = [
   // Floor 1 Rounds
   RoundSet(1, [
-    [UnitData('Icewall Sentinel', Position(2, 3), 1)],
+    [UnitData("Winterblade Guardian", Position(2, 2), 2, [])],
     [
-      UnitData('Icewall Sentinel', Position(2, 3), 1),
-      UnitData('Icewall Sentinel', Position(2, 4), 1),
+      UnitData("Winterblade Guardian", Position(2, 2), 2, [
+        allItems["runed_sabre"]!.copyWith(),
+      ]),
     ],
     [
-      UnitData('Icewall Sentinel', Position(2, 3), 1),
-      UnitData('Rimebound Vanguard', Position(2, 4), 1),
+      UnitData("Winterblade Guardian", Position(2, 2), 2, [
+        allItems["runed_sabre"]!.copyWith(),
+      ]),
+      UnitData("Cloudbreaker", Position(2, 3), 2, []),
     ],
     [
-      UnitData('Icewall Sentinel', Position(2, 3), 1),
-      UnitData('Rimebound Vanguard', Position(2, 4), 1),
-      UnitData('Icewall Sentinel', Position(2, 2), 1),
+      UnitData("Winterblade Guardian", Position(2, 2), 2, [
+        allItems["runed_sabre"]!.copyWith(),
+      ]),
+      UnitData("Cloudbreaker", Position(2, 3), 2, []),
+      UnitData("Icewall Sentinel", Position(2, 1), 2, []),
     ],
     [
-      UnitData('Icewall Sentinel', Position(2, 3), 1),
-      UnitData('Rimebound Vanguard', Position(2, 4), 1),
-      UnitData('Granite Guard', Position(2, 1), 1),
-    ],
-  ]),
-  RoundSet(1, [
-    [UnitData('Cloudbreaker', Position(2, 3), 1)],
-    [
-      UnitData('Cloudbreaker', Position(2, 3), 1),
-      UnitData('Cloudbreaker', Position(2, 4), 1),
-    ],
-    [
-      UnitData('Cloudbreaker', Position(2, 2), 1),
-      UnitData('Thunder Caller', Position(0, 0), 1),
-    ],
-    [
-      UnitData('Cloudbreaker', Position(2, 2), 1),
-      UnitData('Thunder Caller', Position(0, 0), 1),
-      UnitData('Thunder Caller', Position(0, 1), 1),
-    ],
-    [
-      UnitData('Cloudbreaker', Position(2, 3), 1),
-      UnitData('Thunder Caller', Position(0, 0), 1),
-      UnitData('Stormcarver', Position(2, 2), 1),
+      UnitData("Winterblade Guardian", Position(2, 2), 2, [
+        allItems["runed_sabre"]!.copyWith(),
+        allItems["bloodpiercer"]!.copyWith(),
+      ]),
+      UnitData("Cloudbreaker", Position(2, 3), 2, []),
+      UnitData("Icewall Sentinel", Position(2, 1), 2, []),
     ],
   ]),
-
-  // Floor 2 Rounds
   RoundSet(2, [
     [
-      UnitData('Icewall Sentinel', Position(2, 3), 1),
-      UnitData('Rimebound Vanguard', Position(2, 4), 1),
-      UnitData('Granite Guard', Position(2, 1), 1),
+      UnitData("Winterblade Guardian", Position(2, 2), 2, [
+        allItems["runed_sabre"]!.copyWith(),
+        allItems["bloodpiercer"]!.copyWith(),
+      ]),
+      UnitData("Cloudbreaker", Position(2, 3), 2, []),
+      UnitData("Icewall Sentinel", Position(2, 1), 2, []),
     ],
     [
-      UnitData('Icewall Sentinel', Position(2, 3), 2),
-      UnitData('Rimebound Vanguard', Position(2, 4), 1),
-      UnitData('Granite Guard', Position(2, 1), 1),
+      UnitData("Winterblade Guardian", Position(2, 1), 2, [
+        allItems["runed_sabre"]!.copyWith(),
+        allItems["bloodpiercer"]!.copyWith(),
+      ]),
+      UnitData("Glacier Marksman", Position(0, 0), 1, []),
+      UnitData("Icewall Sentinel", Position(2, 2), 1, []),
+      UnitData("Rimebound Vanguard", Position(2, 0), 2, []),
     ],
     [
-      UnitData('Icewall Sentinel', Position(2, 0), 1),
-      UnitData('Rimebound Vanguard', Position(2, 1), 1),
-      UnitData('Winterblade Guardian', Position(2, 2), 1),
-      UnitData('Glacier Marksman', Position(0, 0), 1),
+      UnitData("Winterblade Guardian", Position(2, 1), 2, [
+        allItems["runed_sabre"]!.copyWith(),
+        allItems["bloodpiercer"]!.copyWith(),
+        allItems["psychic_edge"]!.copyWith(),
+      ]),
+      UnitData("Glacier Marksman", Position(0, 0), 1, []),
+      UnitData("Icewall Sentinel", Position(2, 2), 2, []),
+      UnitData("Rimebound Vanguard", Position(2, 0), 2, []),
     ],
     [
-      UnitData('Icewall Sentinel', Position(2, 0), 2),
-      UnitData('Rimebound Vanguard', Position(2, 1), 1),
-      UnitData('Winterblade Guardian', Position(2, 2), 1),
-      UnitData('Glacier Marksman', Position(0, 0), 1),
+      UnitData("Winterblade Guardian", Position(2, 1), 2, [
+        allItems["runed_sabre"]!.copyWith(),
+        allItems["bloodpiercer"]!.copyWith(),
+        allItems["psychic_edge"]!.copyWith(),
+      ]),
+      UnitData("Glacier Marksman", Position(0, 0), 2, []),
+      UnitData("Icewall Sentinel", Position(2, 2), 1, [
+        allItems["wicked_brooch"]!.copyWith(),
+      ]),
+      UnitData("Rimebound Vanguard", Position(2, 0), 2, []),
     ],
     [
-      UnitData('Icewall Sentinel', Position(2, 0), 1),
-      UnitData('Rimebound Vanguard', Position(2, 1), 2),
-      UnitData('Winterblade Guardian', Position(2, 2), 1),
-      UnitData('Glacier Marksman', Position(0, 0), 1),
+      UnitData("Winterblade Guardian", Position(2, 1), 2, [
+        allItems["runed_sabre"]!.copyWith(),
+        allItems["bloodpiercer"]!.copyWith(),
+        allItems["psychic_edge"]!.copyWith(),
+      ]),
+      UnitData("Winterblade Guardian", Position(2, 2), 2, [
+        allItems["runed_sabre"]!.copyWith(),
+        allItems["bloodpiercer"]!.copyWith(),
+        allItems["psychic_edge"]!.copyWith(),
+      ]),
+      UnitData("Winterblade Guardian", Position(2, 3), 2, [
+        allItems["runed_sabre"]!.copyWith(),
+        allItems["bloodpiercer"]!.copyWith(),
+        allItems["psychic_edge"]!.copyWith(),
+      ]),
+      UnitData("Winterblade Guardian", Position(2, 0), 2, [
+        allItems["runed_sabre"]!.copyWith(),
+        allItems["bloodpiercer"]!.copyWith(),
+        allItems["psychic_edge"]!.copyWith(),
+      ]),
     ],
   ]),
-
-  // Floor 3 Rounds
   RoundSet(3, [
     [
-      UnitData('Icewall Sentinel', Position(2, 0), 1),
-      UnitData('Rimebound Vanguard', Position(2, 1), 2),
-      UnitData('Winterblade Guardian', Position(2, 2), 1),
-      UnitData('Glacier Marksman', Position(0, 0), 1),
+      UnitData("Winterblade Guardian", Position(2, 1), 2, [
+        allItems["runed_sabre"]!.copyWith(),
+        allItems["bloodpiercer"]!.copyWith(),
+        allItems["psychic_edge"]!.copyWith(),
+      ]),
+      UnitData("Glacier Marksman", Position(0, 0), 2, []),
+      UnitData("Icewall Sentinel", Position(2, 2), 2, [
+        allItems["wicked_brooch"]!.copyWith(),
+      ]),
+      UnitData("Rimebound Vanguard", Position(2, 0), 2, []),
     ],
     [
-      UnitData('Icewall Sentinel', Position(2, 0), 2),
-      UnitData('Rimebound Vanguard', Position(2, 1), 2),
-      UnitData('Winterblade Guardian', Position(2, 2), 1),
-      UnitData('Glacier Marksman', Position(0, 0), 1),
+      UnitData("Winterblade Guardian", Position(2, 1), 3, [
+        allItems["runed_sabre"]!.copyWith(),
+        allItems["bloodpiercer"]!.copyWith(),
+        allItems["psychic_edge"]!.copyWith(),
+      ]),
+      UnitData("Glacier Marksman", Position(0, 0), 2, []),
+      UnitData("Icewall Sentinel", Position(2, 2), 2, [
+        allItems["wicked_brooch"]!.copyWith(),
+      ]),
+      UnitData("Rimebound Vanguard", Position(2, 0), 2, []),
     ],
     [
-      UnitData('Icewall Sentinel', Position(2, 0), 1),
-      UnitData('Rimebound Vanguard', Position(2, 1), 2),
-      UnitData('Winterblade Guardian', Position(2, 2), 1),
-      UnitData('Glacier Marksman', Position(0, 0), 1),
-      UnitData('Granite Guard', Position(2, 4), 1),
+      UnitData("Winterblade Guardian", Position(2, 1), 3, [
+        allItems["runed_sabre"]!.copyWith(),
+        allItems["bloodpiercer"]!.copyWith(),
+        allItems["psychic_edge"]!.copyWith(),
+      ]),
+      UnitData("Glacier Marksman", Position(0, 0), 2, []),
+      UnitData("Icewall Sentinel", Position(2, 2), 3, [
+        allItems["wicked_brooch"]!.copyWith(),
+      ]),
+      UnitData("Rimebound Vanguard", Position(2, 0), 2, []),
     ],
     [
-      UnitData('Icewall Sentinel', Position(2, 0), 2),
-      UnitData('Rimebound Vanguard', Position(2, 1), 2),
-      UnitData('Winterblade Guardian', Position(2, 2), 1),
-      UnitData('Glacier Marksman', Position(0, 0), 1),
-      UnitData('Granite Guard', Position(2, 4), 1),
+      UnitData("Glacier Marksman", Position(0, 0), 3, []),
+      UnitData("Rimebound Vanguard", Position(2, 0), 3, []),
     ],
     [
-      UnitData('Icewall Sentinel', Position(2, 0), 2),
-      UnitData('Rimebound Vanguard', Position(2, 1), 2),
-      UnitData('Winterblade Guardian', Position(2, 2), 2),
-      UnitData('Glacier Marksman', Position(0, 0), 1),
-      UnitData('Highrock Bulwark', Position(2, 3), 1),
+      UnitData("Glacier Marksman", Position(0, 0), 2, []),
+      UnitData("Glacier Marksman", Position(0, 1), 2, []),
+      UnitData("Rimebound Vanguard", Position(2, 0), 2, []),
+      UnitData("Rimebound Vanguard", Position(2, 1), 2, []),
+      UnitData("Icewall Sentinel", Position(2, 2), 2, []),
+      UnitData("Icewall Sentinel", Position(2, 3), 2, []),
+      UnitData("Winterblade Guardian", Position(2, 4), 2, []),
+      UnitData("Winterblade Guardian", Position(2, 5), 2, []),
     ],
   ]),
 
-  // Floor 4 Rounds
   RoundSet(4, [
     [
-      UnitData('Icewall Sentinel', Position(2, 0), 2),
-      UnitData('Rimebound Vanguard', Position(2, 1), 2),
-      UnitData('Northwind Tracker', Position(1, 0), 2),
-      UnitData('Glacier Marksman', Position(0, 0), 2),
-      UnitData('Winterblade Guardian', Position(2, 2), 1),
-      UnitData('Snowfall Priest', Position(0, 1), 1),
+      UnitData("Glacier Marksman", Position(0, 0), 2, [
+        allItems["bloodpiercer"]!.copyWith(),
+      ]),
+      UnitData("Rimebound Vanguard", Position(2, 0), 2, [
+        allItems["runed_helm"]!.copyWith(),
+      ]),
+      UnitData("Icewall Sentinel", Position(2, 2), 2, [
+        allItems["mystic_harness"]!.copyWith(),
+      ]),
+      UnitData("Winterblade Guardian", Position(2, 1), 2, [
+        allItems["runed_sabre"]!.copyWith(),
+      ]),
+      UnitData("Snowfall Priest", Position(0, 1), 1, []),
+      UnitData("Northwind Tracker", Position(1, 0), 1, [
+        allItems["bloodpiercer"]!.copyWith(),
+      ]),
     ],
     [
-      UnitData('Icewall Sentinel', Position(2, 0), 2),
-      UnitData('Rimebound Vanguard', Position(2, 1), 2),
-      UnitData('Northwind Tracker', Position(1, 0), 2),
-      UnitData('Glacier Marksman', Position(0, 0), 2),
-      UnitData('Winterblade Guardian', Position(2, 2), 2),
-      UnitData('Snowfall Priest', Position(0, 1), 1),
+      UnitData("Glacier Marksman", Position(0, 0), 2, [
+        allItems["bloodpiercer"]!.copyWith(),
+      ]),
+      UnitData("Rimebound Vanguard", Position(2, 0), 2, [
+        allItems["runed_helm"]!.copyWith(),
+      ]),
+      UnitData("Icewall Sentinel", Position(2, 2), 2, [
+        allItems["mystic_harness"]!.copyWith(),
+      ]),
+      UnitData("Winterblade Guardian", Position(2, 1), 2, [
+        allItems["runed_sabre"]!.copyWith(),
+      ]),
+      UnitData("Snowfall Priest", Position(0, 1), 1, [
+        allItems["focused_mind"]!.copyWith(),
+      ]),
+      UnitData("Northwind Tracker", Position(1, 0), 1, [
+        allItems["bloodpiercer"]!.copyWith(),
+      ]),
     ],
     [
-      UnitData('Icewall Sentinel', Position(2, 0), 2),
-      UnitData('Rimebound Vanguard', Position(2, 1), 2),
-      UnitData('Northwind Tracker', Position(1, 0), 2),
-      UnitData('Glacier Marksman', Position(0, 0), 2),
-      UnitData('Winterblade Guardian', Position(2, 2), 2),
-      UnitData('Snowfall Priest', Position(0, 1), 2),
+      UnitData("Glacier Marksman", Position(0, 0), 2, [
+        allItems["bloodpiercer"]!.copyWith(),
+        allItems["bloodpiercer"]!.copyWith(),
+        allItems["bloodpiercer"]!.copyWith(),
+      ]),
+      UnitData("Rimebound Vanguard", Position(2, 0), 2, [
+        allItems["runed_helm"]!.copyWith(),
+      ]),
+      UnitData("Icewall Sentinel", Position(2, 2), 2, [
+        allItems["mystic_harness"]!.copyWith(),
+      ]),
+      UnitData("Winterblade Guardian", Position(2, 1), 2, [
+        allItems["runed_sabre"]!.copyWith(),
+      ]),
+      UnitData("Snowfall Priest", Position(0, 1), 1, [
+        allItems["focused_mind"]!.copyWith(),
+      ]),
+      UnitData("Northwind Tracker", Position(1, 0), 1, [
+        allItems["bloodpiercer"]!.copyWith(),
+      ]),
     ],
     [
-      UnitData('Icewall Sentinel', Position(2, 0), 3),
-      UnitData('Rimebound Vanguard', Position(2, 1), 2),
-      UnitData('Northwind Tracker', Position(1, 0), 2),
-      UnitData('Glacier Marksman', Position(0, 0), 2),
-      UnitData('Winterblade Guardian', Position(2, 2), 1),
-      UnitData('Snowfall Priest', Position(0, 1), 1),
+      UnitData("Glacier Marksman", Position(0, 0), 2, [
+        allItems["bloodpiercer"]!.copyWith(),
+      ]),
+      UnitData("Rimebound Vanguard", Position(2, 0), 1, [
+        allItems["runed_helm"]!.copyWith(),
+      ]),
+      UnitData("Icewall Sentinel", Position(2, 2), 2, [
+        allItems["mystic_harness"]!.copyWith(),
+      ]),
+      UnitData("Winterblade Guardian", Position(2, 1), 2, [
+        allItems["runed_sabre"]!.copyWith(),
+      ]),
+      UnitData("Snowfall Priest", Position(0, 1), 1, [
+        allItems["focused_mind"]!.copyWith(),
+      ]),
+      UnitData("Northwind Tracker", Position(1, 0), 2, [
+        allItems["bloodpiercer"]!.copyWith(),
+      ]),
     ],
     [
-      UnitData('Icewall Sentinel', Position(2, 0), 3),
-      UnitData('Rimebound Vanguard', Position(2, 1), 2),
-      UnitData('Northwind Tracker', Position(1, 0), 2),
-      UnitData('Glacier Marksman', Position(0, 0), 2),
-      UnitData('Winterblade Guardian', Position(2, 2), 2),
-      UnitData('Snowfall Priest', Position(0, 1), 2),
+      UnitData("Glacier Marksman", Position(0, 0), 2, [
+        allItems["bloodpiercer"]!.copyWith(),
+        allItems["bloodpiercer"]!.copyWith(),
+        allItems["bloodpiercer"]!.copyWith(),
+      ]),
+      UnitData("Rimebound Vanguard", Position(2, 0), 1, [
+        allItems["runed_helm"]!.copyWith(),
+      ]),
+      UnitData("Icewall Sentinel", Position(2, 2), 2, [
+        allItems["mystic_harness"]!.copyWith(),
+      ]),
+      UnitData("Winterblade Guardian", Position(2, 1), 2, [
+        allItems["runed_sabre"]!.copyWith(),
+      ]),
+      UnitData("Snowfall Priest", Position(0, 1), 1, [
+        allItems["focused_mind"]!.copyWith(),
+      ]),
+      UnitData("Northwind Tracker", Position(1, 0), 2, [
+        allItems["bloodpiercer"]!.copyWith(),
+      ]),
     ],
   ]),
 
-  // Floor 5 Rounds
-  RoundSet(5, [
-    [
-      UnitData('Icewall Sentinel', Position(2, 0), 3),
-      UnitData('Rimebound Vanguard', Position(2, 1), 2),
-      UnitData('Northwind Tracker', Position(1, 0), 2),
-      UnitData('Glacier Marksman', Position(0, 0), 2),
-      UnitData('Winterblade Guardian', Position(2, 2), 2),
-      UnitData('Snowfall Priest', Position(0, 1), 2),
-    ],
-    [
-      UnitData('Icewall Sentinel', Position(2, 0), 2),
-      UnitData('Rimebound Vanguard', Position(2, 1), 2),
-      UnitData('Northwind Tracker', Position(1, 0), 2),
-      UnitData('Glacier Marksman', Position(0, 0), 2),
-      UnitData('Borealis Arcanist', Position(0, 1), 2),
-      UnitData('Snowfall Priest', Position(1, 1), 2),
-    ],
-    [
-      UnitData('Icewall Sentinel', Position(2, 0), 2),
-      UnitData('Rimebound Vanguard', Position(2, 1), 2),
-      UnitData('Northwind Tracker', Position(1, 0), 2),
-      UnitData('Glacier Marksman', Position(0, 0), 2),
-      UnitData('Borealis Arcanist', Position(0, 1), 2),
-      UnitData('Snowfall Priest', Position(1, 1), 2),
-      UnitData('Highrock Bulwark', Position(2, 2), 2),
-    ],
-    [
-      UnitData('Icewall Sentinel', Position(2, 0), 2),
-      UnitData('Rimebound Vanguard', Position(2, 1), 2),
-      UnitData('Northwind Tracker', Position(1, 0), 2),
-      UnitData('Frostscribe Mystic', Position(1, 1), 2),
-      UnitData('Borealis Arcanist', Position(0, 0), 2),
-      UnitData('Snowfall Priest', Position(0, 1), 2),
-      UnitData('Highrock Bulwark', Position(2, 2), 2),
-    ],
-    [
-      UnitData('Icewall Sentinel', Position(2, 0), 3),
-      UnitData('Rimebound Vanguard', Position(2, 1), 2),
-      UnitData('Northwind Tracker', Position(1, 0), 2),
-      UnitData('Frostscribe Mystic', Position(1, 1), 2),
-      UnitData('Borealis Arcanist', Position(0, 0), 2),
-      UnitData('Snowfall Priest', Position(0, 1), 2),
-      UnitData('Highrock Bulwark', Position(2, 2), 2),
-    ],
-  ]),
-
-  // Floor 6 Rounds
   RoundSet(6, [
     [
-      UnitData('Icewall Sentinel', Position(2, 0), 2),
-      UnitData('Rimebound Vanguard', Position(2, 1), 3),
-      UnitData('Northwind Tracker', Position(1, 0), 2),
-      UnitData('Frostscribe Mystic', Position(1, 1), 2),
-      UnitData('Borealis Arcanist', Position(0, 0), 2),
-      UnitData('Snowfall Priest', Position(0, 1), 2),
-      UnitData('Highrock Bulwark', Position(2, 2), 2),
+      UnitData("Glacier Marksman", Position(0, 0), 2, [
+        allItems["bloodpiercer"]!.copyWith(),
+        allItems["bloodpiercer"]!.copyWith(),
+        allItems["bloodpiercer"]!.copyWith(),
+      ]),
+      UnitData("Rimebound Vanguard", Position(2, 0), 1, [
+        allItems["runed_helm"]!.copyWith(),
+      ]),
+      UnitData("Icewall Sentinel", Position(2, 2), 2, [
+        allItems["mystic_harness"]!.copyWith(),
+      ]),
+      UnitData("Winterblade Guardian", Position(2, 1), 2, [
+        allItems["runed_sabre"]!.copyWith(),
+      ]),
+      UnitData("Snowfall Priest", Position(0, 1), 1, [
+        allItems["focused_mind"]!.copyWith(),
+      ]),
+      UnitData("Northwind Tracker", Position(1, 0), 2, [
+        allItems["bloodpiercer"]!.copyWith(),
+      ]),
     ],
     [
-      UnitData('Icewall Sentinel', Position(2, 0), 3),
-      UnitData('Rimebound Vanguard', Position(2, 1), 3),
-      UnitData('Northwind Tracker', Position(1, 0), 2),
-      UnitData('Frostscribe Mystic', Position(1, 1), 2),
-      UnitData('Borealis Arcanist', Position(0, 0), 2),
-      UnitData('Snowfall Priest', Position(0, 1), 2),
-      UnitData('Highrock Bulwark', Position(2, 2), 2),
+      UnitData("Glacier Marksman", Position(0, 0), 1, [
+        allItems["bloodpiercer"]!.copyWith(),
+      ]),
+      UnitData("Rimebound Vanguard", Position(2, 0), 1, [
+        allItems["runed_helm"]!.copyWith(),
+      ]),
+      UnitData("Icewall Sentinel", Position(2, 2), 2, [
+        allItems["mystic_harness"]!.copyWith(),
+      ]),
+      UnitData("Winterblade Guardian", Position(2, 1), 2, [
+        allItems["runed_sabre"]!.copyWith(),
+      ]),
+      UnitData("Snowfall Priest", Position(0, 1), 2, [
+        allItems["focused_mind"]!.copyWith(),
+      ]),
+      UnitData("Northwind Tracker", Position(1, 0), 2, [
+        allItems["bloodpiercer"]!.copyWith(),
+      ]),
     ],
     [
-      UnitData('Icewall Sentinel', Position(2, 0), 2),
-      UnitData('Rimebound Vanguard', Position(2, 1), 2),
-      UnitData('Northwind Tracker', Position(1, 0), 2),
-      UnitData('Frostscribe Mystic', Position(1, 1), 2),
-      UnitData('Borealis Arcanist', Position(0, 0), 2),
-      UnitData('Snowfall Priest', Position(0, 1), 2),
-      UnitData('Winterblade Guardian', Position(2, 2), 2),
-      UnitData('Glacier Marksman', Position(0, 2), 2),
+      UnitData("Glacier Marksman", Position(0, 0), 1, [
+        allItems["bloodpiercer"]!.copyWith(),
+      ]),
+      UnitData("Rimebound Vanguard", Position(2, 0), 2, [
+        allItems["runed_helm"]!.copyWith(),
+      ]),
+      UnitData("Icewall Sentinel", Position(2, 2), 2, [
+        allItems["mystic_harness"]!.copyWith(),
+      ]),
+      UnitData("Winterblade Guardian", Position(2, 1), 1, [
+        allItems["runed_sabre"]!.copyWith(),
+      ]),
+      UnitData("Snowfall Priest", Position(0, 1), 2, [
+        allItems["focused_mind"]!.copyWith(),
+      ]),
+      UnitData("Northwind Tracker", Position(1, 0), 2, [
+        allItems["bloodpiercer"]!.copyWith(),
+      ]),
     ],
+
     [
-      UnitData('Icewall Sentinel', Position(2, 0), 3),
-      UnitData('Rimebound Vanguard', Position(2, 1), 2),
-      UnitData('Northwind Tracker', Position(1, 0), 2),
-      UnitData('Frostscribe Mystic', Position(1, 1), 2),
-      UnitData('Borealis Arcanist', Position(0, 0), 2),
-      UnitData('Snowfall Priest', Position(0, 1), 2),
-      UnitData('Winterblade Guardian', Position(2, 2), 2),
-      UnitData('Glacier Marksman', Position(0, 2), 2),
-    ],
-    [
-      UnitData('Icewall Sentinel', Position(2, 0), 3),
-      UnitData('Rimebound Vanguard', Position(2, 1), 2),
-      UnitData('Northwind Tracker', Position(1, 0), 2),
-      UnitData('Frostscribe Mystic', Position(1, 1), 2),
-      UnitData('Borealis Arcanist', Position(0, 0), 2),
-      UnitData('Snowfall Priest', Position(0, 1), 2),
-      UnitData('Winterblade Guardian', Position(2, 2), 3),
-      UnitData('Glacier Marksman', Position(0, 2), 2),
+      UnitData("Borealis Arcanist", Position(0, 1), 2, []),
+      UnitData("Frostscribe Mystic", Position(1, 1), 2, []),
+      UnitData("Glacier Marksman", Position(0, 0), 1, []),
+      UnitData("Glacier Marksman", Position(0, 2), 1, []),
+      UnitData("Icewall Sentinel", Position(1, 0), 1, []),
+      UnitData("Icewall Sentinel", Position(1, 2), 1, []),
+      UnitData("Winterblade Guardian", Position(2, 0), 1, []),
+      UnitData("Winterblade Guardian", Position(2, 1), 1, []),
+      UnitData("Rimebound Vanguard", Position(2, 2), 1, []),
     ],
   ]),
 
-  // Floor 7 Rounds
   RoundSet(7, [
     [
-      UnitData('Icewall Sentinel', Position(2, 0), 3),
-      UnitData('Rimebound Vanguard', Position(2, 1), 2),
-      UnitData('Northwind Tracker', Position(1, 0), 2),
-      UnitData('Frostscribe Mystic', Position(1, 1), 2),
-      UnitData('Borealis Arcanist', Position(0, 0), 2),
-      UnitData('Snowfall Priest', Position(0, 1), 2),
-      UnitData('Winterblade Guardian', Position(2, 2), 3),
-      UnitData('Glacier Marksman', Position(0, 2), 2),
-    ],
-    [
-      UnitData('Icewall Sentinel', Position(2, 0), 3),
-      UnitData('Rimebound Vanguard', Position(2, 1), 3),
-      UnitData('Northwind Tracker', Position(1, 0), 2),
-      UnitData('Frostscribe Mystic', Position(1, 1), 2),
-      UnitData('Borealis Arcanist', Position(0, 0), 2),
-      UnitData('Snowfall Priest', Position(0, 1), 2),
-      UnitData('Winterblade Guardian', Position(2, 2), 2),
-      UnitData('Glacier Marksman', Position(0, 2), 2),
-    ],
-    [
-      UnitData('Icewall Sentinel', Position(2, 0), 3),
-      UnitData('Rimebound Vanguard', Position(2, 1), 3),
-      UnitData('Northwind Tracker', Position(1, 0), 2),
-      UnitData('Frostscribe Mystic', Position(1, 1), 2),
-      UnitData('Borealis Arcanist', Position(0, 0), 2),
-      UnitData('Snowfall Priest', Position(0, 1), 2),
-      UnitData('Winterblade Guardian', Position(2, 2), 3),
-      UnitData('Glacier Marksman', Position(0, 2), 2),
-    ],
-    [
-      UnitData('Icewall Sentinel', Position(2, 0), 3),
-      UnitData('Rimebound Vanguard', Position(2, 1), 3),
-      UnitData('Northwind Tracker', Position(1, 0), 3),
-      UnitData('Frostscribe Mystic', Position(1, 1), 2),
-      UnitData('Borealis Arcanist', Position(0, 0), 2),
-      UnitData('Snowfall Priest', Position(0, 1), 2),
-      UnitData('Winterblade Guardian', Position(2, 2), 2),
-      UnitData('Glacier Marksman', Position(0, 2), 2),
-    ],
-    [
-      UnitData('Icewall Sentinel', Position(2, 0), 3),
-      UnitData('Rimebound Vanguard', Position(2, 1), 3),
-      UnitData('Northwind Tracker', Position(1, 0), 3),
-      UnitData('Frostscribe Mystic', Position(1, 1), 2),
-      UnitData('Borealis Arcanist', Position(0, 0), 2),
-      UnitData('Snowfall Priest', Position(0, 1), 2),
-      UnitData('Winterblade Guardian', Position(2, 2), 3),
-      UnitData('Glacier Marksman', Position(0, 2), 2),
+      UnitData("Glacier Marksman", Position(0, 0), 2, [
+        allItems["bloodpiercer"]!.copyWith(),
+      ]),
+      UnitData("Rimebound Vanguard", Position(2, 0), 2, [
+        allItems["runed_helm"]!.copyWith(),
+      ]),
+      UnitData("Icewall Sentinel", Position(2, 2), 2, [
+        allItems["mystic_harness"]!.copyWith(),
+      ]),
+      UnitData("Winterblade Guardian", Position(2, 1), 2, [
+        allItems["runed_sabre"]!.copyWith(),
+      ]),
+      UnitData("Snowfall Priest", Position(0, 1), 2, [
+        allItems["focused_mind"]!.copyWith(),
+      ]),
+      UnitData("Northwind Tracker", Position(1, 0), 2, [
+        allItems["bloodpiercer"]!.copyWith(),
+      ]),
     ],
   ]),
-
-  // Floor 8 Rounds
-  RoundSet(8, [
-    [
-      UnitData('Icewall Sentinel', Position(2, 0), 3),
-      UnitData('Rimebound Vanguard', Position(2, 1), 2),
-      UnitData('Northwind Tracker', Position(1, 0), 2),
-      UnitData('Frostscribe Mystic', Position(1, 1), 2),
-      UnitData('Borealis Arcanist', Position(0, 0), 2),
-      UnitData('Snowfall Priest', Position(0, 1), 2),
-      UnitData('Winterblade Guardian', Position(2, 2), 3),
-      UnitData('Glacier Marksman', Position(0, 2), 2),
-      UnitData('Gearstep Agent', Position(1, 2), 2),
-    ],
-    [
-      UnitData('Icewall Sentinel', Position(2, 0), 3),
-      UnitData('Rimebound Vanguard', Position(2, 1), 3),
-      UnitData('Northwind Tracker', Position(1, 0), 2),
-      UnitData('Frostscribe Mystic', Position(1, 1), 2),
-      UnitData('Borealis Arcanist', Position(0, 0), 2),
-      UnitData('Snowfall Priest', Position(0, 1), 2),
-      UnitData('Winterblade Guardian', Position(2, 2), 2),
-      UnitData('Glacier Marksman', Position(0, 2), 2),
-      UnitData('Veilstrider', Position(1, 2), 1),
-    ],
-    [
-      UnitData('Icewall Sentinel', Position(2, 0), 3),
-      UnitData('Rimebound Vanguard', Position(2, 1), 3),
-      UnitData('Northwind Tracker', Position(1, 0), 2),
-      UnitData('Frostscribe Mystic', Position(1, 1), 2),
-      UnitData('Borealis Arcanist', Position(0, 0), 2),
-      UnitData('Snowfall Priest', Position(0, 1), 2),
-      UnitData('Winterblade Guardian', Position(2, 2), 3),
-      UnitData('Glacier Marksman', Position(0, 2), 2),
-      UnitData('Veilstrider', Position(1, 2), 2),
-    ],
-    [
-      UnitData('Icewall Sentinel', Position(2, 0), 3),
-      UnitData('Rimebound Vanguard', Position(2, 1), 3),
-      UnitData('Northwind Tracker', Position(1, 0), 3),
-      UnitData('Frostscribe Mystic', Position(1, 1), 2),
-      UnitData('Borealis Arcanist', Position(0, 0), 2),
-      UnitData('Snowfall Priest', Position(0, 1), 2),
-      UnitData('Winterblade Guardian', Position(2, 2), 3),
-      UnitData('Glacier Marksman', Position(0, 2), 2),
-      UnitData('Veilstrider', Position(1, 2), 2),
-    ],
-    [
-      UnitData('Icewall Sentinel', Position(2, 0), 3),
-      UnitData('Rimebound Vanguard', Position(2, 1), 3),
-      UnitData('Northwind Tracker', Position(1, 0), 3),
-      UnitData('Frostscribe Mystic', Position(1, 1), 2),
-      UnitData('Borealis Arcanist', Position(0, 0), 2),
-      UnitData('Snowfall Priest', Position(0, 1), 2),
-      UnitData('Winterblade Guardian', Position(2, 2), 3),
-      UnitData('Glacier Marksman', Position(0, 2), 2),
-      UnitData('Blazestep Ranger', Position(1, 2), 2),
-    ],
-  ]),
-
-  // Floor 9 Rounds
-  RoundSet(9, [
-    [
-      UnitData('Icewall Sentinel', Position(2, 0), 3),
-      UnitData('Rimebound Vanguard', Position(2, 1), 3),
-      UnitData('Northwind Tracker', Position(1, 0), 3),
-      UnitData('Frostscribe Mystic', Position(1, 1), 2),
-      UnitData('Borealis Arcanist', Position(0, 0), 2),
-      UnitData('Snowfall Priest', Position(0, 1), 2),
-      UnitData('Winterblade Guardian', Position(2, 2), 3),
-      UnitData('Glacier Marksman', Position(0, 2), 3),
-      UnitData('Blazestep Ranger', Position(1, 2), 2),
-    ],
-    [
-      UnitData('Icewall Sentinel', Position(2, 0), 3),
-      UnitData('Rimebound Vanguard', Position(2, 1), 3),
-      UnitData('Northwind Tracker', Position(1, 0), 3),
-      UnitData('Frostscribe Mystic', Position(1, 1), 2),
-      UnitData('Borealis Arcanist', Position(0, 0), 2),
-      UnitData('Snowfall Priest', Position(0, 1), 3),
-      UnitData('Winterblade Guardian', Position(2, 2), 3),
-      UnitData('Glacier Marksman', Position(0, 2), 3),
-      UnitData('Blazestep Ranger', Position(1, 2), 2),
-    ],
-    [
-      UnitData('Icewall Sentinel', Position(2, 0), 3),
-      UnitData('Rimebound Vanguard', Position(2, 1), 3),
-      UnitData('Northwind Tracker', Position(1, 0), 3),
-      UnitData('Frostscribe Mystic', Position(1, 1), 2),
-      UnitData('Borealis Arcanist', Position(0, 0), 2),
-      UnitData('Snowfall Priest', Position(0, 1), 3),
-      UnitData('Winterblade Guardian', Position(2, 2), 3),
-      UnitData('Glacier Marksman', Position(0, 2), 3),
-      UnitData('Blazestep Ranger', Position(1, 2), 2),
-      UnitData('Harvest Warden', Position(2, 3), 2),
-    ],
-    [
-      UnitData('Icewall Sentinel', Position(2, 0), 3),
-      UnitData('Rimebound Vanguard', Position(2, 1), 3),
-      UnitData('Northwind Tracker', Position(1, 0), 3),
-      UnitData('Frostscribe Mystic', Position(1, 1), 2),
-      UnitData('Borealis Arcanist', Position(0, 0), 2),
-      UnitData('Snowfall Priest', Position(0, 1), 3),
-      UnitData('Winterblade Guardian', Position(2, 2), 3),
-      UnitData('Glacier Marksman', Position(0, 2), 3),
-      UnitData('Blazestep Ranger', Position(1, 2), 2),
-      UnitData('Hearthguard', Position(2, 3), 2),
-    ],
-    [
-      UnitData('Icewall Sentinel', Position(2, 0), 3),
-      UnitData('Rimebound Vanguard', Position(2, 1), 3),
-      UnitData('Northwind Tracker', Position(1, 0), 3),
-      UnitData('Frostscribe Mystic', Position(1, 1), 2),
-      UnitData('Borealis Arcanist', Position(0, 0), 2),
-      UnitData('Snowfall Priest', Position(0, 1), 3),
-      UnitData('Winterblade Guardian', Position(2, 2), 3),
-      UnitData('Glacier Marksman', Position(0, 2), 3),
-      UnitData('Blazestep Ranger', Position(1, 2), 2),
-      UnitData('Farmland Protector', Position(2, 3), 2),
-    ],
-  ]),
-
-  // Floor 10 Rounds
-  RoundSet(10, [
-    [
-      UnitData('Icewall Sentinel', Position(2, 0), 3),
-      UnitData('Rimebound Vanguard', Position(2, 1), 3),
-      UnitData('Northwind Tracker', Position(1, 0), 3),
-      UnitData('Frostscribe Mystic', Position(1, 1), 2),
-      UnitData('Borealis Arcanist', Position(0, 0), 2),
-      UnitData('Snowfall Priest', Position(0, 1), 3),
-      UnitData('Winterblade Guardian', Position(2, 2), 3),
-      UnitData('Glacier Marksman', Position(0, 2), 3),
-      UnitData('Blazestep Ranger', Position(1, 2), 2),
-      UnitData('Farmland Protector', Position(2, 3), 2),
-    ],
-    [
-      UnitData('Icewall Sentinel', Position(2, 0), 3),
-      UnitData('Rimebound Vanguard', Position(2, 1), 3),
-      UnitData('Northwind Tracker', Position(1, 0), 3),
-      UnitData('Frostscribe Mystic', Position(1, 1), 3),
-      UnitData('Borealis Arcanist', Position(0, 0), 2),
-      UnitData('Snowfall Priest', Position(0, 1), 3),
-      UnitData('Winterblade Guardian', Position(2, 2), 3),
-      UnitData('Glacier Marksman', Position(0, 2), 3),
-      UnitData('Blazestep Ranger', Position(1, 2), 2),
-      UnitData('Farmland Protector', Position(2, 3), 2),
-    ],
-    [
-      UnitData('Icewall Sentinel', Position(2, 0), 3),
-      UnitData('Rimebound Vanguard', Position(2, 1), 3),
-      UnitData('Northwind Tracker', Position(1, 0), 3),
-      UnitData('Frostscribe Mystic', Position(1, 1), 3),
-      UnitData('Borealis Arcanist', Position(0, 0), 2),
-      UnitData('Snowfall Priest', Position(0, 1), 3),
-      UnitData('Winterblade Guardian', Position(2, 2), 3),
-      UnitData('Glacier Marksman', Position(0, 2), 3),
-      UnitData('Blazestep Ranger', Position(1, 2), 2),
-      UnitData('Farmland Protector', Position(2, 3), 3),
-    ],
-    [
-      UnitData('Icewall Sentinel', Position(2, 0), 3),
-      UnitData('Rimebound Vanguard', Position(2, 1), 3),
-      UnitData('Northwind Tracker', Position(1, 0), 3),
-      UnitData('Frostscribe Mystic', Position(1, 1), 3),
-      UnitData('Borealis Arcanist', Position(0, 0), 3),
-      UnitData('Snowfall Priest', Position(0, 1), 3),
-      UnitData('Winterblade Guardian', Position(2, 2), 3),
-      UnitData('Glacier Marksman', Position(0, 2), 3),
-      UnitData('Blazestep Ranger', Position(1, 2), 2),
-      UnitData('Farmland Protector', Position(2, 3), 3),
-    ],
-    [
-      UnitData('Icewall Sentinel', Position(2, 0), 3),
-      UnitData('Rimebound Vanguard', Position(2, 1), 3),
-      UnitData('Northwind Tracker', Position(1, 0), 3),
-      UnitData('Frostscribe Mystic', Position(1, 1), 3),
-      UnitData('Borealis Arcanist', Position(0, 0), 3),
-      UnitData('Snowfall Priest', Position(0, 1), 3),
-      UnitData('Winterblade Guardian', Position(2, 2), 3),
-      UnitData('Glacier Marksman', Position(0, 2), 3),
-      UnitData('Blazestep Ranger', Position(1, 2), 3),
-      UnitData('Farmland Protector', Position(2, 3), 3),
-    ],
-  ]),
-  // add more round sets for floors 5, 7, etc...
 ];

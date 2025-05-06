@@ -28,3 +28,9 @@ DONE:
     - Heals some of players health
     - Player health needs balanced more, round damage should scale, but might be too little currently
 - Possible other node ideas: blessing, unit duplicator
+- Fix items being able to be unequipped
+- Fix item info not showing on top of the Unit
+- Fix item info not showing when tapped inside the unit
+- Change synergies all working at the start of combat instead
+- Fix reward units not getting the correct tier set
+- Fix combatstart stats only resetting for alive units at the end of combat

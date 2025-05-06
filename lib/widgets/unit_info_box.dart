@@ -12,8 +12,14 @@ import '../game_data/ability_data.dart';
 class UnitInfoBox extends StatelessWidget {
   final Unit unit;
   final VoidCallback onClose;
+  final void Function(Item) onItemTapped;
 
-  const UnitInfoBox({super.key, required this.unit, required this.onClose});
+  const UnitInfoBox({
+    super.key,
+    required this.unit,
+    required this.onClose,
+    required this.onItemTapped,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -388,7 +394,9 @@ class UnitInfoBox extends StatelessWidget {
           }
         }
       },
-      onItemTapped: (Item item) {},
+      onItemTapped: (Item item) {
+        onItemTapped(item);
+      },
     );
   }
 

@@ -153,7 +153,7 @@ class SummonedUnit extends Unit {
 
   // Summoned units can't equip items—always false
   @override
-  bool equipItem(Item item) {
+  bool equipItem(Item item, {bool? enemyEquip = false}) {
     return false;
   }
 
