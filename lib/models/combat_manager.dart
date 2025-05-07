@@ -64,6 +64,7 @@ class CombatManager extends ChangeNotifier {
   List<CombatEffect> get activeEffects => _activeEffects;
 
   bool speedItUpBonusApplied = false;
+  bool divinifyApplied = false;
 
   // Called each time a combat round starts
   void startCombat(List<Unit> playerUnitsFromBoard, List<Unit> enemyUnits) {
@@ -501,7 +502,9 @@ class CombatManager extends ChangeNotifier {
     bool enemyTeamAlive = _enemyCombatUnits.any((u) => u.isAlive);
 
     if (GameManager.instance!.mapManager.playerBlessings.contains("Divinify") &&
-        _playerUnits.where((unit) => unit.isAlive).length == 1) {
+        _playerUnits.where((unit) => unit.isAlive).length == 1 &&
+        !divinifyApplied) {
+      divinifyApplied = true;
       final aliveUnit = _playerUnits.where((unit) => unit.isAlive).first;
       aliveUnit.stats.combatStartHealthBonus +=
           (aliveUnit.stats.maxHealth * .50).floor();
@@ -749,6 +752,9 @@ class CombatManager extends ChangeNotifier {
     _state = CombatState.finished;
     _activeEffects.clear();
     notifyListeners();
+
+    speedItUpBonusApplied = false;
+    divinifyApplied = false;
 
     _playerUnits.removeWhere((u) {
       if (u is SummonedUnit) {

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:realm_of_tactics/models/item.dart';
 import '../models/unit.dart';
 import 'resource_bar.dart';
 
@@ -8,6 +9,7 @@ class UnitWidget extends StatelessWidget {
   final bool isCompact;
   final bool isBoardUnit;
   final bool isEnemy;
+  final void Function(Item item)? onItemDropped;
 
   const UnitWidget({
     super.key,
@@ -15,6 +17,7 @@ class UnitWidget extends StatelessWidget {
     this.isEnemy = false,
     this.isCompact = true,
     this.isBoardUnit = false,
+    this.onItemDropped,
   });
 
   @override
@@ -76,89 +79,164 @@ class UnitWidget extends StatelessWidget {
 
     // If the unit is on the board, include health/mana bars and overlays
     if (isBoardUnit) {
-      return Container(
-        padding: const EdgeInsets.all(2),
-        decoration: containerDecoration,
-        child: Stack(
-          clipBehavior: Clip.none,
-          children: [
-            // Unit image centered inside the tile
-            Positioned.fill(child: unitImage),
+      return DragTarget<Map<String, dynamic>>(
+        onWillAccept: (data) {
+          if (data == null || data['type'] != 'item') return false;
+          final Item item = data['item'] as Item;
+          return unit.canEquipItem(item);
+        },
+        onAccept: (data) {
+          final Item item = data['item'] as Item;
+          onItemDropped?.call(item);
+        },
+        builder: (context, candidateData, rejectedData) {
+          // highlight if drag is acceptable
+          final isHovering = candidateData.isNotEmpty;
 
-            // Top bar: health and shield
-            Positioned(
-              top: -3,
-              left: 0,
-              right: 0,
-              child: ResourceBar(
-                currentValue: listenedUnit.stats.currentHealth.toDouble(),
-                maxValue: listenedUnit.stats.maxHealth.toDouble(),
-                secondaryValue: listenedUnit.stats.currentShield.toDouble(),
-                primaryColor:
-                    isEnemy ? Colors.red.shade600 : Colors.green.shade600,
-                secondaryColor: Colors.blue.shade300,
-                backgroundColor: Colors.black.withOpacity(0.6),
-                height: 5,
-              ),
+          return Container(
+            decoration:
+                isHovering
+                    ? BoxDecoration(
+                      border: Border.all(color: Colors.green, width: 2),
+                    )
+                    : null,
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                final itemSize = constraints.maxHeight * 0.25;
+
+                return Container(
+                  padding: const EdgeInsets.all(2),
+                  decoration: containerDecoration,
+                  child: Stack(
+                    clipBehavior: Clip.none,
+                    children: [
+                      // Unit image
+                      Positioned.fill(child: unitImage),
+
+                      // HP bar
+                      Positioned(
+                        top: -3,
+                        left: 0,
+                        right: 0,
+                        child: ResourceBar(
+                          currentValue: unit.stats.currentHealth.toDouble(),
+                          maxValue: unit.stats.maxHealth.toDouble(),
+                          secondaryValue: unit.stats.currentShield.toDouble(),
+                          primaryColor:
+                              isEnemy
+                                  ? Colors.red.shade600
+                                  : Colors.green.shade600,
+                          secondaryColor: Colors.blue.shade300,
+                          backgroundColor: Colors.black.withOpacity(0.6),
+                          height: 5,
+                        ),
+                      ),
+
+                      // Mana bar
+                      Positioned(
+                        bottom: -3,
+                        left: 0,
+                        right: 0,
+                        child: ResourceBar(
+                          currentValue: unit.stats.currentMana.toDouble(),
+                          maxValue: unit.stats.maxMana.toDouble(),
+                          primaryColor: Colors.blue,
+                          backgroundColor: Colors.black45,
+                          height: 5,
+                        ),
+                      ),
+
+                      // Star overlay
+                      starsOverlay,
+
+                      // Item overlay
+                      if (unit.getEquippedItems().isNotEmpty)
+                        Positioned(
+                          left: -4,
+                          top: 4,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              if (unit.weapon != null)
+                                _buildItemIcon(unit.weapon!, itemSize),
+                              if (unit.armor != null)
+                                _buildItemIcon(unit.armor!, itemSize),
+                              if (unit.trinket != null)
+                                _buildItemIcon(unit.trinket!, itemSize),
+                            ],
+                          ),
+                        ),
+                    ],
+                  ),
+                );
+              },
             ),
-
-            // Bottom bar: mana
-            Positioned(
-              bottom: -3,
-              left: 0,
-              right: 0,
-              child: ResourceBar(
-                currentValue: listenedUnit.stats.currentMana.toDouble(),
-                maxValue: listenedUnit.stats.maxMana.toDouble(),
-                primaryColor: Colors.blue,
-                backgroundColor: Colors.black45,
-                height: 5,
-              ),
-            ),
-
-            // Top-left overlay: stars
-            starsOverlay,
-          ],
-        ),
+          );
+        },
       );
     } else {
       // Compact unit widget for display in shop or bench
-      return Container(
-        padding: const EdgeInsets.all(2),
-        decoration: containerDecoration,
+      return DragTarget<Map<String, dynamic>>(
+        onWillAccept: (data) {
+          if (data == null || data['type'] != 'item') return false;
+          final Item item = data['item'] as Item;
+          return unit.canEquipItem(item);
+        },
+        onAccept: (data) {
+          final Item item = data['item'] as Item;
+          onItemDropped?.call(item);
+        },
+        builder: (context, candidateData, rejectedData) {
+          // highlight if drag is acceptable
+          final isHovering = candidateData.isNotEmpty;
 
-        child: FittedBox(
-          fit: BoxFit.contain,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              // Top: tier stars
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: List.generate(
-                  listenedUnit.tier,
-                  (index) => Icon(Icons.star, color: Colors.amber, size: 10),
-                ),
-              ),
+          return Container(
+            decoration:
+                isHovering
+                    ? BoxDecoration(
+                      border: Border.all(color: Colors.green, width: 2),
+                    )
+                    : null,
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                final itemSize = constraints.maxHeight * 0.25;
 
-              // Center: unit image
-              unitImage,
+                return Container(
+                  padding: const EdgeInsets.all(2),
+                  decoration: containerDecoration,
+                  child: Stack(
+                    clipBehavior: Clip.none,
+                    children: [
+                      // Unit image
+                      Positioned.fill(child: unitImage),
 
-              // Bottom: unit name
-              Text(
-                listenedUnit.unitName,
-                style: TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 9,
-                ),
-                textAlign: TextAlign.center,
-                overflow: TextOverflow.ellipsis,
-              ),
-            ],
-          ),
-        ),
+                      // Star overlay
+                      starsOverlay,
+
+                      // Item overlay
+                      if (unit.getEquippedItems().isNotEmpty)
+                        Positioned(
+                          left: -4,
+                          top: 4,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              if (unit.weapon != null)
+                                _buildItemIcon(unit.weapon!, itemSize),
+                              if (unit.armor != null)
+                                _buildItemIcon(unit.armor!, itemSize),
+                              if (unit.trinket != null)
+                                _buildItemIcon(unit.trinket!, itemSize),
+                            ],
+                          ),
+                        ),
+                    ],
+                  ),
+                );
+              },
+            ),
+          );
+        },
       );
     }
   }
@@ -213,5 +291,30 @@ class UnitWidget extends StatelessWidget {
       default:
         return Colors.grey.shade600;
     }
+  }
+
+  Widget _buildItemIcon(Item item, double size) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 2),
+      child: Container(
+        width: size,
+        height: size,
+        decoration: BoxDecoration(
+          color: Colors.black.withOpacity(0.7),
+          borderRadius: BorderRadius.circular(4),
+          border: Border.all(color: Colors.white, width: 1),
+        ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(3),
+          child: Image.asset(
+            item.imagePath,
+            fit: BoxFit.contain,
+            errorBuilder:
+                (context, error, stackTrace) =>
+                    Icon(Icons.error, size: size * 0.6, color: Colors.red),
+          ),
+        ),
+      ),
+    );
   }
 }

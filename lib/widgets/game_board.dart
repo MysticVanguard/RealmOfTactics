@@ -287,8 +287,18 @@ class _GameBoardState extends State<GameBoard> {
   ) {
     Widget unitWidget = UnitWidget(
       unit: unit,
-      isBoardUnit: unit.isOnBoard,
       isEnemy: unit.isEnemy,
+      isBoardUnit: true,
+      onItemDropped: (item) {
+        final boardManager = Provider.of<BoardManager>(context, listen: false);
+        if (unit.canEquipItem(item)) {
+          boardManager.remove(item);
+          bool equipped = unit.equipItem(item);
+          if (!equipped) {
+            boardManager.addItemToBench(item);
+          }
+        }
+      },
     );
 
     return Listener(
@@ -322,8 +332,21 @@ class _GameBoardState extends State<GameBoard> {
                       height: tileSize * 1.1,
                       child: UnitWidget(
                         unit: unit,
-                        isBoardUnit: unit.isOnBoard,
                         isEnemy: unit.isEnemy,
+                        isBoardUnit: true,
+                        onItemDropped: (item) {
+                          final boardManager = Provider.of<BoardManager>(
+                            context,
+                            listen: false,
+                          );
+                          if (unit.canEquipItem(item)) {
+                            boardManager.remove(item);
+                            bool equipped = unit.equipItem(item);
+                            if (!equipped) {
+                              boardManager.addItemToBench(item);
+                            }
+                          }
+                        },
                       ),
                     ),
                   ),

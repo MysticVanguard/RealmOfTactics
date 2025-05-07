@@ -1348,26 +1348,26 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
     final boardManager = Provider.of<BoardManager>(context, listen: false);
 
     return DragTarget<Map<String, dynamic>>(
-      onWillAccept: (data) {
-        if (data == null) return false;
-        return data['type'] == 'unit' || data['type'] == 'item';
-      },
       onAccept: (data) {
         if (data['type'] == 'unit') {
           final Unit draggedUnit = data['unit'] as Unit;
           final String sourceType = data['sourceType'];
 
           if (sourceType == 'board') {
-            // Dragged from board to bench
             boardManager.addUnitToBench(draggedUnit);
-          } else if (sourceType == 'bench') {
-            // Swapping bench units (optional)
+          }
+
+          if (_selectedBenchTab != 0) {
+            setState(() {
+              _selectedBenchTab = 0;
+            });
+          } else {
+            setState(() {});
           }
         } else if (data['type'] == 'item') {
           final Item draggedItem = data['item'] as Item;
 
           if (benchContent is Item) {
-            // Try to combine if compatible
             final Item? combined = draggedItem.combine(benchContent);
             if (combined != null) {
               boardManager.remove(draggedItem);
@@ -1375,13 +1375,18 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
               boardManager.addItemToBench(combined);
             }
           } else {
-            // If empty slot
             boardManager.remove(draggedItem);
             boardManager.addItemToBench(draggedItem);
           }
-        }
 
-        setState(() {});
+          if (_selectedBenchTab != 1) {
+            setState(() {
+              _selectedBenchTab = 1;
+            });
+          } else {
+            setState(() {});
+          }
+        }
       },
       builder: (context, candidateData, rejectedData) {
         bool isDropping = candidateData.isNotEmpty;
@@ -1444,7 +1449,23 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
             child: Container(
               width: tileSize * 1.1,
               height: tileSize * 1.1,
-              child: UnitWidget(unit: unit, isEnemy: unit.isEnemy),
+              child: UnitWidget(
+                unit: unit,
+                isEnemy: unit.isEnemy,
+                onItemDropped: (item) {
+                  final boardManager = Provider.of<BoardManager>(
+                    context,
+                    listen: false,
+                  );
+                  if (unit.canEquipItem(item)) {
+                    boardManager.remove(item);
+                    bool equipped = unit.equipItem(item);
+                    if (!equipped) {
+                      boardManager.addItemToBench(item);
+                    }
+                  }
+                },
+              ),
             ),
           ),
 
@@ -1466,7 +1487,23 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
                 _selectUnit(unit);
               }
             },
-            child: UnitWidget(unit: unit, isEnemy: unit.isEnemy),
+            child: UnitWidget(
+              unit: unit,
+              isEnemy: unit.isEnemy,
+              onItemDropped: (item) {
+                final boardManager = Provider.of<BoardManager>(
+                  context,
+                  listen: false,
+                );
+                if (unit.canEquipItem(item)) {
+                  boardManager.remove(item);
+                  bool equipped = unit.equipItem(item);
+                  if (!equipped) {
+                    boardManager.addItemToBench(item);
+                  }
+                }
+              },
+            ),
           ),
         ),
       );
@@ -1498,7 +1535,23 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
             child: Container(
               width: tileSize * 1.1,
               height: tileSize * 1.1,
-              child: UnitWidget(unit: unit, isEnemy: unit.isEnemy),
+              child: UnitWidget(
+                unit: unit,
+                isEnemy: unit.isEnemy,
+                onItemDropped: (item) {
+                  final boardManager = Provider.of<BoardManager>(
+                    context,
+                    listen: false,
+                  );
+                  if (unit.canEquipItem(item)) {
+                    boardManager.remove(item);
+                    bool equipped = unit.equipItem(item);
+                    if (!equipped) {
+                      boardManager.addItemToBench(item);
+                    }
+                  }
+                },
+              ),
             ),
           ),
           childWhenDragging: Container(
@@ -1507,7 +1560,23 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
               borderRadius: BorderRadius.circular(4),
             ),
           ),
-          child: UnitWidget(unit: unit, isEnemy: unit.isEnemy),
+          child: UnitWidget(
+            unit: unit,
+            isEnemy: unit.isEnemy,
+            onItemDropped: (item) {
+              final boardManager = Provider.of<BoardManager>(
+                context,
+                listen: false,
+              );
+              if (unit.canEquipItem(item)) {
+                boardManager.remove(item);
+                bool equipped = unit.equipItem(item);
+                if (!equipped) {
+                  boardManager.addItemToBench(item);
+                }
+              }
+            },
+          ),
         ),
       );
     }

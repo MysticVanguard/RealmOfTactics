@@ -611,7 +611,8 @@ final Map<String, Item> allItems = {
       bonusMagicResist: 20,
       bonusAttackDamagePercent: 0.40,
     ),
-    uniqueAbilityDescription: 'Gain 10% AD at the start of combat.',
+    uniqueAbilityDescription:
+        'Gain 10% of total AD % AD at the start of combat.',
   ),
 
   'mystic_harness': Item(

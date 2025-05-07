@@ -373,12 +373,10 @@ class GameManager extends ChangeNotifier {
 
   // Selects a random base-level item from the component list
   Item getRandomBasicItem() {
-    print(itemPool.entries);
     final poolEntries =
         itemPool.entries
             .where((e) => allItems.containsKey(e.key) && e.value > 0)
             .toList();
-    print(poolEntries);
     if (poolEntries.isEmpty) {
       final basicItems = getBasicItems();
       if (basicItems.isEmpty) throw Exception("No tier 1 items found");
