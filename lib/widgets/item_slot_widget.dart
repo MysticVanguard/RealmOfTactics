@@ -1,10 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import 'package:realm_of_tactics/models/game_manager.dart';
 import '../models/item.dart';
 import '../models/unit.dart';
 import '../enums/item_type.dart';
-import '../models/board_manager.dart';
 
 // Widget that represents an item slot (weapon, armor, trinket) on a unit.
 class ItemSlotWidget extends StatelessWidget {
@@ -30,8 +27,6 @@ class ItemSlotWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final boardManager = Provider.of<BoardManager>(context, listen: false);
-
     return DragTarget<Map<String, dynamic>>(
       builder: (context, candidateData, rejectedData) {
         Widget slotContent;
@@ -40,34 +35,8 @@ class ItemSlotWidget extends StatelessWidget {
         if (item != null) {
           final currentEquippedItem = item!;
           slotContent = GestureDetector(
-            onTap: () {
-              onItemTapped(currentEquippedItem);
-            },
-            child:
-                GameManager.instance!.currentState == GameState.combat
-                    ? _buildItemIcon(currentEquippedItem)
-                    : Draggable<Map<String, dynamic>>(
-                      data: {
-                        'type': 'item',
-                        'item': currentEquippedItem,
-                        'sourceIndex': -1,
-                        'sourceType': 'equipment',
-                      },
-                      feedback: _buildItemIcon(
-                        currentEquippedItem,
-                        isDragging: true,
-                      ),
-                      childWhenDragging: _buildPlaceholder(
-                        isDraggingOver: candidateData.isNotEmpty,
-                      ),
-                      onDragStarted: () {
-                        unit.unequipItem(currentEquippedItem.type);
-                      },
-                      onDraggableCanceled: (velocity, offset) {
-                        boardManager.addItemToBench(currentEquippedItem);
-                      },
-                      child: _buildItemIcon(currentEquippedItem),
-                    ),
+            onTap: () => onItemTapped(currentEquippedItem),
+            child: _buildItemIcon(currentEquippedItem),
           );
         } else {
           // If no item is equipped, show a placeholder slot icon

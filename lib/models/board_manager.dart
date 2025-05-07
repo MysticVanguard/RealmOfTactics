@@ -984,4 +984,34 @@ class BoardManager extends ChangeNotifier {
     }
     return occupiedSlots >= 12;
   }
+
+  // Finds the unit equipped with the specific item
+  Unit? getUnitEquippedWith(Item item) {
+    // Search units on the board
+    for (int row = 0; row < boardRows; row++) {
+      for (int col = 0; col < boardCols; col++) {
+        final Unit? unit = _board[row][col];
+        if (unit != null && _isItemEquippedToUnit(unit, item)) {
+          return unit;
+        }
+      }
+    }
+
+    // Search units on the bench
+    for (int i = 0; i < benchSlots; i++) {
+      final dynamic content = _bench[i];
+      if (content is Unit && _isItemEquippedToUnit(content, item)) {
+        return content;
+      }
+    }
+
+    return null;
+  }
+
+  // Checks if a unit is equipped with the specific item
+  bool _isItemEquippedToUnit(Unit unit, Item item) {
+    return unit.weapon?.id == item.id ||
+        unit.armor?.id == item.id ||
+        unit.trinket?.id == item.id;
+  }
 }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:realm_of_tactics/models/game_manager.dart';
 import '../models/item.dart';
 import '../game_data/items.dart';
 
@@ -6,9 +7,14 @@ import '../game_data/items.dart';
 class ItemInfoBox extends StatelessWidget {
   final Item item;
   final VoidCallback onClose;
+  final VoidCallback? onUnequip;
 
-  const ItemInfoBox({Key? key, required this.item, required this.onClose})
-    : super(key: key);
+  const ItemInfoBox({
+    Key? key,
+    required this.item,
+    required this.onClose,
+    this.onUnequip,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -120,6 +126,23 @@ class ItemInfoBox extends StatelessWidget {
                   // If it's a combined item, show components
                   if (item.tier > 1 && item.componentNames.isNotEmpty)
                     _buildRecipeSection(item.componentNames),
+
+                  if (onUnequip != null &&
+                      GameManager.instance!.currentState != GameState.combat)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 12.0),
+                      child: Center(
+                        child: ElevatedButton.icon(
+                          icon: Icon(Icons.remove_circle_outline),
+                          label: Text("Unequip"),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.redAccent,
+                            padding: EdgeInsets.symmetric(horizontal: 16),
+                          ),
+                          onPressed: onUnequip,
+                        ),
+                      ),
+                    ),
                 ],
               ),
             ),

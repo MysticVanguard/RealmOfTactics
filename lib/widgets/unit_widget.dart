@@ -57,7 +57,7 @@ class UnitWidget extends StatelessWidget {
         listenedUnit.tier > 1
             ? Positioned(
               top: 0,
-              left: 0,
+              right: 0,
               child: Container(
                 padding: EdgeInsets.all(2),
                 decoration: BoxDecoration(

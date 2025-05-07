@@ -4,6 +4,7 @@ import 'package:realm_of_tactics/models/map_manager.dart';
 import 'package:realm_of_tactics/widgets/blessing_widget.dart';
 import 'package:realm_of_tactics/widgets/blessings_tab.dart';
 import 'package:realm_of_tactics/widgets/combat_stats_tab.dart';
+import 'package:realm_of_tactics/widgets/reforger_tab.dart';
 import 'package:realm_of_tactics/widgets/start_choice_ui.dart';
 import 'package:realm_of_tactics/widgets/unit_info_box.dart';
 import 'dart:math';
@@ -53,8 +54,11 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
 
   // Toggles for UI visibility
   bool _isShopOpen = false;
+  bool _isReforgerTabOpen = false;
   bool _isStatsOpen = false;
   bool _isDragging = false;
+
+  dynamic _reforgerSlot;
 
   // Current selected stat tab in stats panel
   StatType _selectedStat = StatType.damageDealt;
@@ -270,6 +274,31 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
   // Starts the combat round
   void _startCombatRound() {
     final gameManager = Provider.of<GameManager>(context, listen: false);
+    final boardManager = Provider.of<BoardManager>(context, listen: false);
+    if (_reforgerSlot != null) {
+      if (_reforgerSlot is Unit) {
+        final Unit unit = _reforgerSlot;
+        if (!boardManager.isBenchFull()) {
+          boardManager.addUnitToBench(unit);
+        } else {
+          final value = boardManager.calculateSellValue(unit);
+          gameManager.addGold(value);
+          if (unit.getEquippedItems().isNotEmpty) {
+            for (final item in unit.getEquippedItems()) {
+              unit.unequipItem(item.type);
+              boardManager.addItemToBench(item);
+            }
+          }
+        }
+      } else if (_reforgerSlot is Item) {
+        boardManager.addItemToBench(_reforgerSlot);
+      }
+
+      setState(() {
+        _reforgerSlot = null;
+        _isReforgerTabOpen = false;
+      });
+    }
     gameManager.startCombatRound();
   }
 
@@ -570,6 +599,9 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
                             : () {
                               setState(() {
                                 _isStatsOpen = !_isStatsOpen;
+                                _isBlessingTabOpen = false;
+                                _isReforgerTabOpen = false;
+                                _isShopOpen = false;
                               });
                             },
                   ),
@@ -583,6 +615,25 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
                     onPressed: () {
                       setState(() {
                         _isBlessingTabOpen = !_isBlessingTabOpen;
+                        _isReforgerTabOpen = false;
+                        _isStatsOpen = false;
+                        _isShopOpen = false;
+                      });
+                    },
+                  ),
+                if (!_isShopOpen)
+                  IconButton(
+                    icon: Icon(
+                      Icons.auto_fix_high,
+                      color: _isReforgerTabOpen ? Colors.amber : Colors.white,
+                    ),
+                    tooltip: "The Reforger",
+                    onPressed: () {
+                      setState(() {
+                        _isReforgerTabOpen = !_isReforgerTabOpen;
+                        _isBlessingTabOpen = false;
+                        _isStatsOpen = false;
+                        _isShopOpen = false;
                       });
                     },
                   ),
@@ -699,13 +750,32 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
                                   ? BlessingsTab()
                                   : gameManager.currentState == GameState.map
                                   ? _buildNodeInfoBox(_selectedMapNode)
+                                  : _isReforgerTabOpen
+                                  ? ReforgerTab(
+                                    slotContent: _reforgerSlot,
+                                    onSlotUpdate: (value) {
+                                      setState(() => _reforgerSlot = value);
+                                    },
+                                    onReforgePressed: _handleReforge,
+                                    playerGold: gameManager.gold,
+                                    onUnitTapped: (unit) {
+                                      setState(() {
+                                        selectedUnit = unit;
+                                      });
+                                    },
+                                    onItemTapped: (item) {
+                                      setState(() {
+                                        _infoItem = item;
+                                      });
+                                    },
+                                  )
                                   : SynergyDisplay(
                                     synergyManager: synergyManager,
                                   ),
                         ),
 
                         // Drag target for selling units
-                        if (!isInCombat)
+                        if (!isInCombat && _isShopOpen)
                           DragTarget<Map<String, dynamic>>(
                             onWillAccept:
                                 (data) =>
@@ -886,9 +956,26 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
                           ItemInfoBox(
                             item: _infoItem!,
                             onClose: () {
-                              setState(() {
-                                _infoItem = null;
-                              });
+                              setState(() => _infoItem = null);
+                            },
+                            onUnequip: () {
+                              final boardManager = Provider.of<BoardManager>(
+                                context,
+                                listen: false,
+                              );
+                              final unit = boardManager.getUnitEquippedWith(
+                                _infoItem!,
+                              );
+
+                              if (unit != null) {
+                                unit.unequipItem(_infoItem!.type);
+
+                                boardManager.addItemToBench(_infoItem!);
+
+                                setState(() {
+                                  _infoItem = null;
+                                });
+                              }
                             },
                           ),
                       ],
@@ -1353,7 +1440,7 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
           final Unit draggedUnit = data['unit'] as Unit;
           final String sourceType = data['sourceType'];
 
-          if (sourceType == 'board') {
+          if (sourceType == 'board' || sourceType == 'reforger') {
             boardManager.addUnitToBench(draggedUnit);
           }
 
@@ -1630,5 +1717,44 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
                 child: ItemWidget(item: item),
               ),
     );
+  }
+
+  void _handleReforge() {
+    final gameManager = Provider.of<GameManager>(context, listen: false);
+
+    if (_reforgerSlot == null) return;
+
+    // Reforge Unit
+    if (_reforgerSlot is Unit) {
+      final Unit original = _reforgerSlot;
+      final int cost = original.cost;
+
+      if (gameManager.gold < cost) return;
+
+      Unit newUnit = gameManager.getRandomUnitByCost(original.cost);
+      if (original.getEquippedItems().isNotEmpty) {
+        for (final item in original.getEquippedItems()) {
+          original.unequipItem(item.type);
+          gameManager.boardManager!.addItemToBench(item);
+        }
+      }
+      for (int i = 1; i < original.tier; i++) {
+        newUnit = newUnit.upgrade();
+      }
+
+      gameManager.spendGold(cost);
+      _reforgerSlot = newUnit;
+    }
+    // Reforge Item
+    else if (_reforgerSlot is Item) {
+      final Item original = _reforgerSlot;
+
+      if (gameManager.gold < 5) return;
+
+      final Item newItem = gameManager.getRandomItemByTier(original.tier);
+
+      gameManager.spendGold(5);
+      _reforgerSlot = newItem;
+    }
   }
 }

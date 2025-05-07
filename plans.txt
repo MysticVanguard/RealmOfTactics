@@ -1,7 +1,5 @@
 TODO:
 - Add other combat round sets
-- Add items to enemy rounds
-    - Will allow for infinitely more uniqueness to rounds
 - Fix how units are displayed so they work with their new sprites
     - Maybe also add a size stat for units that can be changed
 
@@ -34,3 +32,8 @@ DONE:
 - Change synergies all working at the start of combat instead
 - Fix reward units not getting the correct tier set
 - Fix combatstart stats only resetting for alive units at the end of combat
+- Add items to unit widgets
+- Allow dragging items onto units directly
+- Auto switch bench when moving a unit or item onto it
+- Add items to enemy rounds
+    - Will allow for infinitely more uniqueness to rounds

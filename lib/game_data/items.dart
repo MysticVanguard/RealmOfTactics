@@ -425,7 +425,7 @@ final Map<String, Item> allItems = {
     statsBonus: const ItemStatsBonus(
       bonusStartingMana: 20,
       bonusMagicResist: 15,
-      bonusAttackDamagePercent: 30,
+      bonusAttackDamagePercent: .30,
     ),
     uniqueAbilityDescription: 'Casting abilities gives a 100 Health shield.',
   ),
