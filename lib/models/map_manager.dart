@@ -222,6 +222,7 @@ class MapManager extends ChangeNotifier {
           node.rounds.clear();
           node.rounds = _generateRoundsForFloor(floor, isElite: true);
         } else if (floor >= 10 &&
+            floor <= 12 &&
             elitesOnFloor < 4 &&
             Random().nextDouble() < 0.4) {
           elitesOnFloor += 1;
@@ -332,7 +333,7 @@ class MapManager extends ChangeNotifier {
     int effectiveFloor = floor;
 
     if (isElite) {
-      final int offset = 1 + random.nextInt(3);
+      final int offset = 1 + random.nextInt(2);
       effectiveFloor = min(floor + offset, availableFloors.last);
     }
 

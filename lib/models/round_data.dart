@@ -93,9 +93,7 @@ final List<RoundSet> globalRoundSets = [
       ]),
     ],
     [
-      UnitData("Winterblade Guardian", Position(2, 2), 2, [
-        allItems["runed_sabre"]!.copyWith(),
-      ]),
+      UnitData("Winterblade Guardian", Position(2, 2), 2, []),
       UnitData("Cloudbreaker", Position(2, 3), 2, []),
     ],
     [
@@ -103,7 +101,6 @@ final List<RoundSet> globalRoundSets = [
         allItems["runed_sabre"]!.copyWith(),
       ]),
       UnitData("Cloudbreaker", Position(2, 3), 2, []),
-      UnitData("Icewall Sentinel", Position(2, 1), 2, []),
     ],
     [
       UnitData("Winterblade Guardian", Position(2, 2), 2, [
@@ -111,9 +108,9 @@ final List<RoundSet> globalRoundSets = [
         allItems["bloodpiercer"]!.copyWith(),
       ]),
       UnitData("Cloudbreaker", Position(2, 3), 2, []),
-      UnitData("Icewall Sentinel", Position(2, 1), 2, []),
     ],
   ]),
+
   RoundSet(2, [
     [
       UnitData("Winterblade Guardian", Position(2, 2), 2, [
@@ -121,316 +118,1647 @@ final List<RoundSet> globalRoundSets = [
         allItems["bloodpiercer"]!.copyWith(),
       ]),
       UnitData("Cloudbreaker", Position(2, 3), 2, []),
+    ],
+    [
+      UnitData("Winterblade Guardian", Position(2, 2), 2, [
+        allItems["runed_sabre"]!.copyWith(),
+      ]),
+      UnitData("Cloudbreaker", Position(2, 3), 2, []),
       UnitData("Icewall Sentinel", Position(2, 1), 2, []),
     ],
     [
-      UnitData("Winterblade Guardian", Position(2, 1), 2, [
-        allItems["runed_sabre"]!.copyWith(),
-        allItems["bloodpiercer"]!.copyWith(),
-      ]),
-      UnitData("Glacier Marksman", Position(0, 0), 1, []),
-      UnitData("Icewall Sentinel", Position(2, 2), 1, []),
-      UnitData("Rimebound Vanguard", Position(2, 0), 2, []),
-    ],
-    [
-      UnitData("Winterblade Guardian", Position(2, 1), 2, [
-        allItems["runed_sabre"]!.copyWith(),
-        allItems["bloodpiercer"]!.copyWith(),
-        allItems["psychic_edge"]!.copyWith(),
-      ]),
-      UnitData("Glacier Marksman", Position(0, 0), 1, []),
-      UnitData("Icewall Sentinel", Position(2, 2), 2, []),
-      UnitData("Rimebound Vanguard", Position(2, 0), 2, []),
-    ],
-    [
-      UnitData("Winterblade Guardian", Position(2, 1), 2, [
-        allItems["runed_sabre"]!.copyWith(),
-        allItems["bloodpiercer"]!.copyWith(),
-        allItems["psychic_edge"]!.copyWith(),
-      ]),
-      UnitData("Glacier Marksman", Position(0, 0), 2, []),
-      UnitData("Icewall Sentinel", Position(2, 2), 1, [
-        allItems["wicked_brooch"]!.copyWith(),
-      ]),
-      UnitData("Rimebound Vanguard", Position(2, 0), 2, []),
-    ],
-    [
-      UnitData("Winterblade Guardian", Position(2, 1), 2, [
-        allItems["runed_sabre"]!.copyWith(),
-        allItems["bloodpiercer"]!.copyWith(),
-        allItems["psychic_edge"]!.copyWith(),
-      ]),
       UnitData("Winterblade Guardian", Position(2, 2), 2, [
         allItems["runed_sabre"]!.copyWith(),
         allItems["bloodpiercer"]!.copyWith(),
-        allItems["psychic_edge"]!.copyWith(),
       ]),
-      UnitData("Winterblade Guardian", Position(2, 3), 2, [
+      UnitData("Cloudbreaker", Position(2, 3), 2, []),
+      UnitData("Icewall Sentinel", Position(2, 1), 2, []),
+    ],
+    [
+      UnitData("Winterblade Guardian", Position(2, 2), 2, [
         allItems["runed_sabre"]!.copyWith(),
         allItems["bloodpiercer"]!.copyWith(),
-        allItems["psychic_edge"]!.copyWith(),
       ]),
-      UnitData("Winterblade Guardian", Position(2, 0), 2, [
+      UnitData("Cloudbreaker", Position(2, 3), 2, []),
+      UnitData("Icewall Sentinel", Position(2, 1), 2, [
+        allItems["titan_hide"]!.copyWith(),
+      ]),
+    ],
+    [
+      UnitData("Winterblade Guardian", Position(2, 2), 2, [
         allItems["runed_sabre"]!.copyWith(),
         allItems["bloodpiercer"]!.copyWith(),
-        allItems["psychic_edge"]!.copyWith(),
+      ]),
+      UnitData("Cloudbreaker", Position(2, 3), 2, []),
+      UnitData("Icewall Sentinel", Position(2, 1), 2, [
+        allItems["titan_hide"]!.copyWith(),
+        allItems["bulwarks_crown"]!.copyWith(),
       ]),
     ],
   ]),
   RoundSet(3, [
     [
-      UnitData("Winterblade Guardian", Position(2, 1), 2, [
+      UnitData("Winterblade Guardian", Position(2, 2), 2, [
         allItems["runed_sabre"]!.copyWith(),
         allItems["bloodpiercer"]!.copyWith(),
-        allItems["psychic_edge"]!.copyWith(),
       ]),
-      UnitData("Glacier Marksman", Position(0, 0), 2, []),
-      UnitData("Icewall Sentinel", Position(2, 2), 2, [
-        allItems["wicked_brooch"]!.copyWith(),
+      UnitData("Cloudbreaker", Position(2, 3), 2, []),
+      UnitData("Icewall Sentinel", Position(2, 1), 2, [
+        allItems["titan_hide"]!.copyWith(),
+        allItems["bulwarks_crown"]!.copyWith(),
       ]),
-      UnitData("Rimebound Vanguard", Position(2, 0), 2, []),
     ],
     [
-      UnitData("Winterblade Guardian", Position(2, 1), 3, [
+      UnitData("Winterblade Guardian", Position(2, 2), 2, [
         allItems["runed_sabre"]!.copyWith(),
         allItems["bloodpiercer"]!.copyWith(),
-        allItems["psychic_edge"]!.copyWith(),
+        allItems["battle_plate"]!.copyWith(),
       ]),
-      UnitData("Glacier Marksman", Position(0, 0), 2, []),
-      UnitData("Icewall Sentinel", Position(2, 2), 2, [
-        allItems["wicked_brooch"]!.copyWith(),
+      UnitData("Cloudbreaker", Position(2, 3), 2, []),
+      UnitData("Icewall Sentinel", Position(2, 1), 2, [
+        allItems["titan_hide"]!.copyWith(),
+        allItems["bulwarks_crown"]!.copyWith(),
       ]),
-      UnitData("Rimebound Vanguard", Position(2, 0), 2, []),
     ],
     [
-      UnitData("Winterblade Guardian", Position(2, 1), 3, [
+      UnitData("Winterblade Guardian", Position(2, 2), 2, [
         allItems["runed_sabre"]!.copyWith(),
-        allItems["bloodpiercer"]!.copyWith(),
-        allItems["psychic_edge"]!.copyWith(),
       ]),
-      UnitData("Glacier Marksman", Position(0, 0), 2, []),
-      UnitData("Icewall Sentinel", Position(2, 2), 3, [
-        allItems["wicked_brooch"]!.copyWith(),
+      UnitData("Rimebound Vanguard", Position(2, 3), 2, []),
+      UnitData("Icewall Sentinel", Position(2, 1), 2, [
+        allItems["titan_hide"]!.copyWith(),
       ]),
-      UnitData("Rimebound Vanguard", Position(2, 0), 2, []),
-    ],
-    [
-      UnitData("Glacier Marksman", Position(0, 0), 3, []),
-      UnitData("Rimebound Vanguard", Position(2, 0), 3, []),
-    ],
-    [
-      UnitData("Glacier Marksman", Position(0, 0), 2, []),
       UnitData("Glacier Marksman", Position(0, 1), 2, []),
-      UnitData("Rimebound Vanguard", Position(2, 0), 2, []),
-      UnitData("Rimebound Vanguard", Position(2, 1), 2, []),
-      UnitData("Icewall Sentinel", Position(2, 2), 2, []),
-      UnitData("Icewall Sentinel", Position(2, 3), 2, []),
-      UnitData("Winterblade Guardian", Position(2, 4), 2, []),
-      UnitData("Winterblade Guardian", Position(2, 5), 2, []),
+    ],
+    [
+      UnitData("Winterblade Guardian", Position(2, 2), 2, [
+        allItems["runed_sabre"]!.copyWith(),
+      ]),
+      UnitData("Rimebound Vanguard", Position(2, 3), 2, [
+        allItems["titan_hide"]!.copyWith(),
+      ]),
+      UnitData("Icewall Sentinel", Position(2, 1), 2, [
+        allItems["titan_hide"]!.copyWith(),
+      ]),
+      UnitData("Glacier Marksman", Position(0, 1), 2, []),
+    ],
+    [
+      UnitData("Winterblade Guardian", Position(2, 2), 2, [
+        allItems["runed_sabre"]!.copyWith(),
+      ]),
+      UnitData("Rimebound Vanguard", Position(2, 3), 2, [
+        allItems["titan_hide"]!.copyWith(),
+      ]),
+      UnitData("Icewall Sentinel", Position(2, 1), 2, [
+        allItems["titan_hide"]!.copyWith(),
+      ]),
+      UnitData("Glacier Marksman", Position(0, 1), 2, [
+        allItems["bloodpiercer"]!.copyWith(),
+      ]),
     ],
   ]),
-
   RoundSet(4, [
     [
-      UnitData("Glacier Marksman", Position(0, 0), 2, [
-        allItems["bloodpiercer"]!.copyWith(),
-      ]),
-      UnitData("Rimebound Vanguard", Position(2, 0), 2, [
-        allItems["runed_helm"]!.copyWith(),
-      ]),
-      UnitData("Icewall Sentinel", Position(2, 2), 2, [
-        allItems["mystic_harness"]!.copyWith(),
-      ]),
-      UnitData("Winterblade Guardian", Position(2, 1), 2, [
+      UnitData("Winterblade Guardian", Position(2, 2), 2, [
         allItems["runed_sabre"]!.copyWith(),
       ]),
-      UnitData("Snowfall Priest", Position(0, 1), 1, []),
-      UnitData("Northwind Tracker", Position(1, 0), 1, [
+      UnitData("Rimebound Vanguard", Position(2, 3), 2, [
+        allItems["titan_hide"]!.copyWith(),
+      ]),
+      UnitData("Icewall Sentinel", Position(2, 1), 2, [
+        allItems["titan_hide"]!.copyWith(),
+      ]),
+      UnitData("Glacier Marksman", Position(0, 1), 2, [
         allItems["bloodpiercer"]!.copyWith(),
       ]),
     ],
     [
-      UnitData("Glacier Marksman", Position(0, 0), 2, [
+      UnitData("Winterblade Guardian", Position(2, 2), 2, [
+        allItems["runed_sabre"]!.copyWith(),
         allItems["bloodpiercer"]!.copyWith(),
       ]),
-      UnitData("Rimebound Vanguard", Position(2, 0), 2, [
-        allItems["runed_helm"]!.copyWith(),
+      UnitData("Rimebound Vanguard", Position(2, 3), 2, [
+        allItems["titan_hide"]!.copyWith(),
       ]),
-      UnitData("Icewall Sentinel", Position(2, 2), 2, [
-        allItems["mystic_harness"]!.copyWith(),
+      UnitData("Icewall Sentinel", Position(2, 1), 2, [
+        allItems["titan_hide"]!.copyWith(),
       ]),
-      UnitData("Winterblade Guardian", Position(2, 1), 2, [
-        allItems["runed_sabre"]!.copyWith(),
-      ]),
-      UnitData("Snowfall Priest", Position(0, 1), 1, [
-        allItems["focused_mind"]!.copyWith(),
-      ]),
-      UnitData("Northwind Tracker", Position(1, 0), 1, [
+      UnitData("Glacier Marksman", Position(0, 1), 2, [
         allItems["bloodpiercer"]!.copyWith(),
       ]),
     ],
     [
-      UnitData("Glacier Marksman", Position(0, 0), 2, [
-        allItems["bloodpiercer"]!.copyWith(),
-        allItems["bloodpiercer"]!.copyWith(),
-        allItems["bloodpiercer"]!.copyWith(),
-      ]),
-      UnitData("Rimebound Vanguard", Position(2, 0), 2, [
-        allItems["runed_helm"]!.copyWith(),
-      ]),
-      UnitData("Icewall Sentinel", Position(2, 2), 2, [
-        allItems["mystic_harness"]!.copyWith(),
-      ]),
-      UnitData("Winterblade Guardian", Position(2, 1), 2, [
+      UnitData("Winterblade Guardian", Position(2, 2), 2, [
         allItems["runed_sabre"]!.copyWith(),
+        allItems["bloodpiercer"]!.copyWith(),
       ]),
-      UnitData("Snowfall Priest", Position(0, 1), 1, [
-        allItems["focused_mind"]!.copyWith(),
+      UnitData("Rimebound Vanguard", Position(2, 3), 2, [
+        allItems["titan_hide"]!.copyWith(),
       ]),
-      UnitData("Northwind Tracker", Position(1, 0), 1, [
+      UnitData("Icewall Sentinel", Position(2, 1), 2, [
+        allItems["titan_hide"]!.copyWith(),
+        allItems["bulwarks_crown"]!.copyWith(),
+      ]),
+      UnitData("Glacier Marksman", Position(0, 1), 2, [
         allItems["bloodpiercer"]!.copyWith(),
       ]),
     ],
     [
-      UnitData("Glacier Marksman", Position(0, 0), 2, [
-        allItems["bloodpiercer"]!.copyWith(),
-      ]),
-      UnitData("Rimebound Vanguard", Position(2, 0), 1, [
-        allItems["runed_helm"]!.copyWith(),
-      ]),
-      UnitData("Icewall Sentinel", Position(2, 2), 2, [
-        allItems["mystic_harness"]!.copyWith(),
-      ]),
-      UnitData("Winterblade Guardian", Position(2, 1), 2, [
+      UnitData("Winterblade Guardian", Position(2, 2), 2, [
         allItems["runed_sabre"]!.copyWith(),
+        allItems["bloodpiercer"]!.copyWith(),
+        allItems["battle_plate"]!.copyWith(),
       ]),
-      UnitData("Snowfall Priest", Position(0, 1), 1, [
-        allItems["focused_mind"]!.copyWith(),
+      UnitData("Rimebound Vanguard", Position(2, 3), 2, []),
+      UnitData("Icewall Sentinel", Position(2, 1), 2, [
+        allItems["titan_hide"]!.copyWith(),
+        allItems["bulwarks_crown"]!.copyWith(),
+        allItems["blood_vessel"]!.copyWith(),
       ]),
-      UnitData("Northwind Tracker", Position(1, 0), 2, [
+      UnitData("Glacier Marksman", Position(0, 1), 2, []),
+    ],
+    [
+      UnitData("Winterblade Guardian", Position(2, 2), 3, [
+        allItems["runed_sabre"]!.copyWith(),
+        allItems["bloodpiercer"]!.copyWith(),
+        allItems["battle_plate"]!.copyWith(),
+      ]),
+      UnitData("Rimebound Vanguard", Position(2, 3), 2, []),
+      UnitData("Icewall Sentinel", Position(2, 1), 2, [
+        allItems["titan_hide"]!.copyWith(),
+        allItems["bulwarks_crown"]!.copyWith(),
+      ]),
+      UnitData("Glacier Marksman", Position(0, 1), 2, []),
+    ],
+  ]),
+  RoundSet(5, [
+    [
+      UnitData("Winterblade Guardian", Position(2, 2), 3, [
+        allItems["runed_sabre"]!.copyWith(),
+        allItems["bloodpiercer"]!.copyWith(),
+        allItems["battle_plate"]!.copyWith(),
+      ]),
+      UnitData("Rimebound Vanguard", Position(2, 3), 2, []),
+      UnitData("Icewall Sentinel", Position(2, 1), 2, [
+        allItems["titan_hide"]!.copyWith(),
+        allItems["bulwarks_crown"]!.copyWith(),
+      ]),
+      UnitData("Glacier Marksman", Position(0, 1), 2, []),
+    ],
+    [
+      UnitData("Winterblade Guardian", Position(2, 2), 2, [
+        allItems["runed_sabre"]!.copyWith(),
+        allItems["bloodpiercer"]!.copyWith(),
+        allItems["battle_plate"]!.copyWith(),
+      ]),
+      UnitData("Rimebound Vanguard", Position(2, 3), 2, [
+        allItems["titan_hide"]!.copyWith(),
+      ]),
+      UnitData("Icewall Sentinel", Position(2, 1), 2, [
+        allItems["titan_hide"]!.copyWith(),
+        allItems["bulwarks_crown"]!.copyWith(),
+        allItems["blood_vessel"]!.copyWith(),
+      ]),
+      UnitData("Glacier Marksman", Position(0, 1), 2, []),
+    ],
+    [
+      UnitData("Winterblade Guardian", Position(2, 2), 2, [
+        allItems["runed_sabre"]!.copyWith(),
+        allItems["bloodpiercer"]!.copyWith(),
+        allItems["battle_plate"]!.copyWith(),
+      ]),
+      UnitData("Rimebound Vanguard", Position(2, 3), 2, [
+        allItems["titan_hide"]!.copyWith(),
+      ]),
+      UnitData("Icewall Sentinel", Position(2, 1), 2, [
+        allItems["titan_hide"]!.copyWith(),
+        allItems["bulwarks_crown"]!.copyWith(),
+        allItems["blood_vessel"]!.copyWith(),
+      ]),
+      UnitData("Glacier Marksman", Position(0, 1), 2, [
         allItems["bloodpiercer"]!.copyWith(),
       ]),
     ],
     [
-      UnitData("Glacier Marksman", Position(0, 0), 2, [
-        allItems["bloodpiercer"]!.copyWith(),
-        allItems["bloodpiercer"]!.copyWith(),
-        allItems["bloodpiercer"]!.copyWith(),
-      ]),
-      UnitData("Rimebound Vanguard", Position(2, 0), 1, [
-        allItems["runed_helm"]!.copyWith(),
-      ]),
-      UnitData("Icewall Sentinel", Position(2, 2), 2, [
-        allItems["mystic_harness"]!.copyWith(),
-      ]),
-      UnitData("Winterblade Guardian", Position(2, 1), 2, [
+      UnitData("Winterblade Guardian", Position(2, 2), 2, [
         allItems["runed_sabre"]!.copyWith(),
-      ]),
-      UnitData("Snowfall Priest", Position(0, 1), 1, [
-        allItems["focused_mind"]!.copyWith(),
-      ]),
-      UnitData("Northwind Tracker", Position(1, 0), 2, [
         allItems["bloodpiercer"]!.copyWith(),
+        allItems["battle_plate"]!.copyWith(),
+      ]),
+      UnitData("Rimebound Vanguard", Position(2, 3), 2, [
+        allItems["titan_hide"]!.copyWith(),
+        allItems["bulwarks_crown"]!.copyWith(),
+      ]),
+      UnitData("Icewall Sentinel", Position(2, 1), 2, [
+        allItems["titan_hide"]!.copyWith(),
+        allItems["bulwarks_crown"]!.copyWith(),
+        allItems["blood_vessel"]!.copyWith(),
+      ]),
+      UnitData("Glacier Marksman", Position(0, 1), 2, [
+        allItems["bloodpiercer"]!.copyWith(),
+      ]),
+    ],
+    [
+      UnitData("Winterblade Guardian", Position(2, 2), 2, [
+        allItems["runed_sabre"]!.copyWith(),
+        allItems["bloodpiercer"]!.copyWith(),
+        allItems["battle_plate"]!.copyWith(),
+      ]),
+      UnitData("Rimebound Vanguard", Position(2, 3), 2, [
+        allItems["titan_hide"]!.copyWith(),
+        allItems["bulwarks_crown"]!.copyWith(),
+      ]),
+      UnitData("Icewall Sentinel", Position(2, 1), 2, [
+        allItems["titan_hide"]!.copyWith(),
+        allItems["bulwarks_crown"]!.copyWith(),
+        allItems["blood_vessel"]!.copyWith(),
+      ]),
+      UnitData("Glacier Marksman", Position(0, 1), 2, [
+        allItems["bloodpiercer"]!.copyWith(),
+        allItems["bladed_repeater"]!.copyWith(),
       ]),
     ],
   ]),
-
   RoundSet(6, [
     [
-      UnitData("Glacier Marksman", Position(0, 0), 2, [
+      UnitData("Winterblade Guardian", Position(2, 2), 2, [
+        allItems["runed_sabre"]!.copyWith(),
         allItems["bloodpiercer"]!.copyWith(),
+        allItems["battle_plate"]!.copyWith(),
+      ]),
+      UnitData("Rimebound Vanguard", Position(2, 3), 2, [
+        allItems["titan_hide"]!.copyWith(),
+        allItems["bulwarks_crown"]!.copyWith(),
+      ]),
+      UnitData("Icewall Sentinel", Position(2, 1), 2, [
+        allItems["titan_hide"]!.copyWith(),
+        allItems["bulwarks_crown"]!.copyWith(),
+        allItems["blood_vessel"]!.copyWith(),
+      ]),
+      UnitData("Glacier Marksman", Position(0, 1), 2, [
         allItems["bloodpiercer"]!.copyWith(),
+        allItems["bladed_repeater"]!.copyWith(),
+      ]),
+    ],
+    [
+      UnitData("Winterblade Guardian", Position(2, 2), 2, [
+        allItems["runed_sabre"]!.copyWith(),
         allItems["bloodpiercer"]!.copyWith(),
+        allItems["battle_plate"]!.copyWith(),
       ]),
-      UnitData("Rimebound Vanguard", Position(2, 0), 1, [
-        allItems["runed_helm"]!.copyWith(),
+      UnitData("Rimebound Vanguard", Position(2, 3), 2, [
+        allItems["titan_hide"]!.copyWith(),
+        allItems["bulwarks_crown"]!.copyWith(),
+        allItems["blood_vessel"]!.copyWith(),
       ]),
-      UnitData("Icewall Sentinel", Position(2, 2), 2, [
-        allItems["mystic_harness"]!.copyWith(),
+      UnitData("Icewall Sentinel", Position(2, 1), 2, [
+        allItems["titan_hide"]!.copyWith(),
+        allItems["bulwarks_crown"]!.copyWith(),
+        allItems["blood_vessel"]!.copyWith(),
       ]),
+      UnitData("Glacier Marksman", Position(0, 1), 2, [
+        allItems["bloodpiercer"]!.copyWith(),
+        allItems["bladed_repeater"]!.copyWith(),
+        allItems["psychic_edge"]!.copyWith(),
+      ]),
+    ],
+    [
       UnitData("Winterblade Guardian", Position(2, 1), 2, [
         allItems["runed_sabre"]!.copyWith(),
-      ]),
-      UnitData("Snowfall Priest", Position(0, 1), 1, [
-        allItems["focused_mind"]!.copyWith(),
-      ]),
-      UnitData("Northwind Tracker", Position(1, 0), 2, [
         allItems["bloodpiercer"]!.copyWith(),
+        allItems["battle_plate"]!.copyWith(),
       ]),
+      UnitData("Rimebound Vanguard", Position(2, 2), 2, []),
+      UnitData("Icewall Sentinel", Position(2, 0), 2, []),
+      UnitData("Glacier Marksman", Position(0, 1), 2, []),
+      UnitData("Snowfall Priest", Position(0, 0), 2, []),
+      UnitData("Northwind Tracker", Position(1, 1), 2, []),
     ],
     [
-      UnitData("Glacier Marksman", Position(0, 0), 1, [
-        allItems["bloodpiercer"]!.copyWith(),
-      ]),
-      UnitData("Rimebound Vanguard", Position(2, 0), 1, [
-        allItems["runed_helm"]!.copyWith(),
-      ]),
-      UnitData("Icewall Sentinel", Position(2, 2), 2, [
-        allItems["mystic_harness"]!.copyWith(),
-      ]),
       UnitData("Winterblade Guardian", Position(2, 1), 2, [
         allItems["runed_sabre"]!.copyWith(),
-      ]),
-      UnitData("Snowfall Priest", Position(0, 1), 2, [
-        allItems["focused_mind"]!.copyWith(),
-      ]),
-      UnitData("Northwind Tracker", Position(1, 0), 2, [
         allItems["bloodpiercer"]!.copyWith(),
+        allItems["battle_plate"]!.copyWith(),
       ]),
-    ],
-    [
-      UnitData("Glacier Marksman", Position(0, 0), 1, [
-        allItems["bloodpiercer"]!.copyWith(),
+      UnitData("Rimebound Vanguard", Position(2, 2), 2, []),
+      UnitData("Icewall Sentinel", Position(2, 0), 2, [
+        allItems["titan_hide"]!.copyWith(),
+        allItems["bulwarks_crown"]!.copyWith(),
       ]),
-      UnitData("Rimebound Vanguard", Position(2, 0), 2, [
-        allItems["runed_helm"]!.copyWith(),
-      ]),
-      UnitData("Icewall Sentinel", Position(2, 2), 2, [
-        allItems["mystic_harness"]!.copyWith(),
-      ]),
-      UnitData("Winterblade Guardian", Position(2, 1), 1, [
-        allItems["runed_sabre"]!.copyWith(),
-      ]),
-      UnitData("Snowfall Priest", Position(0, 1), 2, [
-        allItems["focused_mind"]!.copyWith(),
-      ]),
-      UnitData("Northwind Tracker", Position(1, 0), 2, [
-        allItems["bloodpiercer"]!.copyWith(),
-      ]),
-    ],
-
-    [
-      UnitData("Borealis Arcanist", Position(0, 1), 2, []),
-      UnitData("Frostscribe Mystic", Position(1, 1), 2, []),
-      UnitData("Glacier Marksman", Position(0, 0), 1, []),
-      UnitData("Glacier Marksman", Position(0, 2), 1, []),
-      UnitData("Icewall Sentinel", Position(1, 0), 1, []),
-      UnitData("Icewall Sentinel", Position(1, 2), 1, []),
-      UnitData("Winterblade Guardian", Position(2, 0), 1, []),
-      UnitData("Winterblade Guardian", Position(2, 1), 1, []),
-      UnitData("Rimebound Vanguard", Position(2, 2), 1, []),
+      UnitData("Glacier Marksman", Position(0, 1), 2, []),
+      UnitData("Snowfall Priest", Position(0, 0), 2, []),
+      UnitData("Northwind Tracker", Position(1, 1), 2, []),
     ],
   ]),
-
   RoundSet(7, [
     [
-      UnitData("Glacier Marksman", Position(0, 0), 2, [
+      UnitData("Winterblade Guardian", Position(2, 1), 2, [
+        allItems["runed_sabre"]!.copyWith(),
+        allItems["bloodpiercer"]!.copyWith(),
+        allItems["battle_plate"]!.copyWith(),
+      ]),
+      UnitData("Rimebound Vanguard", Position(2, 2), 2, []),
+      UnitData("Icewall Sentinel", Position(2, 0), 2, [
+        allItems["titan_hide"]!.copyWith(),
+        allItems["bulwarks_crown"]!.copyWith(),
+      ]),
+      UnitData("Glacier Marksman", Position(0, 1), 2, []),
+      UnitData("Snowfall Priest", Position(0, 0), 2, []),
+      UnitData("Northwind Tracker", Position(1, 1), 2, []),
+    ],
+    [
+      UnitData("Winterblade Guardian", Position(2, 1), 2, [
+        allItems["runed_sabre"]!.copyWith(),
+        allItems["bloodpiercer"]!.copyWith(),
+        allItems["battle_plate"]!.copyWith(),
+      ]),
+      UnitData("Rimebound Vanguard", Position(2, 2), 2, []),
+      UnitData("Icewall Sentinel", Position(2, 0), 2, [
+        allItems["titan_hide"]!.copyWith(),
+        allItems["bulwarks_crown"]!.copyWith(),
+        allItems["blood_vessel"]!.copyWith(),
+      ]),
+      UnitData("Glacier Marksman", Position(0, 1), 2, []),
+      UnitData("Snowfall Priest", Position(0, 0), 2, []),
+      UnitData("Northwind Tracker", Position(1, 1), 2, []),
+    ],
+    [
+      UnitData("Winterblade Guardian", Position(2, 1), 2, [
+        allItems["runed_sabre"]!.copyWith(),
+        allItems["bloodpiercer"]!.copyWith(),
+        allItems["battle_plate"]!.copyWith(),
+      ]),
+      UnitData("Rimebound Vanguard", Position(2, 2), 2, [
+        allItems["titan_hide"]!.copyWith(),
+      ]),
+      UnitData("Icewall Sentinel", Position(2, 0), 2, [
+        allItems["titan_hide"]!.copyWith(),
+        allItems["bulwarks_crown"]!.copyWith(),
+        allItems["blood_vessel"]!.copyWith(),
+      ]),
+      UnitData("Glacier Marksman", Position(0, 1), 2, []),
+      UnitData("Snowfall Priest", Position(0, 0), 2, []),
+      UnitData("Northwind Tracker", Position(1, 1), 2, []),
+    ],
+    [
+      UnitData("Winterblade Guardian", Position(2, 1), 2, [
+        allItems["runed_sabre"]!.copyWith(),
+        allItems["bloodpiercer"]!.copyWith(),
+        allItems["battle_plate"]!.copyWith(),
+      ]),
+      UnitData("Rimebound Vanguard", Position(2, 2), 2, [
+        allItems["titan_hide"]!.copyWith(),
+      ]),
+      UnitData("Icewall Sentinel", Position(2, 0), 2, [
+        allItems["titan_hide"]!.copyWith(),
+        allItems["bulwarks_crown"]!.copyWith(),
+        allItems["blood_vessel"]!.copyWith(),
+      ]),
+      UnitData("Glacier Marksman", Position(0, 1), 2, [
         allItems["bloodpiercer"]!.copyWith(),
       ]),
-      UnitData("Rimebound Vanguard", Position(2, 0), 2, [
+      UnitData("Snowfall Priest", Position(0, 0), 2, []),
+      UnitData("Northwind Tracker", Position(1, 1), 2, []),
+    ],
+    [
+      UnitData("Winterblade Guardian", Position(2, 1), 2, [
+        allItems["runed_sabre"]!.copyWith(),
+        allItems["bloodpiercer"]!.copyWith(),
+        allItems["battle_plate"]!.copyWith(),
+      ]),
+      UnitData("Rimebound Vanguard", Position(2, 2), 2, [
+        allItems["titan_hide"]!.copyWith(),
+        allItems["bulwarks_crown"]!.copyWith(),
+      ]),
+      UnitData("Icewall Sentinel", Position(2, 0), 2, [
+        allItems["titan_hide"]!.copyWith(),
+        allItems["bulwarks_crown"]!.copyWith(),
+        allItems["blood_vessel"]!.copyWith(),
+      ]),
+      UnitData("Glacier Marksman", Position(0, 1), 2, [
+        allItems["bloodpiercer"]!.copyWith(),
+      ]),
+      UnitData("Snowfall Priest", Position(0, 0), 2, []),
+      UnitData("Northwind Tracker", Position(1, 1), 2, []),
+    ],
+  ]),
+  RoundSet(8, [
+    [
+      UnitData("Winterblade Guardian", Position(2, 1), 2, [
+        allItems["runed_sabre"]!.copyWith(),
+        allItems["bloodpiercer"]!.copyWith(),
+        allItems["battle_plate"]!.copyWith(),
+      ]),
+      UnitData("Rimebound Vanguard", Position(2, 2), 2, [
+        allItems["titan_hide"]!.copyWith(),
+        allItems["bulwarks_crown"]!.copyWith(),
+      ]),
+      UnitData("Icewall Sentinel", Position(2, 0), 2, [
+        allItems["titan_hide"]!.copyWith(),
+        allItems["bulwarks_crown"]!.copyWith(),
+        allItems["blood_vessel"]!.copyWith(),
+      ]),
+      UnitData("Glacier Marksman", Position(0, 1), 2, [
+        allItems["bloodpiercer"]!.copyWith(),
+      ]),
+      UnitData("Snowfall Priest", Position(0, 0), 2, []),
+      UnitData("Northwind Tracker", Position(1, 1), 2, []),
+    ],
+    [
+      UnitData("Winterblade Guardian", Position(2, 1), 2, [
+        allItems["runed_sabre"]!.copyWith(),
+        allItems["bloodpiercer"]!.copyWith(),
+        allItems["battle_plate"]!.copyWith(),
+      ]),
+      UnitData("Rimebound Vanguard", Position(2, 2), 2, [
+        allItems["titan_hide"]!.copyWith(),
+        allItems["bulwarks_crown"]!.copyWith(),
+      ]),
+      UnitData("Icewall Sentinel", Position(2, 0), 2, [
+        allItems["titan_hide"]!.copyWith(),
+        allItems["bulwarks_crown"]!.copyWith(),
+        allItems["blood_vessel"]!.copyWith(),
+      ]),
+      UnitData("Glacier Marksman", Position(0, 1), 2, [
+        allItems["bloodpiercer"]!.copyWith(),
+        allItems["bladed_repeater"]!.copyWith(),
+      ]),
+      UnitData("Snowfall Priest", Position(0, 0), 2, []),
+      UnitData("Northwind Tracker", Position(1, 1), 2, []),
+    ],
+    [
+      UnitData("Winterblade Guardian", Position(2, 1), 2, [
+        allItems["runed_sabre"]!.copyWith(),
+        allItems["bloodpiercer"]!.copyWith(),
+        allItems["battle_plate"]!.copyWith(),
+      ]),
+      UnitData("Rimebound Vanguard", Position(2, 2), 2, [
+        allItems["titan_hide"]!.copyWith(),
+        allItems["bulwarks_crown"]!.copyWith(),
+      ]),
+      UnitData("Icewall Sentinel", Position(2, 0), 2, [
+        allItems["titan_hide"]!.copyWith(),
+        allItems["bulwarks_crown"]!.copyWith(),
+        allItems["blood_vessel"]!.copyWith(),
+      ]),
+      UnitData("Glacier Marksman", Position(0, 1), 2, [
+        allItems["bloodpiercer"]!.copyWith(),
+        allItems["bladed_repeater"]!.copyWith(),
+      ]),
+      UnitData("Snowfall Priest", Position(0, 0), 2, [
+        allItems["focused_mind"]!.copyWith(),
+      ]),
+      UnitData("Northwind Tracker", Position(1, 1), 2, []),
+    ],
+    [
+      UnitData("Winterblade Guardian", Position(2, 1), 2, [
+        allItems["runed_sabre"]!.copyWith(),
+        allItems["bloodpiercer"]!.copyWith(),
+        allItems["battle_plate"]!.copyWith(),
+      ]),
+      UnitData("Rimebound Vanguard", Position(2, 2), 2, [
+        allItems["titan_hide"]!.copyWith(),
+        allItems["bulwarks_crown"]!.copyWith(),
+      ]),
+      UnitData("Icewall Sentinel", Position(2, 0), 2, [
+        allItems["titan_hide"]!.copyWith(),
+        allItems["bulwarks_crown"]!.copyWith(),
+        allItems["blood_vessel"]!.copyWith(),
+      ]),
+      UnitData("Glacier Marksman", Position(0, 1), 2, [
+        allItems["bloodpiercer"]!.copyWith(),
+        allItems["bladed_repeater"]!.copyWith(),
+      ]),
+      UnitData("Snowfall Priest", Position(0, 0), 2, [
+        allItems["focused_mind"]!.copyWith(),
+      ]),
+      UnitData("Northwind Tracker", Position(1, 1), 2, [
+        allItems["bloodpiercer"]!.copyWith(),
+      ]),
+    ],
+    [
+      UnitData("Winterblade Guardian", Position(2, 1), 2, [
+        allItems["runed_sabre"]!.copyWith(),
+        allItems["bloodpiercer"]!.copyWith(),
+        allItems["battle_plate"]!.copyWith(),
+      ]),
+      UnitData("Rimebound Vanguard", Position(2, 2), 2, [
+        allItems["titan_hide"]!.copyWith(),
+        allItems["bulwarks_crown"]!.copyWith(),
+        allItems["blood_vessel"]!.copyWith(),
+      ]),
+      UnitData("Icewall Sentinel", Position(2, 0), 2, [
+        allItems["titan_hide"]!.copyWith(),
+        allItems["bulwarks_crown"]!.copyWith(),
+        allItems["blood_vessel"]!.copyWith(),
+      ]),
+      UnitData("Glacier Marksman", Position(0, 1), 2, [
+        allItems["bloodpiercer"]!.copyWith(),
+        allItems["bladed_repeater"]!.copyWith(),
+      ]),
+      UnitData("Snowfall Priest", Position(0, 0), 2, [
+        allItems["focused_mind"]!.copyWith(),
+      ]),
+      UnitData("Northwind Tracker", Position(1, 1), 2, [
+        allItems["bloodpiercer"]!.copyWith(),
+      ]),
+    ],
+  ]),
+  RoundSet(9, [
+    [
+      UnitData("Winterblade Guardian", Position(2, 1), 2, [
+        allItems["runed_sabre"]!.copyWith(),
+        allItems["bloodpiercer"]!.copyWith(),
+        allItems["battle_plate"]!.copyWith(),
+      ]),
+      UnitData("Rimebound Vanguard", Position(2, 2), 2, [
+        allItems["titan_hide"]!.copyWith(),
+        allItems["bulwarks_crown"]!.copyWith(),
+        allItems["blood_vessel"]!.copyWith(),
+      ]),
+      UnitData("Icewall Sentinel", Position(2, 0), 2, [
+        allItems["titan_hide"]!.copyWith(),
+        allItems["bulwarks_crown"]!.copyWith(),
+        allItems["blood_vessel"]!.copyWith(),
+      ]),
+      UnitData("Glacier Marksman", Position(0, 1), 2, [
+        allItems["bloodpiercer"]!.copyWith(),
+        allItems["bladed_repeater"]!.copyWith(),
+      ]),
+      UnitData("Snowfall Priest", Position(0, 0), 2, [
+        allItems["focused_mind"]!.copyWith(),
+      ]),
+      UnitData("Northwind Tracker", Position(1, 1), 2, [
+        allItems["bloodpiercer"]!.copyWith(),
+      ]),
+    ],
+    [
+      UnitData("Winterblade Guardian", Position(2, 1), 2, [
+        allItems["runed_sabre"]!.copyWith(),
+        allItems["bloodpiercer"]!.copyWith(),
+        allItems["battle_plate"]!.copyWith(),
+      ]),
+      UnitData("Rimebound Vanguard", Position(2, 2), 2, [
+        allItems["titan_hide"]!.copyWith(),
+        allItems["bulwarks_crown"]!.copyWith(),
+        allItems["blood_vessel"]!.copyWith(),
+      ]),
+      UnitData("Icewall Sentinel", Position(2, 0), 2, [
+        allItems["titan_hide"]!.copyWith(),
+        allItems["bulwarks_crown"]!.copyWith(),
+        allItems["blood_vessel"]!.copyWith(),
+      ]),
+      UnitData("Glacier Marksman", Position(0, 1), 2, [
+        allItems["bloodpiercer"]!.copyWith(),
+        allItems["bladed_repeater"]!.copyWith(),
+        allItems["psychic_edge"]!.copyWith(),
+      ]),
+      UnitData("Snowfall Priest", Position(0, 0), 2, [
+        allItems["focused_mind"]!.copyWith(),
+      ]),
+      UnitData("Northwind Tracker", Position(1, 1), 2, [
+        allItems["bloodpiercer"]!.copyWith(),
+      ]),
+    ],
+    [
+      UnitData("Winterblade Guardian", Position(2, 1), 3, [
+        allItems["runed_sabre"]!.copyWith(),
+        allItems["bloodpiercer"]!.copyWith(),
+        allItems["battle_plate"]!.copyWith(),
+      ]),
+      UnitData("Rimebound Vanguard", Position(2, 2), 2, [
+        allItems["titan_hide"]!.copyWith(),
+      ]),
+      UnitData("Icewall Sentinel", Position(2, 0), 3, [
+        allItems["titan_hide"]!.copyWith(),
+        allItems["bulwarks_crown"]!.copyWith(),
+        allItems["blood_vessel"]!.copyWith(),
+      ]),
+      UnitData("Glacier Marksman", Position(0, 1), 2, [
+        allItems["bloodpiercer"]!.copyWith(),
+      ]),
+      UnitData("Snowfall Priest", Position(0, 0), 2, [
+        allItems["focused_mind"]!.copyWith(),
+      ]),
+      UnitData("Northwind Tracker", Position(1, 1), 2, [
+        allItems["bloodpiercer"]!.copyWith(),
+      ]),
+    ],
+    [
+      UnitData("Winterblade Guardian", Position(2, 1), 2, []),
+      UnitData("Rimebound Vanguard", Position(2, 2), 3, [
+        allItems["titan_hide"]!.copyWith(),
+        allItems["bulwarks_crown"]!.copyWith(),
+        allItems["blood_vessel"]!.copyWith(),
+      ]),
+      UnitData("Icewall Sentinel", Position(2, 0), 2, []),
+      UnitData("Glacier Marksman", Position(0, 1), 3, [
+        allItems["bloodpiercer"]!.copyWith(),
+        allItems["bladed_repeater"]!.copyWith(),
+        allItems["psychic_edge"]!.copyWith(),
+      ]),
+      UnitData("Snowfall Priest", Position(0, 0), 2, [
+        allItems["focused_mind"]!.copyWith(),
+      ]),
+      UnitData("Northwind Tracker", Position(1, 1), 2, [
+        allItems["bloodpiercer"]!.copyWith(),
+      ]),
+    ],
+    [
+      UnitData("Winterblade Guardian", Position(2, 1), 2, []),
+      UnitData("Rimebound Vanguard", Position(2, 2), 2, [
+        allItems["titan_hide"]!.copyWith(),
+        allItems["bulwarks_crown"]!.copyWith(),
+        allItems["blood_vessel"]!.copyWith(),
+      ]),
+      UnitData("Icewall Sentinel", Position(2, 0), 3, [
+        allItems["titan_hide"]!.copyWith(),
+        allItems["bulwarks_crown"]!.copyWith(),
+        allItems["blood_vessel"]!.copyWith(),
+      ]),
+      UnitData("Glacier Marksman", Position(0, 1), 2, []),
+      UnitData("Snowfall Priest", Position(0, 0), 2, []),
+      UnitData("Northwind Tracker", Position(1, 1), 3, [
+        allItems["bloodpiercer"]!.copyWith(),
+        allItems["twinfang_blade"]!.copyWith(),
+        allItems["psychic_edge"]!.copyWith(),
+      ]),
+    ],
+  ]),
+  RoundSet(10, [
+    [
+      UnitData("Winterblade Guardian", Position(2, 1), 2, []),
+      UnitData("Rimebound Vanguard", Position(2, 2), 2, [
+        allItems["titan_hide"]!.copyWith(),
+        allItems["bulwarks_crown"]!.copyWith(),
+        allItems["blood_vessel"]!.copyWith(),
+      ]),
+      UnitData("Icewall Sentinel", Position(2, 0), 3, [
+        allItems["titan_hide"]!.copyWith(),
+        allItems["bulwarks_crown"]!.copyWith(),
+        allItems["blood_vessel"]!.copyWith(),
+      ]),
+      UnitData("Glacier Marksman", Position(0, 1), 2, []),
+      UnitData("Snowfall Priest", Position(0, 0), 2, []),
+      UnitData("Northwind Tracker", Position(1, 1), 3, [
+        allItems["bloodpiercer"]!.copyWith(),
+        allItems["twinfang_blade"]!.copyWith(),
+        allItems["psychic_edge"]!.copyWith(),
+      ]),
+    ],
+    [
+      UnitData("Winterblade Guardian", Position(2, 1), 2, [
+        allItems["runed_sabre"]!.copyWith(),
+        allItems["bloodpiercer"]!.copyWith(),
+        allItems["battle_plate"]!.copyWith(),
+      ]),
+      UnitData("Rimebound Vanguard", Position(2, 2), 2, [
+        allItems["titan_hide"]!.copyWith(),
+        allItems["bulwarks_crown"]!.copyWith(),
+        allItems["blood_vessel"]!.copyWith(),
+      ]),
+      UnitData("Icewall Sentinel", Position(2, 0), 2, [
+        allItems["titan_hide"]!.copyWith(),
+        allItems["bulwarks_crown"]!.copyWith(),
+        allItems["blood_vessel"]!.copyWith(),
+      ]),
+      UnitData("Glacier Marksman", Position(0, 1), 2, [
+        allItems["bloodpiercer"]!.copyWith(),
+        allItems["bladed_repeater"]!.copyWith(),
+        allItems["psychic_edge"]!.copyWith(),
+      ]),
+      UnitData("Snowfall Priest", Position(0, 0), 2, [
+        allItems["focused_mind"]!.copyWith(),
+        allItems["vital_focus"]!.copyWith(),
         allItems["runed_helm"]!.copyWith(),
       ]),
-      UnitData("Icewall Sentinel", Position(2, 2), 2, [
-        allItems["mystic_harness"]!.copyWith(),
+      UnitData("Northwind Tracker", Position(1, 1), 2, [
+        allItems["bloodpiercer"]!.copyWith(),
+        allItems["twinfang_blade"]!.copyWith(),
       ]),
+    ],
+    [
+      UnitData("Winterblade Guardian", Position(2, 1), 2, [
+        allItems["runed_sabre"]!.copyWith(),
+        allItems["bloodpiercer"]!.copyWith(),
+        allItems["battle_plate"]!.copyWith(),
+      ]),
+      UnitData("Rimebound Vanguard", Position(2, 2), 2, [
+        allItems["titan_hide"]!.copyWith(),
+        allItems["bulwarks_crown"]!.copyWith(),
+        allItems["blood_vessel"]!.copyWith(),
+      ]),
+      UnitData("Icewall Sentinel", Position(2, 0), 2, [
+        allItems["titan_hide"]!.copyWith(),
+        allItems["bulwarks_crown"]!.copyWith(),
+        allItems["blood_vessel"]!.copyWith(),
+      ]),
+      UnitData("Glacier Marksman", Position(0, 1), 2, [
+        allItems["bloodpiercer"]!.copyWith(),
+        allItems["bladed_repeater"]!.copyWith(),
+        allItems["psychic_edge"]!.copyWith(),
+      ]),
+      UnitData("Snowfall Priest", Position(0, 0), 2, [
+        allItems["focused_mind"]!.copyWith(),
+        allItems["vital_focus"]!.copyWith(),
+        allItems["runed_helm"]!.copyWith(),
+      ]),
+      UnitData("Northwind Tracker", Position(1, 1), 2, [
+        allItems["bloodpiercer"]!.copyWith(),
+        allItems["twinfang_blade"]!.copyWith(),
+        allItems["psychic_edge"]!.copyWith(),
+      ]),
+    ],
+    [
       UnitData("Winterblade Guardian", Position(2, 1), 2, [
         allItems["runed_sabre"]!.copyWith(),
       ]),
-      UnitData("Snowfall Priest", Position(0, 1), 2, [
+      UnitData("Rimebound Vanguard", Position(2, 2), 2, []),
+      UnitData("Icewall Sentinel", Position(2, 0), 2, [
+        allItems["titan_hide"]!.copyWith(),
+        allItems["bulwarks_crown"]!.copyWith(),
+      ]),
+      UnitData("Glacier Marksman", Position(0, 2), 2, []),
+      UnitData("Snowfall Priest", Position(0, 0), 2, []),
+      UnitData("Northwind Tracker", Position(1, 1), 2, []),
+      UnitData("Borealis Arcanist", Position(0, 1), 2, []),
+      UnitData("Frostscribe Mystic", Position(1, 0), 2, []),
+    ],
+    [
+      UnitData("Winterblade Guardian", Position(2, 1), 2, [
+        allItems["runed_sabre"]!.copyWith(),
+        allItems["bloodpiercer"]!.copyWith(),
+        allItems["battle_plate"]!.copyWith(),
+      ]),
+      UnitData("Rimebound Vanguard", Position(2, 2), 2, []),
+      UnitData("Icewall Sentinel", Position(2, 0), 2, [
+        allItems["titan_hide"]!.copyWith(),
+        allItems["bulwarks_crown"]!.copyWith(),
+        allItems["blood_vessel"]!.copyWith(),
+      ]),
+      UnitData("Glacier Marksman", Position(0, 2), 2, []),
+      UnitData("Snowfall Priest", Position(0, 0), 2, []),
+      UnitData("Northwind Tracker", Position(1, 1), 2, []),
+      UnitData("Borealis Arcanist", Position(0, 1), 2, []),
+      UnitData("Frostscribe Mystic", Position(1, 0), 2, []),
+    ],
+  ]),
+  RoundSet(11, [
+    [
+      UnitData("Winterblade Guardian", Position(2, 1), 2, [
+        allItems["runed_sabre"]!.copyWith(),
+        allItems["bloodpiercer"]!.copyWith(),
+        allItems["battle_plate"]!.copyWith(),
+      ]),
+      UnitData("Rimebound Vanguard", Position(2, 2), 2, []),
+      UnitData("Icewall Sentinel", Position(2, 0), 2, [
+        allItems["titan_hide"]!.copyWith(),
+        allItems["bulwarks_crown"]!.copyWith(),
+        allItems["blood_vessel"]!.copyWith(),
+      ]),
+      UnitData("Glacier Marksman", Position(0, 2), 2, []),
+      UnitData("Snowfall Priest", Position(0, 0), 2, []),
+      UnitData("Northwind Tracker", Position(1, 1), 2, []),
+      UnitData("Borealis Arcanist", Position(0, 1), 2, []),
+      UnitData("Frostscribe Mystic", Position(1, 0), 2, []),
+    ],
+    [
+      UnitData("Winterblade Guardian", Position(2, 1), 2, [
+        allItems["runed_sabre"]!.copyWith(),
+        allItems["bloodpiercer"]!.copyWith(),
+        allItems["battle_plate"]!.copyWith(),
+      ]),
+      UnitData("Rimebound Vanguard", Position(2, 2), 2, [
+        allItems["titan_hide"]!.copyWith(),
+      ]),
+      UnitData("Icewall Sentinel", Position(2, 0), 2, [
+        allItems["titan_hide"]!.copyWith(),
+        allItems["bulwarks_crown"]!.copyWith(),
+        allItems["blood_vessel"]!.copyWith(),
+      ]),
+      UnitData("Glacier Marksman", Position(0, 2), 2, [
+        allItems["bloodpiercer"]!.copyWith(),
+      ]),
+      UnitData("Snowfall Priest", Position(0, 0), 2, []),
+      UnitData("Northwind Tracker", Position(1, 1), 2, []),
+      UnitData("Borealis Arcanist", Position(0, 1), 2, []),
+      UnitData("Frostscribe Mystic", Position(1, 0), 2, []),
+    ],
+    [
+      UnitData("Winterblade Guardian", Position(2, 1), 2, [
+        allItems["runed_sabre"]!.copyWith(),
+        allItems["bloodpiercer"]!.copyWith(),
+        allItems["battle_plate"]!.copyWith(),
+      ]),
+      UnitData("Rimebound Vanguard", Position(2, 2), 2, [
+        allItems["titan_hide"]!.copyWith(),
+        allItems["bulwarks_crown"]!.copyWith(),
+      ]),
+      UnitData("Icewall Sentinel", Position(2, 0), 2, [
+        allItems["titan_hide"]!.copyWith(),
+        allItems["bulwarks_crown"]!.copyWith(),
+        allItems["blood_vessel"]!.copyWith(),
+      ]),
+      UnitData("Glacier Marksman", Position(0, 2), 2, [
+        allItems["bloodpiercer"]!.copyWith(),
+        allItems["bladed_repeater"]!.copyWith(),
+      ]),
+      UnitData("Snowfall Priest", Position(0, 0), 2, []),
+      UnitData("Northwind Tracker", Position(1, 1), 2, []),
+      UnitData("Borealis Arcanist", Position(0, 1), 2, []),
+      UnitData("Frostscribe Mystic", Position(1, 0), 2, []),
+    ],
+    [
+      UnitData("Winterblade Guardian", Position(2, 1), 2, [
+        allItems["runed_sabre"]!.copyWith(),
+        allItems["bloodpiercer"]!.copyWith(),
+        allItems["battle_plate"]!.copyWith(),
+      ]),
+      UnitData("Rimebound Vanguard", Position(2, 2), 2, [
+        allItems["titan_hide"]!.copyWith(),
+        allItems["bulwarks_crown"]!.copyWith(),
+      ]),
+      UnitData("Icewall Sentinel", Position(2, 0), 2, [
+        allItems["titan_hide"]!.copyWith(),
+        allItems["bulwarks_crown"]!.copyWith(),
+        allItems["blood_vessel"]!.copyWith(),
+      ]),
+      UnitData("Glacier Marksman", Position(0, 2), 2, [
+        allItems["bloodpiercer"]!.copyWith(),
+        allItems["bladed_repeater"]!.copyWith(),
+      ]),
+      UnitData("Snowfall Priest", Position(0, 0), 2, [
         allItems["focused_mind"]!.copyWith(),
       ]),
-      UnitData("Northwind Tracker", Position(1, 0), 2, [
+      UnitData("Northwind Tracker", Position(1, 1), 2, []),
+      UnitData("Borealis Arcanist", Position(0, 1), 2, []),
+      UnitData("Frostscribe Mystic", Position(1, 0), 2, []),
+    ],
+    [
+      UnitData("Winterblade Guardian", Position(2, 1), 2, [
+        allItems["runed_sabre"]!.copyWith(),
         allItems["bloodpiercer"]!.copyWith(),
+        allItems["battle_plate"]!.copyWith(),
+      ]),
+      UnitData("Rimebound Vanguard", Position(2, 2), 2, [
+        allItems["titan_hide"]!.copyWith(),
+        allItems["bulwarks_crown"]!.copyWith(),
+      ]),
+      UnitData("Icewall Sentinel", Position(2, 0), 2, [
+        allItems["titan_hide"]!.copyWith(),
+        allItems["bulwarks_crown"]!.copyWith(),
+        allItems["blood_vessel"]!.copyWith(),
+      ]),
+      UnitData("Glacier Marksman", Position(0, 2), 2, [
+        allItems["bloodpiercer"]!.copyWith(),
+        allItems["bladed_repeater"]!.copyWith(),
+      ]),
+      UnitData("Snowfall Priest", Position(0, 0), 2, [
+        allItems["focused_mind"]!.copyWith(),
+      ]),
+      UnitData("Northwind Tracker", Position(1, 1), 2, [
+        allItems["bloodpiercer"]!.copyWith(),
+      ]),
+      UnitData("Borealis Arcanist", Position(0, 1), 2, []),
+      UnitData("Frostscribe Mystic", Position(1, 0), 2, []),
+    ],
+  ]),
+  RoundSet(12, [
+    [
+      UnitData("Winterblade Guardian", Position(2, 1), 2, [
+        allItems["runed_sabre"]!.copyWith(),
+        allItems["bloodpiercer"]!.copyWith(),
+        allItems["battle_plate"]!.copyWith(),
+      ]),
+      UnitData("Rimebound Vanguard", Position(2, 2), 2, [
+        allItems["titan_hide"]!.copyWith(),
+        allItems["bulwarks_crown"]!.copyWith(),
+      ]),
+      UnitData("Icewall Sentinel", Position(2, 0), 2, [
+        allItems["titan_hide"]!.copyWith(),
+        allItems["bulwarks_crown"]!.copyWith(),
+        allItems["blood_vessel"]!.copyWith(),
+      ]),
+      UnitData("Glacier Marksman", Position(0, 2), 2, [
+        allItems["bloodpiercer"]!.copyWith(),
+        allItems["bladed_repeater"]!.copyWith(),
+      ]),
+      UnitData("Snowfall Priest", Position(0, 0), 2, [
+        allItems["focused_mind"]!.copyWith(),
+      ]),
+      UnitData("Northwind Tracker", Position(1, 1), 2, [
+        allItems["bloodpiercer"]!.copyWith(),
+      ]),
+      UnitData("Borealis Arcanist", Position(0, 1), 2, []),
+      UnitData("Frostscribe Mystic", Position(1, 0), 2, []),
+    ],
+    [
+      UnitData("Winterblade Guardian", Position(2, 1), 2, [
+        allItems["runed_sabre"]!.copyWith(),
+        allItems["bloodpiercer"]!.copyWith(),
+        allItems["battle_plate"]!.copyWith(),
+      ]),
+      UnitData("Rimebound Vanguard", Position(2, 2), 2, [
+        allItems["titan_hide"]!.copyWith(),
+        allItems["bulwarks_crown"]!.copyWith(),
+        allItems["blood_vessel"]!.copyWith(),
+      ]),
+      UnitData("Icewall Sentinel", Position(2, 0), 2, [
+        allItems["titan_hide"]!.copyWith(),
+        allItems["bulwarks_crown"]!.copyWith(),
+        allItems["blood_vessel"]!.copyWith(),
+      ]),
+      UnitData("Glacier Marksman", Position(0, 2), 2, [
+        allItems["bloodpiercer"]!.copyWith(),
+        allItems["bladed_repeater"]!.copyWith(),
+      ]),
+      UnitData("Snowfall Priest", Position(0, 0), 2, [
+        allItems["focused_mind"]!.copyWith(),
+      ]),
+      UnitData("Northwind Tracker", Position(1, 1), 2, [
+        allItems["bloodpiercer"]!.copyWith(),
+      ]),
+      UnitData("Borealis Arcanist", Position(0, 1), 2, []),
+      UnitData("Frostscribe Mystic", Position(1, 0), 2, []),
+    ],
+    [
+      UnitData("Winterblade Guardian", Position(2, 1), 2, [
+        allItems["runed_sabre"]!.copyWith(),
+        allItems["bloodpiercer"]!.copyWith(),
+        allItems["battle_plate"]!.copyWith(),
+      ]),
+      UnitData("Rimebound Vanguard", Position(2, 2), 2, [
+        allItems["titan_hide"]!.copyWith(),
+        allItems["bulwarks_crown"]!.copyWith(),
+        allItems["blood_vessel"]!.copyWith(),
+      ]),
+      UnitData("Icewall Sentinel", Position(2, 0), 2, [
+        allItems["titan_hide"]!.copyWith(),
+        allItems["bulwarks_crown"]!.copyWith(),
+        allItems["blood_vessel"]!.copyWith(),
+      ]),
+      UnitData("Glacier Marksman", Position(0, 2), 2, [
+        allItems["bloodpiercer"]!.copyWith(),
+        allItems["bladed_repeater"]!.copyWith(),
+        allItems["psychic_edge"]!.copyWith(),
+      ]),
+      UnitData("Snowfall Priest", Position(0, 0), 2, [
+        allItems["focused_mind"]!.copyWith(),
+      ]),
+      UnitData("Northwind Tracker", Position(1, 1), 2, [
+        allItems["bloodpiercer"]!.copyWith(),
+      ]),
+      UnitData("Borealis Arcanist", Position(0, 1), 2, []),
+      UnitData("Frostscribe Mystic", Position(1, 0), 2, []),
+    ],
+    [
+      UnitData("Winterblade Guardian", Position(2, 1), 2, [
+        allItems["runed_sabre"]!.copyWith(),
+        allItems["bloodpiercer"]!.copyWith(),
+        allItems["battle_plate"]!.copyWith(),
+      ]),
+      UnitData("Rimebound Vanguard", Position(2, 2), 2, [
+        allItems["titan_hide"]!.copyWith(),
+        allItems["bulwarks_crown"]!.copyWith(),
+        allItems["blood_vessel"]!.copyWith(),
+      ]),
+      UnitData("Icewall Sentinel", Position(2, 0), 2, [
+        allItems["titan_hide"]!.copyWith(),
+        allItems["bulwarks_crown"]!.copyWith(),
+        allItems["blood_vessel"]!.copyWith(),
+      ]),
+      UnitData("Glacier Marksman", Position(0, 2), 2, [
+        allItems["bloodpiercer"]!.copyWith(),
+        allItems["bladed_repeater"]!.copyWith(),
+        allItems["psychic_edge"]!.copyWith(),
+      ]),
+      UnitData("Snowfall Priest", Position(0, 0), 2, [
+        allItems["focused_mind"]!.copyWith(),
+        allItems["vital_focus"]!.copyWith(),
+      ]),
+      UnitData("Northwind Tracker", Position(1, 1), 2, [
+        allItems["bloodpiercer"]!.copyWith(),
+      ]),
+      UnitData("Borealis Arcanist", Position(0, 1), 2, []),
+      UnitData("Frostscribe Mystic", Position(1, 0), 2, []),
+    ],
+    [
+      UnitData("Winterblade Guardian", Position(2, 1), 2, [
+        allItems["runed_sabre"]!.copyWith(),
+        allItems["bloodpiercer"]!.copyWith(),
+        allItems["battle_plate"]!.copyWith(),
+      ]),
+      UnitData("Rimebound Vanguard", Position(2, 2), 2, [
+        allItems["titan_hide"]!.copyWith(),
+        allItems["bulwarks_crown"]!.copyWith(),
+        allItems["blood_vessel"]!.copyWith(),
+      ]),
+      UnitData("Icewall Sentinel", Position(2, 0), 2, [
+        allItems["titan_hide"]!.copyWith(),
+        allItems["bulwarks_crown"]!.copyWith(),
+        allItems["blood_vessel"]!.copyWith(),
+      ]),
+      UnitData("Glacier Marksman", Position(0, 2), 2, [
+        allItems["bloodpiercer"]!.copyWith(),
+        allItems["bladed_repeater"]!.copyWith(),
+        allItems["psychic_edge"]!.copyWith(),
+      ]),
+      UnitData("Snowfall Priest", Position(0, 0), 2, [
+        allItems["focused_mind"]!.copyWith(),
+        allItems["vital_focus"]!.copyWith(),
+      ]),
+      UnitData("Northwind Tracker", Position(1, 1), 2, [
+        allItems["bloodpiercer"]!.copyWith(),
+        allItems["twinfang_blade"]!.copyWith(),
+      ]),
+      UnitData("Borealis Arcanist", Position(0, 1), 2, []),
+      UnitData("Frostscribe Mystic", Position(1, 0), 2, []),
+    ],
+  ]),
+  RoundSet(13, [
+    [
+      UnitData("Winterblade Guardian", Position(2, 1), 2, [
+        allItems["runed_sabre"]!.copyWith(),
+        allItems["bloodpiercer"]!.copyWith(),
+        allItems["battle_plate"]!.copyWith(),
+      ]),
+      UnitData("Rimebound Vanguard", Position(2, 2), 2, [
+        allItems["titan_hide"]!.copyWith(),
+        allItems["bulwarks_crown"]!.copyWith(),
+        allItems["blood_vessel"]!.copyWith(),
+      ]),
+      UnitData("Icewall Sentinel", Position(2, 0), 2, [
+        allItems["titan_hide"]!.copyWith(),
+        allItems["bulwarks_crown"]!.copyWith(),
+        allItems["blood_vessel"]!.copyWith(),
+      ]),
+      UnitData("Glacier Marksman", Position(0, 2), 2, [
+        allItems["bloodpiercer"]!.copyWith(),
+        allItems["bladed_repeater"]!.copyWith(),
+        allItems["psychic_edge"]!.copyWith(),
+      ]),
+      UnitData("Snowfall Priest", Position(0, 0), 2, [
+        allItems["focused_mind"]!.copyWith(),
+        allItems["vital_focus"]!.copyWith(),
+      ]),
+      UnitData("Northwind Tracker", Position(1, 1), 2, [
+        allItems["bloodpiercer"]!.copyWith(),
+        allItems["twinfang_blade"]!.copyWith(),
+      ]),
+      UnitData("Borealis Arcanist", Position(0, 1), 2, [
+        allItems["chaos_prism"]!.copyWith(),
+      ]),
+      UnitData("Frostscribe Mystic", Position(1, 0), 2, [
+        allItems["focused_mind"]!.copyWith(),
+      ]),
+    ],
+    [
+      UnitData("Winterblade Guardian", Position(2, 1), 2, [
+        allItems["runed_sabre"]!.copyWith(),
+        allItems["bloodpiercer"]!.copyWith(),
+        allItems["battle_plate"]!.copyWith(),
+      ]),
+      UnitData("Rimebound Vanguard", Position(2, 2), 2, [
+        allItems["titan_hide"]!.copyWith(),
+        allItems["bulwarks_crown"]!.copyWith(),
+        allItems["blood_vessel"]!.copyWith(),
+      ]),
+      UnitData("Icewall Sentinel", Position(2, 0), 2, [
+        allItems["titan_hide"]!.copyWith(),
+        allItems["bulwarks_crown"]!.copyWith(),
+        allItems["blood_vessel"]!.copyWith(),
+      ]),
+      UnitData("Glacier Marksman", Position(0, 2), 2, [
+        allItems["bloodpiercer"]!.copyWith(),
+        allItems["bladed_repeater"]!.copyWith(),
+        allItems["psychic_edge"]!.copyWith(),
+      ]),
+      UnitData("Snowfall Priest", Position(0, 0), 2, [
+        allItems["focused_mind"]!.copyWith(),
+        allItems["vital_focus"]!.copyWith(),
+        allItems["runed_helm"]!.copyWith(),
+      ]),
+      UnitData("Northwind Tracker", Position(1, 1), 2, [
+        allItems["bloodpiercer"]!.copyWith(),
+        allItems["twinfang_blade"]!.copyWith(),
+      ]),
+      UnitData("Borealis Arcanist", Position(0, 1), 2, [
+        allItems["chaos_prism"]!.copyWith(),
+      ]),
+      UnitData("Frostscribe Mystic", Position(1, 0), 2, [
+        allItems["focused_mind"]!.copyWith(),
+      ]),
+    ],
+    [
+      UnitData("Winterblade Guardian", Position(2, 1), 2, [
+        allItems["runed_sabre"]!.copyWith(),
+        allItems["bloodpiercer"]!.copyWith(),
+        allItems["battle_plate"]!.copyWith(),
+      ]),
+      UnitData("Rimebound Vanguard", Position(2, 2), 2, [
+        allItems["titan_hide"]!.copyWith(),
+        allItems["bulwarks_crown"]!.copyWith(),
+        allItems["blood_vessel"]!.copyWith(),
+      ]),
+      UnitData("Icewall Sentinel", Position(2, 0), 2, [
+        allItems["titan_hide"]!.copyWith(),
+        allItems["bulwarks_crown"]!.copyWith(),
+        allItems["blood_vessel"]!.copyWith(),
+      ]),
+      UnitData("Glacier Marksman", Position(0, 2), 2, [
+        allItems["bloodpiercer"]!.copyWith(),
+        allItems["bladed_repeater"]!.copyWith(),
+        allItems["psychic_edge"]!.copyWith(),
+      ]),
+      UnitData("Snowfall Priest", Position(0, 0), 2, [
+        allItems["focused_mind"]!.copyWith(),
+        allItems["vital_focus"]!.copyWith(),
+        allItems["runed_helm"]!.copyWith(),
+      ]),
+      UnitData("Northwind Tracker", Position(1, 1), 2, [
+        allItems["bloodpiercer"]!.copyWith(),
+        allItems["twinfang_blade"]!.copyWith(),
+        allItems["psychic_edge"]!.copyWith(),
+      ]),
+      UnitData("Borealis Arcanist", Position(0, 1), 2, [
+        allItems["chaos_prism"]!.copyWith(),
+        allItems["focused_mind"]!.copyWith(),
+      ]),
+      UnitData("Frostscribe Mystic", Position(1, 0), 2, [
+        allItems["focused_mind"]!.copyWith(),
+      ]),
+    ],
+    [
+      UnitData("Winterblade Guardian", Position(2, 1), 2, [
+        allItems["runed_sabre"]!.copyWith(),
+        allItems["bloodpiercer"]!.copyWith(),
+        allItems["battle_plate"]!.copyWith(),
+      ]),
+      UnitData("Rimebound Vanguard", Position(2, 2), 2, [
+        allItems["titan_hide"]!.copyWith(),
+        allItems["bulwarks_crown"]!.copyWith(),
+        allItems["blood_vessel"]!.copyWith(),
+      ]),
+      UnitData("Icewall Sentinel", Position(2, 0), 2, [
+        allItems["titan_hide"]!.copyWith(),
+        allItems["bulwarks_crown"]!.copyWith(),
+        allItems["blood_vessel"]!.copyWith(),
+      ]),
+      UnitData("Glacier Marksman", Position(0, 2), 2, [
+        allItems["bloodpiercer"]!.copyWith(),
+        allItems["bladed_repeater"]!.copyWith(),
+        allItems["psychic_edge"]!.copyWith(),
+      ]),
+      UnitData("Snowfall Priest", Position(0, 0), 2, [
+        allItems["focused_mind"]!.copyWith(),
+        allItems["vital_focus"]!.copyWith(),
+        allItems["runed_helm"]!.copyWith(),
+      ]),
+      UnitData("Northwind Tracker", Position(1, 1), 2, [
+        allItems["bloodpiercer"]!.copyWith(),
+        allItems["twinfang_blade"]!.copyWith(),
+        allItems["psychic_edge"]!.copyWith(),
+      ]),
+      UnitData("Borealis Arcanist", Position(0, 1), 2, [
+        allItems["chaos_prism"]!.copyWith(),
+        allItems["focused_mind"]!.copyWith(),
+      ]),
+      UnitData("Frostscribe Mystic", Position(1, 0), 2, [
+        allItems["focused_mind"]!.copyWith(),
+        allItems["vital_focus"]!.copyWith(),
+      ]),
+    ],
+    [
+      UnitData("Winterblade Guardian", Position(2, 1), 2, [
+        allItems["runed_sabre"]!.copyWith(),
+        allItems["bloodpiercer"]!.copyWith(),
+        allItems["battle_plate"]!.copyWith(),
+      ]),
+      UnitData("Rimebound Vanguard", Position(2, 2), 2, [
+        allItems["titan_hide"]!.copyWith(),
+        allItems["bulwarks_crown"]!.copyWith(),
+        allItems["blood_vessel"]!.copyWith(),
+      ]),
+      UnitData("Icewall Sentinel", Position(2, 0), 2, [
+        allItems["titan_hide"]!.copyWith(),
+        allItems["bulwarks_crown"]!.copyWith(),
+        allItems["blood_vessel"]!.copyWith(),
+      ]),
+      UnitData("Glacier Marksman", Position(0, 2), 2, [
+        allItems["bloodpiercer"]!.copyWith(),
+        allItems["bladed_repeater"]!.copyWith(),
+        allItems["psychic_edge"]!.copyWith(),
+      ]),
+      UnitData("Snowfall Priest", Position(0, 0), 2, [
+        allItems["focused_mind"]!.copyWith(),
+        allItems["vital_focus"]!.copyWith(),
+        allItems["runed_helm"]!.copyWith(),
+      ]),
+      UnitData("Northwind Tracker", Position(1, 1), 2, [
+        allItems["bloodpiercer"]!.copyWith(),
+        allItems["twinfang_blade"]!.copyWith(),
+        allItems["psychic_edge"]!.copyWith(),
+      ]),
+      UnitData("Borealis Arcanist", Position(0, 1), 2, [
+        allItems["chaos_prism"]!.copyWith(),
+        allItems["focused_mind"]!.copyWith(),
+        allItems["wardbreaker_gem"]!.copyWith(),
+      ]),
+      UnitData("Frostscribe Mystic", Position(1, 0), 2, [
+        allItems["focused_mind"]!.copyWith(),
+        allItems["vital_focus"]!.copyWith(),
+        allItems["runed_helm"]!.copyWith(),
+      ]),
+    ],
+  ]),
+  RoundSet(14, [
+    [
+      UnitData("Winterblade Guardian", Position(2, 1), 3, [
+        allItems["runed_sabre"]!.copyWith(),
+        allItems["bloodpiercer"]!.copyWith(),
+        allItems["battle_plate"]!.copyWith(),
+      ]),
+      UnitData("Rimebound Vanguard", Position(2, 2), 2, [
+        allItems["titan_hide"]!.copyWith(),
+        allItems["bulwarks_crown"]!.copyWith(),
+        allItems["blood_vessel"]!.copyWith(),
+      ]),
+      UnitData("Icewall Sentinel", Position(2, 0), 2, [
+        allItems["titan_hide"]!.copyWith(),
+        allItems["bulwarks_crown"]!.copyWith(),
+        allItems["blood_vessel"]!.copyWith(),
+      ]),
+      UnitData("Glacier Marksman", Position(0, 2), 2, [
+        allItems["bloodpiercer"]!.copyWith(),
+        allItems["bladed_repeater"]!.copyWith(),
+        allItems["psychic_edge"]!.copyWith(),
+      ]),
+      UnitData("Snowfall Priest", Position(0, 0), 2, [
+        allItems["focused_mind"]!.copyWith(),
+        allItems["vital_focus"]!.copyWith(),
+        allItems["runed_helm"]!.copyWith(),
+      ]),
+      UnitData("Northwind Tracker", Position(1, 1), 2, [
+        allItems["bloodpiercer"]!.copyWith(),
+        allItems["twinfang_blade"]!.copyWith(),
+        allItems["psychic_edge"]!.copyWith(),
+      ]),
+      UnitData("Borealis Arcanist", Position(0, 1), 2, [
+        allItems["chaos_prism"]!.copyWith(),
+        allItems["focused_mind"]!.copyWith(),
+        allItems["wardbreaker_gem"]!.copyWith(),
+      ]),
+      UnitData("Frostscribe Mystic", Position(1, 0), 2, [
+        allItems["focused_mind"]!.copyWith(),
+        allItems["vital_focus"]!.copyWith(),
+        allItems["runed_helm"]!.copyWith(),
+      ]),
+    ],
+    [
+      UnitData("Winterblade Guardian", Position(2, 1), 3, [
+        allItems["runed_sabre"]!.copyWith(),
+        allItems["bloodpiercer"]!.copyWith(),
+        allItems["battle_plate"]!.copyWith(),
+      ]),
+      UnitData("Rimebound Vanguard", Position(2, 2), 2, [
+        allItems["titan_hide"]!.copyWith(),
+        allItems["bulwarks_crown"]!.copyWith(),
+        allItems["blood_vessel"]!.copyWith(),
+      ]),
+      UnitData("Icewall Sentinel", Position(2, 0), 3, [
+        allItems["titan_hide"]!.copyWith(),
+        allItems["bulwarks_crown"]!.copyWith(),
+        allItems["blood_vessel"]!.copyWith(),
+      ]),
+      UnitData("Glacier Marksman", Position(0, 2), 2, [
+        allItems["bloodpiercer"]!.copyWith(),
+        allItems["bladed_repeater"]!.copyWith(),
+        allItems["psychic_edge"]!.copyWith(),
+      ]),
+      UnitData("Snowfall Priest", Position(0, 0), 2, [
+        allItems["focused_mind"]!.copyWith(),
+        allItems["vital_focus"]!.copyWith(),
+        allItems["runed_helm"]!.copyWith(),
+      ]),
+      UnitData("Northwind Tracker", Position(1, 1), 2, [
+        allItems["bloodpiercer"]!.copyWith(),
+        allItems["twinfang_blade"]!.copyWith(),
+        allItems["psychic_edge"]!.copyWith(),
+      ]),
+      UnitData("Borealis Arcanist", Position(0, 1), 2, [
+        allItems["chaos_prism"]!.copyWith(),
+        allItems["focused_mind"]!.copyWith(),
+        allItems["wardbreaker_gem"]!.copyWith(),
+      ]),
+      UnitData("Frostscribe Mystic", Position(1, 0), 2, [
+        allItems["focused_mind"]!.copyWith(),
+        allItems["vital_focus"]!.copyWith(),
+        allItems["runed_helm"]!.copyWith(),
+      ]),
+    ],
+    [
+      UnitData("Winterblade Guardian", Position(2, 1), 3, [
+        allItems["runed_sabre"]!.copyWith(),
+        allItems["bloodpiercer"]!.copyWith(),
+        allItems["battle_plate"]!.copyWith(),
+      ]),
+      UnitData("Rimebound Vanguard", Position(2, 2), 3, [
+        allItems["titan_hide"]!.copyWith(),
+        allItems["bulwarks_crown"]!.copyWith(),
+        allItems["blood_vessel"]!.copyWith(),
+      ]),
+      UnitData("Icewall Sentinel", Position(2, 0), 3, [
+        allItems["titan_hide"]!.copyWith(),
+        allItems["bulwarks_crown"]!.copyWith(),
+        allItems["blood_vessel"]!.copyWith(),
+      ]),
+      UnitData("Glacier Marksman", Position(0, 2), 2, [
+        allItems["bloodpiercer"]!.copyWith(),
+        allItems["bladed_repeater"]!.copyWith(),
+        allItems["psychic_edge"]!.copyWith(),
+      ]),
+      UnitData("Snowfall Priest", Position(0, 0), 2, [
+        allItems["focused_mind"]!.copyWith(),
+        allItems["vital_focus"]!.copyWith(),
+        allItems["runed_helm"]!.copyWith(),
+      ]),
+      UnitData("Northwind Tracker", Position(1, 1), 2, [
+        allItems["bloodpiercer"]!.copyWith(),
+        allItems["twinfang_blade"]!.copyWith(),
+        allItems["psychic_edge"]!.copyWith(),
+      ]),
+      UnitData("Borealis Arcanist", Position(0, 1), 2, [
+        allItems["chaos_prism"]!.copyWith(),
+        allItems["focused_mind"]!.copyWith(),
+        allItems["wardbreaker_gem"]!.copyWith(),
+      ]),
+      UnitData("Frostscribe Mystic", Position(1, 0), 2, [
+        allItems["focused_mind"]!.copyWith(),
+        allItems["vital_focus"]!.copyWith(),
+        allItems["runed_helm"]!.copyWith(),
+      ]),
+    ],
+    [
+      UnitData("Winterblade Guardian", Position(2, 1), 3, [
+        allItems["runed_sabre"]!.copyWith(),
+        allItems["bloodpiercer"]!.copyWith(),
+        allItems["battle_plate"]!.copyWith(),
+      ]),
+      UnitData("Rimebound Vanguard", Position(2, 2), 3, [
+        allItems["titan_hide"]!.copyWith(),
+        allItems["bulwarks_crown"]!.copyWith(),
+        allItems["blood_vessel"]!.copyWith(),
+      ]),
+      UnitData("Icewall Sentinel", Position(2, 0), 3, [
+        allItems["titan_hide"]!.copyWith(),
+        allItems["bulwarks_crown"]!.copyWith(),
+        allItems["blood_vessel"]!.copyWith(),
+      ]),
+      UnitData("Glacier Marksman", Position(0, 2), 3, [
+        allItems["bloodpiercer"]!.copyWith(),
+        allItems["bladed_repeater"]!.copyWith(),
+        allItems["psychic_edge"]!.copyWith(),
+      ]),
+      UnitData("Snowfall Priest", Position(0, 0), 2, [
+        allItems["focused_mind"]!.copyWith(),
+        allItems["vital_focus"]!.copyWith(),
+        allItems["runed_helm"]!.copyWith(),
+      ]),
+      UnitData("Northwind Tracker", Position(1, 1), 2, [
+        allItems["bloodpiercer"]!.copyWith(),
+        allItems["twinfang_blade"]!.copyWith(),
+        allItems["psychic_edge"]!.copyWith(),
+      ]),
+      UnitData("Borealis Arcanist", Position(0, 1), 2, [
+        allItems["chaos_prism"]!.copyWith(),
+        allItems["focused_mind"]!.copyWith(),
+        allItems["wardbreaker_gem"]!.copyWith(),
+      ]),
+      UnitData("Frostscribe Mystic", Position(1, 0), 2, [
+        allItems["focused_mind"]!.copyWith(),
+        allItems["vital_focus"]!.copyWith(),
+      ]),
+    ],
+    [
+      UnitData("Winterblade Guardian", Position(2, 1), 3, [
+        allItems["runed_sabre"]!.copyWith(),
+        allItems["bloodpiercer"]!.copyWith(),
+        allItems["battle_plate"]!.copyWith(),
+      ]),
+      UnitData("Rimebound Vanguard", Position(2, 2), 3, [
+        allItems["titan_hide"]!.copyWith(),
+        allItems["bulwarks_crown"]!.copyWith(),
+        allItems["blood_vessel"]!.copyWith(),
+      ]),
+      UnitData("Icewall Sentinel", Position(2, 0), 3, [
+        allItems["titan_hide"]!.copyWith(),
+        allItems["bulwarks_crown"]!.copyWith(),
+        allItems["blood_vessel"]!.copyWith(),
+      ]),
+      UnitData("Glacier Marksman", Position(0, 2), 3, [
+        allItems["bloodpiercer"]!.copyWith(),
+        allItems["bladed_repeater"]!.copyWith(),
+        allItems["psychic_edge"]!.copyWith(),
+      ]),
+      UnitData("Snowfall Priest", Position(0, 0), 2, [
+        allItems["focused_mind"]!.copyWith(),
+        allItems["vital_focus"]!.copyWith(),
+        allItems["runed_helm"]!.copyWith(),
+      ]),
+      UnitData("Northwind Tracker", Position(1, 1), 2, [
+        allItems["bloodpiercer"]!.copyWith(),
+        allItems["twinfang_blade"]!.copyWith(),
+        allItems["psychic_edge"]!.copyWith(),
+      ]),
+      UnitData("Borealis Arcanist", Position(0, 1), 2, [
+        allItems["chaos_prism"]!.copyWith(),
+        allItems["focused_mind"]!.copyWith(),
+        allItems["wardbreaker_gem"]!.copyWith(),
+      ]),
+      UnitData("Frostscribe Mystic", Position(1, 0), 2, [
+        allItems["focused_mind"]!.copyWith(),
+        allItems["vital_focus"]!.copyWith(),
+        allItems["runed_helm"]!.copyWith(),
+      ]),
+    ],
+  ]),
+  RoundSet(15, [
+    [
+      UnitData("Winterblade Guardian", Position(2, 1), 3, [
+        allItems["runed_sabre"]!.copyWith(),
+        allItems["bloodpiercer"]!.copyWith(),
+        allItems["battle_plate"]!.copyWith(),
+      ]),
+      UnitData("Rimebound Vanguard", Position(2, 2), 3, [
+        allItems["titan_hide"]!.copyWith(),
+        allItems["bulwarks_crown"]!.copyWith(),
+        allItems["blood_vessel"]!.copyWith(),
+      ]),
+      UnitData("Icewall Sentinel", Position(2, 0), 3, [
+        allItems["titan_hide"]!.copyWith(),
+        allItems["bulwarks_crown"]!.copyWith(),
+        allItems["blood_vessel"]!.copyWith(),
+      ]),
+      UnitData("Glacier Marksman", Position(0, 2), 2, [
+        allItems["bloodpiercer"]!.copyWith(),
+        allItems["bladed_repeater"]!.copyWith(),
+        allItems["psychic_edge"]!.copyWith(),
+      ]),
+      UnitData("Snowfall Priest", Position(0, 0), 2, [
+        allItems["focused_mind"]!.copyWith(),
+        allItems["vital_focus"]!.copyWith(),
+        allItems["runed_helm"]!.copyWith(),
+      ]),
+      UnitData("Northwind Tracker", Position(1, 1), 3, [
+        allItems["bloodpiercer"]!.copyWith(),
+        allItems["twinfang_blade"]!.copyWith(),
+        allItems["psychic_edge"]!.copyWith(),
+      ]),
+      UnitData("Borealis Arcanist", Position(0, 1), 2, [
+        allItems["chaos_prism"]!.copyWith(),
+        allItems["focused_mind"]!.copyWith(),
+        allItems["wardbreaker_gem"]!.copyWith(),
+      ]),
+      UnitData("Frostscribe Mystic", Position(1, 0), 2, [
+        allItems["focused_mind"]!.copyWith(),
+        allItems["vital_focus"]!.copyWith(),
+        allItems["runed_helm"]!.copyWith(),
+      ]),
+    ],
+    [
+      UnitData("Winterblade Guardian", Position(2, 1), 3, [
+        allItems["runed_sabre"]!.copyWith(),
+        allItems["bloodpiercer"]!.copyWith(),
+        allItems["battle_plate"]!.copyWith(),
+      ]),
+      UnitData("Rimebound Vanguard", Position(2, 2), 2, [
+        allItems["titan_hide"]!.copyWith(),
+        allItems["bulwarks_crown"]!.copyWith(),
+        allItems["blood_vessel"]!.copyWith(),
+      ]),
+      UnitData("Icewall Sentinel", Position(2, 0), 3, [
+        allItems["titan_hide"]!.copyWith(),
+        allItems["bulwarks_crown"]!.copyWith(),
+        allItems["blood_vessel"]!.copyWith(),
+      ]),
+      UnitData("Glacier Marksman", Position(0, 2), 2, [
+        allItems["bloodpiercer"]!.copyWith(),
+        allItems["bladed_repeater"]!.copyWith(),
+        allItems["psychic_edge"]!.copyWith(),
+      ]),
+      UnitData("Snowfall Priest", Position(0, 0), 3, [
+        allItems["focused_mind"]!.copyWith(),
+        allItems["vital_focus"]!.copyWith(),
+        allItems["runed_helm"]!.copyWith(),
+      ]),
+      UnitData("Northwind Tracker", Position(1, 1), 3, [
+        allItems["bloodpiercer"]!.copyWith(),
+        allItems["twinfang_blade"]!.copyWith(),
+        allItems["psychic_edge"]!.copyWith(),
+      ]),
+      UnitData("Borealis Arcanist", Position(0, 1), 2, [
+        allItems["chaos_prism"]!.copyWith(),
+        allItems["focused_mind"]!.copyWith(),
+        allItems["wardbreaker_gem"]!.copyWith(),
+      ]),
+      UnitData("Frostscribe Mystic", Position(1, 0), 2, [
+        allItems["focused_mind"]!.copyWith(),
+        allItems["vital_focus"]!.copyWith(),
+        allItems["runed_helm"]!.copyWith(),
+      ]),
+    ],
+    [
+      UnitData("Winterblade Guardian", Position(2, 1), 2, []),
+      UnitData("Rimebound Vanguard", Position(2, 2), 2, [
+        allItems["titan_hide"]!.copyWith(),
+        allItems["bulwarks_crown"]!.copyWith(),
+        allItems["blood_vessel"]!.copyWith(),
+      ]),
+      UnitData("Icewall Sentinel", Position(2, 0), 2, []),
+      UnitData("Glacier Marksman", Position(0, 2), 2, [
+        allItems["bloodpiercer"]!.copyWith(),
+        allItems["bladed_repeater"]!.copyWith(),
+        allItems["psychic_edge"]!.copyWith(),
+      ]),
+      UnitData("Snowfall Priest", Position(0, 0), 3, [
+        allItems["focused_mind"]!.copyWith(),
+        allItems["vital_focus"]!.copyWith(),
+        allItems["runed_helm"]!.copyWith(),
+      ]),
+      UnitData("Northwind Tracker", Position(1, 1), 3, [
+        allItems["bloodpiercer"]!.copyWith(),
+        allItems["twinfang_blade"]!.copyWith(),
+        allItems["psychic_edge"]!.copyWith(),
+      ]),
+      UnitData("Borealis Arcanist", Position(0, 1), 2, [
+        allItems["chaos_prism"]!.copyWith(),
+        allItems["focused_mind"]!.copyWith(),
+        allItems["wardbreaker_gem"]!.copyWith(),
+      ]),
+      UnitData("Frostscribe Mystic", Position(1, 0), 3, [
+        allItems["focused_mind"]!.copyWith(),
+        allItems["vital_focus"]!.copyWith(),
+        allItems["runed_helm"]!.copyWith(),
+      ]),
+    ],
+    [
+      UnitData("Winterblade Guardian", Position(2, 1), 3, []),
+      UnitData("Rimebound Vanguard", Position(2, 2), 2, [
+        allItems["titan_hide"]!.copyWith(),
+        allItems["bulwarks_crown"]!.copyWith(),
+        allItems["blood_vessel"]!.copyWith(),
+      ]),
+      UnitData("Icewall Sentinel", Position(2, 0), 3, []),
+      UnitData("Glacier Marksman", Position(0, 2), 2, [
+        allItems["bloodpiercer"]!.copyWith(),
+        allItems["bladed_repeater"]!.copyWith(),
+        allItems["psychic_edge"]!.copyWith(),
+      ]),
+      UnitData("Snowfall Priest", Position(0, 0), 3, [
+        allItems["focused_mind"]!.copyWith(),
+        allItems["vital_focus"]!.copyWith(),
+        allItems["runed_helm"]!.copyWith(),
+      ]),
+      UnitData("Northwind Tracker", Position(1, 1), 3, [
+        allItems["bloodpiercer"]!.copyWith(),
+        allItems["twinfang_blade"]!.copyWith(),
+        allItems["psychic_edge"]!.copyWith(),
+      ]),
+      UnitData("Borealis Arcanist", Position(0, 1), 2, [
+        allItems["chaos_prism"]!.copyWith(),
+        allItems["focused_mind"]!.copyWith(),
+        allItems["wardbreaker_gem"]!.copyWith(),
+      ]),
+      UnitData("Frostscribe Mystic", Position(1, 0), 3, [
+        allItems["focused_mind"]!.copyWith(),
+        allItems["vital_focus"]!.copyWith(),
+        allItems["runed_helm"]!.copyWith(),
+      ]),
+    ],
+    [
+      UnitData("Winterblade Guardian", Position(2, 1), 2, []),
+      UnitData("Rimebound Vanguard", Position(2, 2), 2, []),
+      UnitData("Icewall Sentinel", Position(2, 0), 2, []),
+      UnitData("Glacier Marksman", Position(0, 2), 2, []),
+      UnitData("Snowfall Priest", Position(0, 0), 3, [
+        allItems["focused_mind"]!.copyWith(),
+        allItems["vital_focus"]!.copyWith(),
+        allItems["runed_helm"]!.copyWith(),
+      ]),
+      UnitData("Northwind Tracker", Position(1, 1), 3, [
+        allItems["bloodpiercer"]!.copyWith(),
+        allItems["twinfang_blade"]!.copyWith(),
+        allItems["psychic_edge"]!.copyWith(),
+      ]),
+      UnitData("Borealis Arcanist", Position(0, 1), 3, [
+        allItems["chaos_prism"]!.copyWith(),
+        allItems["focused_mind"]!.copyWith(),
+        allItems["wardbreaker_gem"]!.copyWith(),
+      ]),
+      UnitData("Frostscribe Mystic", Position(1, 0), 3, [
+        allItems["focused_mind"]!.copyWith(),
+        allItems["vital_focus"]!.copyWith(),
+        allItems["runed_helm"]!.copyWith(),
       ]),
     ],
   ]),

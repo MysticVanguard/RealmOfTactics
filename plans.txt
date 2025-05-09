@@ -1,5 +1,5 @@
 TODO:
-- Add other combat round sets
+
 - Fix how units are displayed so they work with their new sprites
     - Maybe also add a size stat for units that can be changed
 
@@ -37,3 +37,5 @@ DONE:
 - Auto switch bench when moving a unit or item onto it
 - Add items to enemy rounds
     - Will allow for infinitely more uniqueness to rounds
+- Add reforger for changing units/items for gold
+- Add other combat round sets
