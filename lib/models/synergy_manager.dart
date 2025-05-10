@@ -50,14 +50,7 @@ class SynergyManager extends ChangeNotifier {
   // List of all synergies in the game
   final List<Synergy> _synergies = [];
 
-  // Active synergy tracking by class and origin counts
-  final Map<String, int> _activeClassCounts = {};
-  final Map<String, int> _activeOriginCounts = {};
-  Set<String> _activeSynergiesSet = {};
-
   List<Item> forgedItems = [];
-
-  final Map<String, (int count, int nextThreshold)> _activeSynergies = {};
 
   final Map<String, int> _synergyCounts = {};
 
@@ -90,9 +83,6 @@ class SynergyManager extends ChangeNotifier {
   ];
 
   List<Synergy> get synergies => _synergies;
-  Map<String, (int count, int nextThreshold)> get activeSynergies =>
-      Map.unmodifiable(_activeSynergies);
-  Set<String> get activeSynergiesSet => _activeSynergiesSet;
   Map<String, int> get synergyCounts => Map.unmodifiable(_synergyCounts);
 
   // Initializes all synergy definitions
@@ -102,6 +92,7 @@ class SynergyManager extends ChangeNotifier {
 
   // Populates allSynergies with predefined origin and class synergy data
   void _initializeSynergies() {
+    _synergies.clear();
     _synergies.addAll([
       const Synergy(name: 'Frostward', type: 'Origin', tiers: [2, 4, 6, 8]),
       const Synergy(name: 'Stormpeak', type: 'Origin', tiers: [3, 5, 7]),
@@ -137,14 +128,15 @@ class SynergyManager extends ChangeNotifier {
   void updateSynergies([List<Unit>? activeUnits]) {
     final units = activeUnits ?? _gameManager!.boardManager!.getAllBoardUnits();
 
-    final Set<String> seenUnitNames = {};
     final Map<String, int> newCounts = {};
+    final List<String> seenNames = [];
 
     for (final unit in units) {
       if (unit.isSummon || unit.isEnemy) continue;
-      if (seenUnitNames.contains(unit.unitName)) continue;
 
-      seenUnitNames.add(unit.unitName);
+      final unitName = unit.unitName;
+      if (seenNames.contains(unitName)) continue;
+      seenNames.add(unitName);
 
       for (final origin in unit.origins) {
         newCounts[origin] = (newCounts[origin] ?? 0) + 1;
@@ -154,15 +146,11 @@ class SynergyManager extends ChangeNotifier {
       }
     }
 
-    final newSynergySet = newCounts.keys.toSet();
-
-    if (!mapEquals(_synergyCounts, newCounts) ||
-        !_activeSynergiesSet.containsAll(newSynergySet) ||
-        _activeSynergiesSet.difference(newSynergySet).isNotEmpty) {
+    if (!mapEquals(_synergyCounts, newCounts)) {
       _synergyCounts
         ..clear()
         ..addAll(newCounts);
-      _activeSynergiesSet = newSynergySet;
+
       notifyListeners();
     }
   }
@@ -177,44 +165,13 @@ class SynergyManager extends ChangeNotifier {
   }
 
   // Gets the player's synergy level for a given synergy name
-  int getSynergyLevel(String synergy) {
-    if (!_activeSynergiesSet.contains(synergy)) {
-      return 0;
-    }
-
-    final synergyObj = _synergies.firstWhere(
-      (s) => s.name == synergy,
-      orElse: () => const Synergy(name: '', type: '', tiers: []),
-    );
-    final count = _synergyCounts[synergy] ?? 0;
-    for (int i = synergyObj.tiers.length - 1; i >= 0; i--) {
-      if (count >= synergyObj.tiers[i]) {
-        return i + 1;
-      }
-    }
-
-    return 0;
-  }
-
-  // Gets the enemy team's synergy level during combat
-  int getEnemySynergyLevel(String synergyName, List<Unit> enemyUnits) {
+  int getSynergyLevel(String synergyName) {
     final synergy = _synergies.firstWhere(
       (s) => s.name == synergyName,
       orElse: () => const Synergy(name: '', type: '', tiers: []),
     );
 
-    if (synergy.name.isEmpty) return 0;
-
-    int count =
-        enemyUnits
-            .where(
-              (unit) =>
-                  !unit.isSummon &&
-                  (unit.classes.contains(synergyName) ||
-                      unit.origins.contains(synergyName)),
-            )
-            .length;
-
+    final count = _synergyCounts[synergyName] ?? 0;
     for (int i = synergy.tiers.length - 1; i >= 0; i--) {
       if (count >= synergy.tiers[i]) {
         return i + 1;
@@ -239,101 +196,62 @@ class SynergyManager extends ChangeNotifier {
 
   // Clears all synergy-related state, used after combat or game reset
   void reset() {
-    _activeClassCounts.clear();
-    _activeOriginCounts.clear();
     _synergyCounts.clear();
-    _activeSynergiesSet.clear();
-    _activeSynergies.clear();
     _playerIronvaleSummon = null;
     _enemyIronvaleSummon = null;
     notifyListeners();
   }
 
   // Applies synergy effects like bonuses or spawn effects at combat start
-  void applyStartOfCombatEffects(List<Unit> units) {
-    for (var unit in units) {
+  void applyStartOfCombatEffects(List<Unit> allUnits) {
+    for (var unit in allUnits) {
       unit.stats.resetStartOfCombatStats();
     }
 
-    List<Unit> playerUnits = units.where((unit) => !unit.isEnemy).toList();
-    List<Unit> enemyUnits = units.where((unit) => unit.isEnemy).toList();
+    final playerUnits = allUnits.where((u) => !u.isEnemy).toList();
+    final enemyUnits = allUnits.where((u) => u.isEnemy).toList();
 
-    Map<String, int> enemySynergyCounts = {};
-    final Set<String> seenEnemyNames = {};
+    // Apply player synergies
+    _applyCombatEffectsForTeam(playerUnits, isEnemy: false);
 
-    for (var unit in enemyUnits) {
-      if (!unit.isSummon && !seenEnemyNames.contains(unit.unitName)) {
-        seenEnemyNames.add(unit.unitName);
-        for (var unitClass in unit.classes) {
-          enemySynergyCounts[unitClass] =
-              (enemySynergyCounts[unitClass] ?? 0) + 1;
-        }
-        for (var origin in unit.origins) {
-          enemySynergyCounts[origin] = (enemySynergyCounts[origin] ?? 0) + 1;
-        }
+    // Apply enemy synergies
+    _applyCombatEffectsForTeam(enemyUnits, isEnemy: true);
+  }
+
+  // Checks the synergy counts to apply each effect seperately
+  void _applyCombatEffectsForTeam(List<Unit> units, {required bool isEnemy}) {
+    if (units.isEmpty) return;
+
+    // Calculate synergy counts for this team
+    final Map<String, int> localSynergyCounts = {};
+    final List<String> unitNames = [];
+    for (var unit in units) {
+      if (unit.isSummon || unitNames.contains(unit.unitName)) continue;
+      unitNames.add(unit.unitName);
+      for (var origin in unit.origins) {
+        localSynergyCounts[origin] = (localSynergyCounts[origin] ?? 0) + 1;
+      }
+      for (var unitClass in unit.classes) {
+        localSynergyCounts[unitClass] =
+            (localSynergyCounts[unitClass] ?? 0) + 1;
       }
     }
 
-    Set<String> appliedEnemySynergies = {};
-
-    for (var synergyName in _activeSynergiesSet) {
-      if (startOfCombatSynergies.contains(synergyName)) {
-        final synergy = _synergies.firstWhere(
-          (s) => s.name == synergyName,
-          orElse: () => const Synergy(name: '', type: '', tiers: []),
-        );
-
-        if (synergy.name.isEmpty) continue;
-
-        final playerCount =
-            playerUnits
-                .where(
-                  (unit) =>
-                      !unit.isSummon &&
-                      (unit.classes.contains(synergyName) ||
-                          unit.origins.contains(synergyName)),
-                )
-                .length;
-
-        int? playerActiveTier;
-        for (var tier in synergy.tiers) {
-          if (playerCount >= tier) {
-            playerActiveTier = tier;
-          }
-        }
-
-        if (playerActiveTier != null) {
-          _applyStartOfCombatEffect(playerUnits, synergyName, playerActiveTier);
-        }
-      }
-    }
-
+    // Apply synergies for this team
     for (var synergy in _synergies) {
-      if (startOfCombatSynergies.contains(synergy.name)) {
-        if (appliedEnemySynergies.contains(synergy.name)) {
-          continue;
-        }
-
-        final count = enemySynergyCounts[synergy.name] ?? 0;
-        if (count > 0) {
-          int? enemyActiveTier;
-          for (var tier in synergy.tiers) {
-            if (count >= tier) {
-              enemyActiveTier = tier;
-            }
-          }
-
-          if (enemyActiveTier != null) {
-            _applyStartOfCombatEffect(
-              enemyUnits,
-              synergy.name,
-              enemyActiveTier,
-            );
-            appliedEnemySynergies.add(synergy.name);
-          }
-        }
+      final count = localSynergyCounts[synergy.name] ?? 0;
+      final threshold = determineSynergyTier(synergy.tiers, count);
+      if (threshold > 0) {
+        _applyStartOfCombatEffect(units, synergy.name, threshold);
       }
     }
+  }
+
+  int determineSynergyTier(List<int> thresholds, int count) {
+    for (int i = thresholds.length - 1; i >= 0; i--) {
+      if (count >= thresholds[i]) return thresholds[i];
+    }
+    return 0;
   }
 
   // Applies stat bonuses or unit behavior modifications at the start of combat

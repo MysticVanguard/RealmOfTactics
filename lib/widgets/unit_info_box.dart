@@ -12,6 +12,7 @@ import '../game_data/ability_data.dart';
 class UnitInfoBox extends StatelessWidget {
   final Unit unit;
   final VoidCallback onClose;
+  final VoidCallback onEquipped;
   final void Function(Item) onItemTapped;
 
   const UnitInfoBox({
@@ -19,6 +20,7 @@ class UnitInfoBox extends StatelessWidget {
     required this.unit,
     required this.onClose,
     required this.onItemTapped,
+    required this.onEquipped,
   });
 
   @override
@@ -358,7 +360,7 @@ class UnitInfoBox extends StatelessWidget {
       item: currentItem,
       slotType: slotType,
       unit: unit,
-      onEquip: (Map<String, dynamic> dragData) {
+      onEquip: (Map<String, dynamic> dragData, String source) {
         final Item itemToEquip = dragData['item'] as Item;
         final int? sourceIndex = dragData['sourceIndex'] as int?;
         final String? sourceType = dragData['sourceType'] as String?;
@@ -391,6 +393,9 @@ class UnitInfoBox extends StatelessWidget {
           } else {
             // If equip failed, return to bench
             boardManager.addItemToBench(removedItem);
+          }
+          if (source == "reforger") {
+            onEquipped.call();
           }
         }
       },

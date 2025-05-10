@@ -27,8 +27,12 @@ class ReforgerTab extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final bool hasUnit = slotContent is Unit;
-    final int cost =
-        hasUnit ? ((slotContent as Unit).cost * (slotContent as Unit).tier) : 5;
+    final int tokens =
+        hasUnit
+            ? (slotContent as Unit).cost <= 3
+                ? GameManager.instance!.playerSmallUnitDuplicator
+                : GameManager.instance!.playerLargeUnitDuplicator
+            : GameManager.instance!.playerItemReforgeTokens;
 
     return Container(
       padding: EdgeInsets.all(8),
@@ -48,10 +52,11 @@ class ReforgerTab extends StatelessWidget {
           ),
           SizedBox(height: 6),
           Text(
-            "Place a unit or item here to reforge it into another of the same cost and tier.\n"
-            "Units cost their gold value * their tier, items cost 5 gold.\n"
+            "Place a unit here and duplicate it by using a Unit Duplicator (Small for 1-3 costs, Large for 4-5 costs).\n"
+            "Place an item here and reforge it into another item of the same tier by using an Item Reforge Token.\n"
+            "Units cost 1 Unit Reforge Token, items cost 1 Item Reforge Token.\n"
             "Leaving a unit or item here when closing the tab or starting combat moves them to your bench.\n"
-            "If your unit bench is full, the unit will be sold instead.",
+            "If your unit bench is full, the unit will be sold instead. You cannot duplicate a unit if you have no bench space.",
             style: TextStyle(color: Colors.white70, fontSize: 12),
             textAlign: TextAlign.center,
           ),
@@ -116,7 +121,6 @@ class ReforgerTab extends StatelessWidget {
                             ),
                           ),
                           childWhenDragging: Container(),
-                          onDragCompleted: () => onSlotUpdate(null),
                           onDraggableCanceled: (_, __) {},
                           child: GestureDetector(
                             onTap: () {
@@ -144,14 +148,21 @@ class ReforgerTab extends StatelessWidget {
           ),
 
           // Reforge button
-          if (slotContent != null)
+          if (tokens >= 1 &&
+              (slotContent is Item ||
+                  (slotContent is Unit &&
+                      !GameManager.instance!.boardManager!.isBenchFull())))
             Padding(
               padding: const EdgeInsets.only(top: 12.0),
               child: ElevatedButton.icon(
-                onPressed: (playerGold >= cost) ? onReforgePressed : null,
+                onPressed: (tokens >= 1) ? onReforgePressed : null,
                 icon: Icon(Icons.autorenew),
                 label: Text(
-                  hasUnit ? "Reforge Unit: $cost Gold" : "Reforge Item: 5 Gold",
+                  hasUnit
+                      ? (slotContent as Unit).cost <= 3
+                          ? "Duplicate Unit: 1 Small Unit Duplicator ($tokens Total)"
+                          : "Duplicate Unit: 1 Large Unit Duplicator ($tokens Total)"
+                      : "Reforge Item: 1 Item Reforge Token ($tokens Total)",
                 ),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: hasUnit ? Colors.orange : Colors.teal,

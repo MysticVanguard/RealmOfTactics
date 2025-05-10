@@ -8,7 +8,7 @@ class ItemSlotWidget extends StatelessWidget {
   final Item? item; // The item currently equipped in this slot
   final ItemType slotType; // The type of item this slot accepts
   final Unit unit; // The unit this slot belongs to
-  final Function(Map<String, dynamic>)
+  final Function(Map<String, dynamic>, String)
   onEquip; // Called when an item is equipped
   final Function(Item)
   onItemTapped; // Called when the item is tapped to show info
@@ -88,7 +88,7 @@ class ItemSlotWidget extends StatelessWidget {
         }
 
         // Call external equip handler
-        onEquip(droppedData);
+        onEquip(droppedData, droppedData['sourceType']);
       },
     );
   }

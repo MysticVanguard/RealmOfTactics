@@ -13,15 +13,17 @@ class GameBoard extends StatefulWidget {
   final BoardManager boardManager;
   final Function(Unit) onUnitSelected;
   final VoidCallback onClearSelection;
+  final VoidCallback? onClearReforgerSlot;
   final Unit? selectedUnit;
 
   const GameBoard({
-    Key? key,
+    super.key,
     required this.boardManager,
     required this.onUnitSelected,
     required this.onClearSelection,
+    this.onClearReforgerSlot,
     this.selectedUnit,
-  }) : super(key: key);
+  });
 
   @override
   _GameBoardState createState() => _GameBoardState();
@@ -192,8 +194,20 @@ class _GameBoardState extends State<GameBoard> {
               boardManager.swapBoardUnits(sourcePosition, targetPosition);
             }
           }
+          if (data['sourceType'] == 'reforger') {
+            if (widget.onClearReforgerSlot != null) {
+              widget.onClearReforgerSlot!();
+            }
+          }
         } else {
-          boardManager.placeUnit(draggedUnit, targetPosition);
+          bool placed = boardManager.placeUnit(draggedUnit, targetPosition);
+          if (placed) {
+            if (data['sourceType'] == 'reforger') {
+              if (widget.onClearReforgerSlot != null) {
+                widget.onClearReforgerSlot!();
+              }
+            }
+          }
         }
       },
       builder: (context, candidateData, rejectedData) {
@@ -289,13 +303,16 @@ class _GameBoardState extends State<GameBoard> {
       unit: unit,
       isEnemy: unit.isEnemy,
       isBoardUnit: true,
-      onItemDropped: (item) {
+      onItemDropped: (item, source) {
         final boardManager = Provider.of<BoardManager>(context, listen: false);
         if (unit.canEquipItem(item)) {
           boardManager.remove(item);
           bool equipped = unit.equipItem(item);
           if (!equipped) {
             boardManager.addItemToBench(item);
+          }
+          if (source == 'reforger' && widget.onClearReforgerSlot != null) {
+            widget.onClearReforgerSlot!();
           }
         }
       },
@@ -334,7 +351,7 @@ class _GameBoardState extends State<GameBoard> {
                         unit: unit,
                         isEnemy: unit.isEnemy,
                         isBoardUnit: true,
-                        onItemDropped: (item) {
+                        onItemDropped: (item, source) {
                           final boardManager = Provider.of<BoardManager>(
                             context,
                             listen: false,
@@ -344,6 +361,10 @@ class _GameBoardState extends State<GameBoard> {
                             bool equipped = unit.equipItem(item);
                             if (!equipped) {
                               boardManager.addItemToBench(item);
+                            }
+                            if (source == 'reforger' &&
+                                widget.onClearReforgerSlot != null) {
+                              widget.onClearReforgerSlot!();
                             }
                           }
                         },

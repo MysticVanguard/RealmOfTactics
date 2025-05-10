@@ -172,7 +172,7 @@ class BoardManager extends ChangeNotifier {
 
     _board[position.row][position.col] = unitToPlace;
 
-    _synergyManager.updateSynergies();
+    _synergyManager.updateSynergies(getAllBoardUnits());
 
     notifyListeners();
     return true;

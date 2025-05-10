@@ -11,7 +11,6 @@ class SynergyDisplay extends StatelessWidget {
   Widget build(BuildContext context) {
     // Get the current synergy counts from the manager
     final allSynergyCounts = synergyManager.synergyCounts;
-
     // Sort the synergies alphabetically by name
     final sortedSynergies =
         allSynergyCounts.entries.toList()
@@ -60,7 +59,11 @@ class SynergyDisplay extends StatelessWidget {
                         context,
                         entry.key,
                         entry.value,
-                        synergyManager.activeSynergiesSet.contains(entry.key),
+                        synergyManager.determineSynergyTier(
+                              synergyManager.getSynergyThresholds(entry.key),
+                              entry.value,
+                            ) >
+                            0,
                       ),
                     ),
                 ],

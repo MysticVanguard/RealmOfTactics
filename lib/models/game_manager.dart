@@ -141,6 +141,9 @@ class GameManager extends ChangeNotifier {
   int _playerXp = 0;
   int _currentStage = 0;
   int _ironvaleScrap = 0;
+  int playerItemReforgeTokens = 0;
+  int playerSmallUnitDuplicator = 0;
+  int playerLargeUnitDuplicator = 0;
 
   // UI and round transition helpers
   bool isDragging = false;
@@ -592,19 +595,25 @@ class GameManager extends ChangeNotifier {
           } else {
             if (currentNode != null) {
               if (currentNode.rewardGold > 0) {
-                GameManager.instance!.addGold(currentNode.rewardGold);
+                addGold(currentNode.rewardGold);
               }
-
+              if (currentNode.rewardItemReforgeTokens > 0) {
+                playerItemReforgeTokens += currentNode.rewardItemReforgeTokens;
+              }
+              if (currentNode.rewardUnitSmallDuplicators > 0) {
+                playerSmallUnitDuplicator +=
+                    currentNode.rewardUnitSmallDuplicators;
+              }
+              if (currentNode.rewardUnitLargeDuplicators > 0) {
+                playerLargeUnitDuplicator +=
+                    currentNode.rewardUnitLargeDuplicators;
+              }
               for (final item in currentNode.rewardItems) {
-                GameManager.instance!.boardManager!.addItemToBench(
-                  item.copyWith(),
-                );
+                boardManager?.addItemToBench(item.copyWith());
               }
 
               for (final unit in currentNode.rewardUnits) {
-                GameManager.instance!.boardManager!.addUnitToBench(
-                  unit.copyWith(),
-                );
+                boardManager?.addUnitToBench(unit.copyWith());
               }
             }
             _currentState = GameState.map;

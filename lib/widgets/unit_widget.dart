@@ -9,7 +9,7 @@ class UnitWidget extends StatelessWidget {
   final bool isCompact;
   final bool isBoardUnit;
   final bool isEnemy;
-  final void Function(Item item)? onItemDropped;
+  final void Function(Item item, String? sourceType)? onItemDropped;
 
   const UnitWidget({
     super.key,
@@ -87,7 +87,7 @@ class UnitWidget extends StatelessWidget {
         },
         onAccept: (data) {
           final Item item = data['item'] as Item;
-          onItemDropped?.call(item);
+          onItemDropped?.call(item, data['sourceType']);
         },
         builder: (context, candidateData, rejectedData) {
           // highlight if drag is acceptable
@@ -184,7 +184,7 @@ class UnitWidget extends StatelessWidget {
         },
         onAccept: (data) {
           final Item item = data['item'] as Item;
-          onItemDropped?.call(item);
+          onItemDropped?.call(item, data['sourceType']);
         },
         builder: (context, candidateData, rejectedData) {
           // highlight if drag is acceptable

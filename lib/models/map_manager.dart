@@ -20,6 +20,9 @@ class MapNode {
   List<List<UnitData>> rounds;
   String rewardDescription = '';
   int rewardGold = 0;
+  int rewardItemReforgeTokens = 0;
+  int rewardUnitSmallDuplicators = 0;
+  int rewardUnitLargeDuplicators = 0;
   List<Item> rewardItems = [];
   List<Unit> rewardUnits = [];
 
@@ -371,77 +374,87 @@ class MapManager extends ChangeNotifier {
         if (node.type != MapNodeType.combat && node.type != MapNodeType.elite) {
           continue;
         }
-
-        int rewardFloor = node.floor;
-        if (node.type == MapNodeType.elite) {
-          rewardFloor = min(rewardFloor + 2, totalFloors - 1);
-        }
-
         final items = <Item>[];
         final units = <Unit>[];
         int gold = 0;
+        int itemReforgeTokens = 0;
+        int unitLargeDuplicators = 0;
+        int unitSmallDuplicators = 0;
+        int rewardFloor = node.floor;
+        if (node.type == MapNodeType.elite) {
+          gold += 10;
+          itemReforgeTokens += 1;
+          items.add(gameManager.getRandomBasicItem());
+        }
 
         switch (rewardFloor) {
           case 0:
           case 1:
-            gold = 5;
             items.add(gameManager.getRandomBasicItem());
+            itemReforgeTokens += 1;
             break;
           case 2:
-            gold = 5;
             items.add(gameManager.getRandomBasicItem());
-            units.add(gameManager.getRandomUnitByCost(2));
             break;
           case 3:
-            gold = 15;
+            units.add(gameManager.getRandomUnitByCost(1));
+            itemReforgeTokens += 1;
             break;
           case 4:
-            gold = 10;
             items.add(gameManager.getRandomBasicItem());
+            unitSmallDuplicators += 1;
             break;
           case 5:
-            items.addAll([
-              gameManager.getRandomBasicItem(),
-              gameManager.getRandomBasicItem(),
-            ]);
+            itemReforgeTokens += 1;
             break;
           case 6:
-            items.add(gameManager.getRandomItemByTier(2));
-            break;
-          case 7:
-            gold = 20;
-            break;
-          case 8:
-            units.add(gameManager.getRandomUnitByCost(3));
+            items.add(gameManager.getRandomBasicItem());
             units.add(gameManager.getRandomUnitByCost(2));
             break;
-          case 9:
-            gold = 10;
+          case 7:
             items.addAll([
               gameManager.getRandomBasicItem(),
               gameManager.getRandomBasicItem(),
             ]);
+            itemReforgeTokens += 1;
+            break;
+          case 8:
+            items.addAll([
+              gameManager.getRandomBasicItem(),
+              gameManager.getRandomBasicItem(),
+            ]);
+            break;
+          case 9:
+            items.addAll([
+              gameManager.getRandomBasicItem(),
+              gameManager.getRandomBasicItem(),
+            ]);
+            units.add(gameManager.getRandomUnitByCost(3));
+            itemReforgeTokens += 2;
+            unitSmallDuplicators += 2;
             break;
           case 10:
             items.add(gameManager.getRandomItemByTier(2));
-            gold = 5;
+            itemReforgeTokens += 1;
             break;
           case 11:
-            gold = 25;
+            itemReforgeTokens += 1;
             break;
           case 12:
+            itemReforgeTokens += 1;
             units.add(gameManager.getRandomUnitByCost(4));
-            units.add(gameManager.getRandomUnitByCost(3));
+            items.add(gameManager.getRandomItemByTier(2));
             break;
           case 13:
-            gold = 15;
-            items.add(gameManager.getRandomItemByTier(2));
+            itemReforgeTokens += 1;
             break;
           case 14:
             items.addAll([
               gameManager.getRandomItemByTier(2),
               gameManager.getRandomItemByTier(2),
             ]);
+            itemReforgeTokens += 2;
+            unitLargeDuplicators += 1;
             break;
         }
 
@@ -454,10 +467,28 @@ class MapManager extends ChangeNotifier {
         node.rewardGold = gold;
         node.rewardItems = items;
         node.rewardUnits = newUnits;
+        node.rewardItemReforgeTokens = itemReforgeTokens;
+        node.rewardUnitSmallDuplicators = unitSmallDuplicators;
+        node.rewardUnitLargeDuplicators = unitLargeDuplicators;
 
         // Build display string
         final parts = <String>[];
         if (gold > 0) parts.add('$gold Gold');
+        if (itemReforgeTokens > 0) {
+          parts.add(
+            '$itemReforgeTokens Item Reforge Token${itemReforgeTokens > 1 ? 's' : ''}',
+          );
+        }
+        if (unitSmallDuplicators > 0) {
+          parts.add(
+            '$unitSmallDuplicators Small Unit Duplicator${unitSmallDuplicators > 1 ? 's' : ''}',
+          );
+        }
+        if (unitLargeDuplicators > 0) {
+          parts.add(
+            '$unitLargeDuplicators Large Unit Duplicator${unitLargeDuplicators > 1 ? 's' : ''}',
+          );
+        }
         parts.addAll(items.map((item) => 'Item: ${item.name}'));
         parts.addAll(newUnits.map((unit) => 'Unit: Tier 2 ${unit.unitName}'));
 

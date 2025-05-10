@@ -875,6 +875,11 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
                                   onUnitSelected: _selectUnit,
                                   onClearSelection: _deselectUnit,
                                   selectedUnit: selectedUnit,
+                                  onClearReforgerSlot: () {
+                                    setState(() {
+                                      _reforgerSlot = null;
+                                    });
+                                  },
                                 ),
                               ),
                             ),
@@ -947,6 +952,11 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
                             onItemTapped: (item) {
                               setState(() {
                                 _infoItem = item;
+                              });
+                            },
+                            onEquipped: () {
+                              setState(() {
+                                _reforgerSlot = null;
                               });
                             },
                           ),
@@ -1444,6 +1454,12 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
             boardManager.addUnitToBench(draggedUnit);
           }
 
+          if (sourceType == 'reforger') {
+            setState(() {
+              _reforgerSlot = null;
+            });
+          }
+
           if (_selectedBenchTab != 0) {
             setState(() {
               _selectedBenchTab = 0;
@@ -1453,6 +1469,13 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
           }
         } else if (data['type'] == 'item') {
           final Item draggedItem = data['item'] as Item;
+          final String sourceType = data['sourceType'];
+
+          if (sourceType == 'reforger') {
+            setState(() {
+              _reforgerSlot = null;
+            });
+          }
 
           if (benchContent is Item) {
             final Item? combined = draggedItem.combine(benchContent);
@@ -1539,7 +1562,7 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
               child: UnitWidget(
                 unit: unit,
                 isEnemy: unit.isEnemy,
-                onItemDropped: (item) {
+                onItemDropped: (item, source) {
                   final boardManager = Provider.of<BoardManager>(
                     context,
                     listen: false,
@@ -1549,6 +1572,9 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
                     bool equipped = unit.equipItem(item);
                     if (!equipped) {
                       boardManager.addItemToBench(item);
+                    }
+                    if (source == 'reforger') {
+                      _reforgerSlot = null;
                     }
                   }
                 },
@@ -1577,7 +1603,7 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
             child: UnitWidget(
               unit: unit,
               isEnemy: unit.isEnemy,
-              onItemDropped: (item) {
+              onItemDropped: (item, source) {
                 final boardManager = Provider.of<BoardManager>(
                   context,
                   listen: false,
@@ -1588,6 +1614,9 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
                   if (!equipped) {
                     boardManager.addItemToBench(item);
                   }
+                }
+                if (source == 'reforger') {
+                  _reforgerSlot = null;
                 }
               },
             ),
@@ -1625,7 +1654,7 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
               child: UnitWidget(
                 unit: unit,
                 isEnemy: unit.isEnemy,
-                onItemDropped: (item) {
+                onItemDropped: (item, source) {
                   final boardManager = Provider.of<BoardManager>(
                     context,
                     listen: false,
@@ -1635,6 +1664,9 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
                     bool equipped = unit.equipItem(item);
                     if (!equipped) {
                       boardManager.addItemToBench(item);
+                    }
+                    if (source == 'reforger') {
+                      _reforgerSlot = null;
                     }
                   }
                 },
@@ -1650,7 +1682,7 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
           child: UnitWidget(
             unit: unit,
             isEnemy: unit.isEnemy,
-            onItemDropped: (item) {
+            onItemDropped: (item, source) {
               final boardManager = Provider.of<BoardManager>(
                 context,
                 listen: false,
@@ -1660,6 +1692,9 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
                 bool equipped = unit.equipItem(item);
                 if (!equipped) {
                   boardManager.addItemToBench(item);
+                }
+                if (source == 'reforger') {
+                  _reforgerSlot = null;
                 }
               }
             },
@@ -1727,34 +1762,38 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
     // Reforge Unit
     if (_reforgerSlot is Unit) {
       final Unit original = _reforgerSlot;
-      final int cost = original.cost;
-
-      if (gameManager.gold < cost) return;
-
-      Unit newUnit = gameManager.getRandomUnitByCost(original.cost);
-      if (original.getEquippedItems().isNotEmpty) {
-        for (final item in original.getEquippedItems()) {
-          original.unequipItem(item.type);
-          gameManager.boardManager!.addItemToBench(item);
-        }
-      }
-      for (int i = 1; i < original.tier; i++) {
-        newUnit = newUnit.upgrade();
+      if (original.cost <= 3 && gameManager.playerSmallUnitDuplicator < 1) {
+        return;
+      } else if (gameManager.playerLargeUnitDuplicator < 1) {
+        return;
       }
 
-      gameManager.spendGold(cost);
-      _reforgerSlot = newUnit;
+      Unit newUnit = original.copyWith(
+        weapon: null,
+        armor: null,
+        trinket: null,
+      );
+      gameManager.boardManager?.addUnitToBench(newUnit);
+
+      if (original.cost <= 3) {
+        gameManager.playerSmallUnitDuplicator -= 1;
+      } else {
+        gameManager.playerLargeUnitDuplicator -= 1;
+      }
     }
     // Reforge Item
     else if (_reforgerSlot is Item) {
       final Item original = _reforgerSlot;
 
-      if (gameManager.gold < 5) return;
+      if (gameManager.playerItemReforgeTokens < 1) return;
 
       final Item newItem = gameManager.getRandomItemByTier(original.tier);
 
-      gameManager.spendGold(5);
-      _reforgerSlot = newItem;
+      gameManager.playerItemReforgeTokens -= 1;
+
+      setState(() {
+        _reforgerSlot = newItem;
+      });
     }
   }
 }
