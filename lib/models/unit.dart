@@ -351,7 +351,7 @@ class Unit extends ChangeNotifier {
       _handleItemEffectsOnManaGain(amount);
     }
 
-    if (stats.currentMana >= stats.maxMana && stats.maxMana > 0) {
+    if (stats.currentMana >= stats.maxMana && stats.maxMana > 0 && !fromItem) {
       castAbility();
     }
   }
@@ -881,8 +881,16 @@ class Unit extends ChangeNotifier {
               // If projectile stops at first enemy, apply impact effects and exit
               if (effect.projectileStopsAtFirstHit && unitAtPos.team != team) {
                 if (effect.impactEffects != null) {
-                  for (final impact in effect.impactEffects!) {
-                    _applyAbilityEffect(this, unitAtPos, impact);
+                  final impactTargets = bm.getUnitsInArea(
+                    targetPosition,
+                    effect.targeting.areaShape,
+                    effect.targeting.size,
+                    _getUnitsByTeam(effect.targeting.targetTeam),
+                  );
+                  for (final unit in impactTargets) {
+                    for (final impact in effect.impactEffects!) {
+                      _applyAbilityEffect(this, unit, impact);
+                    }
                   }
                 }
                 return;
@@ -1806,7 +1814,7 @@ class Unit extends ChangeNotifier {
           ),
         );
       } else if (item.id.startsWith('item_psychic_edge')) {
-        attacker.gainMana(5);
+        attacker.gainMana(5, fromItem: true);
       }
     }
   }

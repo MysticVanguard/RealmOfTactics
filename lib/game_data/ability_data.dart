@@ -39,7 +39,7 @@ final Map<String, Ability> abilities = {
   'Freezing Slash': Ability(
     name: 'Freezing Slash',
     description:
-        'Stabs the target for 200/300/400% AD physical damage. Gain 5/10/15% AP AD for the rest of combat.',
+        'Stabs the target for 200/250/300% AD physical damage. Gain 5/10/15% AP AD for the rest of combat.',
     effects: [
       AbilityEffect(
         type: AbilityEffectType.damage,
@@ -50,7 +50,7 @@ final Map<String, Ability> abilities = {
           targetTeam: TargetTeam.enemies,
         ),
         scalingStat: "attackDamage",
-        scalingPercentByTier: [2.0, 3.0, 4.0],
+        scalingPercentByTier: [2.0, 2.5, 3.0],
       ),
       AbilityEffect(
         type: AbilityEffectType.statBuff,
@@ -101,7 +101,7 @@ final Map<String, Ability> abilities = {
 
   'Frigid Volley': Ability(
     name: 'Frigid Volley',
-    description: 'Deal 200/400/700% AD as physical damage to the target.',
+    description: 'Deal 200/400/600% AD as physical damage to the target.',
 
     effects: [
       AbilityEffect(
@@ -113,7 +113,7 @@ final Map<String, Ability> abilities = {
           targetTeam: TargetTeam.enemies,
         ),
         scalingStat: "attackDamage",
-        scalingPercentByTier: [2.0, 4.0, 7.0],
+        scalingPercentByTier: [2.0, 4.0, 6.0],
       ),
     ],
   ),
@@ -174,7 +174,7 @@ final Map<String, Ability> abilities = {
   'Crippling Dagger': Ability(
     name: 'Crippling Dagger',
     description:
-        'Throw a dagger at the lowest health enemy unit, dealing 200/300/400% AD physical damage and reducing their damage by 10% for 5 seconds.',
+        'Throw a dagger at the lowest health enemy unit, dealing 300/350/400% AD physical damage and reducing their damage by 10% for 5 seconds.',
 
     effects: [
       AbilityEffect(
@@ -189,7 +189,7 @@ final Map<String, Ability> abilities = {
           targetTeam: TargetTeam.enemies,
         ),
         scalingStat: "attackDamage",
-        scalingPercentByTier: [2.0, 3.0, 4.0],
+        scalingPercentByTier: [3.0, 3.5, 4.0],
       ),
       AbilityEffect(
         type: AbilityEffectType.statDebuff,
@@ -372,7 +372,7 @@ final Map<String, Ability> abilities = {
   'Deadeye Barrage': Ability(
     name: 'Deadeye Barrage',
     description:
-        'Fires 8 shots at the lowest max health enemy, each dealing 100/200/300% AD as physical damage.',
+        'Fires 8 shots at the lowest max health enemy, each dealing 20/30/50% AD as physical damage.',
 
     effects: List.generate(
       8,
@@ -387,7 +387,7 @@ final Map<String, Ability> abilities = {
           targetTeam: TargetTeam.enemies,
         ),
         scalingStat: "attackDamage",
-        scalingPercentByTier: [1.0, 2.0, 3.0],
+        scalingPercentByTier: [.2, .3, .5],
       ),
     ),
   ),
@@ -395,7 +395,7 @@ final Map<String, Ability> abilities = {
   'Cannon Blast': Ability(
     name: 'Cannon Blast',
     description:
-        'Fires a cannonball at the largest clump of enemies in a 2x2 area, dealing 200/400/600% AD as physical damage.',
+        'Fires a cannonball at the largest clump of enemies in a 2x2 area, dealing 400/400/1500% AD as physical damage.',
 
     effects: [
       AbilityEffect(
@@ -407,7 +407,7 @@ final Map<String, Ability> abilities = {
           targetTeam: TargetTeam.enemies,
         ),
         scalingStat: "attackDamage",
-        scalingPercentByTier: [2.0, 4.0, 15.0],
+        scalingPercentByTier: [4.0, 4.0, 15.0],
       ),
     ],
   ),
@@ -415,7 +415,7 @@ final Map<String, Ability> abilities = {
   "Hurricane's Eye": Ability(
     name: "Hurricane's Eye",
     description:
-        'Strike adjacent enemies 20 times, dealing 150/300/5000% AD physical damage each time.',
+        'Strike adjacent enemies 20 times, dealing 7/15/200% AD physical damage each time.',
 
     effects: List.generate(
       20,
@@ -428,7 +428,7 @@ final Map<String, Ability> abilities = {
           targetTeam: TargetTeam.enemies,
         ),
         scalingStat: "attackDamage",
-        scalingPercentByTier: [1.5, 3.0, 50.0],
+        scalingPercentByTier: [.07, .15, 2.0],
       ),
     ),
   ),
@@ -620,7 +620,7 @@ final Map<String, Ability> abilities = {
   'Colossal Might': Ability(
     name: 'Colossal Might',
     description:
-        'Gain 20/40/100% AD as bonus AD for 5s. Gain a shield for 10/20/100% max HP + 100/200/500% AP.',
+        'Gain 100/200/500% AD as bonus AD for 5s. Gain a shield for 10/20/100% max HP + 100/200/500% AP.',
 
     manaLockDuration: Duration(seconds: 5),
     effects: [
@@ -634,7 +634,7 @@ final Map<String, Ability> abilities = {
         ),
         stat: "attackDamage",
         scalingStat: "attackDamage",
-        scalingPercentByTier: [0.2, 0.4, 1.0],
+        scalingPercentByTier: [1.0, 2.0, 5.0],
         duration: Duration(seconds: 5),
       ),
       AbilityEffect(
@@ -983,7 +983,7 @@ final Map<String, Ability> abilities = {
   'Piercing Round': Ability(
     name: 'Piercing Round',
     description:
-        'Fire a shot at the lowest armor enemy, dealing 400/600/800% AD Physical damage.',
+        'Fire a shot at the lowest armor enemy, dealing 400/800/4000% AD Physical damage.',
 
     effects: [
       AbilityEffect(
@@ -1047,7 +1047,7 @@ final Map<String, Ability> abilities = {
           targetTeam: TargetTeam.enemies,
         ),
         scalingStat: "attackDamage",
-        scalingPercentByTier: [2.0, 4.0, 6.0],
+        scalingPercentByTier: [2.0, 3.0, 4.0],
       ),
     ],
   ),
@@ -1165,8 +1165,7 @@ final Map<String, Ability> abilities = {
 
   'Flame Surge': Ability(
     name: 'Flame Surge',
-    description:
-        'Gain 20/40/60% Attack Speed and 20/40/60% AP Attack Damage for 5 seconds.',
+    description: 'Gain 40/80/120% Attack Speed for 5 seconds.',
 
     effects: [
       AbilityEffect(
@@ -1178,20 +1177,7 @@ final Map<String, Ability> abilities = {
           targetTeam: TargetTeam.allies,
         ),
         stat: "attackSpeed",
-        baseAmountByTier: [20, 40, 60],
-        duration: Duration(seconds: 5),
-      ),
-      AbilityEffect(
-        type: AbilityEffectType.statBuff,
-        targeting: TargetingRule(
-          areaShape: AreaShape.xByX,
-          size: 1,
-          selection: TargetSelection.self,
-          targetTeam: TargetTeam.allies,
-        ),
-        stat: "attackDamage",
-        scalingStat: "abilityPower",
-        scalingPercentByTier: [0.2, 0.4, 0.6],
+        baseAmountByTier: [40, 80, 120],
         duration: Duration(seconds: 5),
       ),
     ],
@@ -1200,7 +1186,7 @@ final Map<String, Ability> abilities = {
   'Flare Burst': Ability(
     name: 'Flare Burst',
     description:
-        'Gain 10/20/30 Lifesteal for 6 seconds. Set off a flare dealing 100/200/300% AD physical damage to all enemies in a 3x3 square centered on the target.',
+        'Gain 10/20/30 Lifesteal for 6 seconds. Set off a flare dealing 200/250/300% AD physical damage to all enemies in a 3x3 square centered on the target.',
 
     effects: [
       AbilityEffect(
@@ -1224,7 +1210,7 @@ final Map<String, Ability> abilities = {
           targetTeam: TargetTeam.enemies,
         ),
         scalingStat: "attackDamage",
-        scalingPercentByTier: [1.0, 2.0, 3.0],
+        scalingPercentByTier: [2.0, 2.5, 3.0],
       ),
     ],
   ),
@@ -1327,7 +1313,7 @@ final Map<String, Ability> abilities = {
   'Infernal Volley': Ability(
     name: 'Infernal Volley',
     description:
-        'Gain 5/10/15% AP Attack Speed and AD. Rapidly throw daggers at the largest group of enemies in a plus shape, dealing 15/25/1000% AD 20 times. Then throw a final dagger at the enemy, dealing 300/600/3000% AD.',
+        'Gain 5/10/15% AP Attack Speed and AD. Rapidly throw daggers at the largest group of enemies in a plus shape, dealing 10/20/300% AD 10 times. Then throw a final dagger at the enemy, dealing 300/400/2000% AD.',
 
     effects: [
       AbilityEffect(
@@ -1358,7 +1344,7 @@ final Map<String, Ability> abilities = {
       ),
 
       ...List.generate(
-        20,
+        10,
         (_) => AbilityEffect(
           type: AbilityEffectType.damage,
           targeting: TargetingRule(
@@ -1368,7 +1354,7 @@ final Map<String, Ability> abilities = {
             targetTeam: TargetTeam.enemies,
           ),
           scalingStat: "attackDamage",
-          scalingPercentByTier: [0.15, 0.25, 10.0],
+          scalingPercentByTier: [0.1, 0.2, 3.0],
         ),
       ),
 
@@ -1381,7 +1367,7 @@ final Map<String, Ability> abilities = {
           targetTeam: TargetTeam.enemies,
         ),
         scalingStat: "attackDamage",
-        scalingPercentByTier: [3.0, 6.0, 30.0],
+        scalingPercentByTier: [3.0, 4.0, 20.0],
       ),
     ],
   ),
@@ -1389,7 +1375,7 @@ final Map<String, Ability> abilities = {
   'Rocket Barrage': Ability(
     name: 'Rocket Barrage',
     description:
-        'Dash 2 tiles away from enemies, then fire a rocket at the largest group of enemies, dealing small damage over time to enemies it passes through and heavy damage in a 2x2 at the impact.',
+        'Gain 20/30/40% AP Attack Speed. Fire a rocket at the largest group of enemies, dealing 50/75/100% AD to a 2x2 area.',
 
     effects: [
       AbilityEffect(
@@ -1408,18 +1394,6 @@ final Map<String, Ability> abilities = {
       ),
 
       AbilityEffect(
-        type: AbilityEffectType.dash,
-        dashRange: 2,
-        dashAway: true,
-        targeting: TargetingRule(
-          areaShape: AreaShape.xByX,
-          size: 1,
-          selection: TargetSelection.mostCanHit,
-          targetTeam: TargetTeam.enemies,
-        ),
-      ),
-
-      AbilityEffect(
         type: AbilityEffectType.projectile,
         targeting: TargetingRule(
           areaShape: AreaShape.xByX,
@@ -1428,25 +1402,10 @@ final Map<String, Ability> abilities = {
           targetTeam: TargetTeam.enemies,
         ),
         projectileWidth: 1,
-        projectileTravelSpeed: 4,
+        projectileTravelSpeed: 6,
         projectileSpritePath: 'images/effects/projectile_bullet.png',
         projectileStopsAtFirstHit: true,
-        passThroughEffects: [
-          AbilityEffect(
-            type: AbilityEffectType.damage,
-            targeting: TargetingRule(
-              areaShape: AreaShape.xByX,
-              size: 1,
-              selection: TargetSelection.self,
-              targetTeam: TargetTeam.enemies,
-            ),
-            scalingStat: "attackDamage",
-            scalingPercentByTier: [0.2, 0.3, 0.4],
-            isDamageOverTime: true,
-            damageOverTimeDuration: Duration(seconds: 2),
-            effectImagePath: "images/effects/melee_poke.png",
-          ),
-        ],
+        passThroughEffects: [],
         impactEffects: [
           AbilityEffect(
             type: AbilityEffectType.damage,
@@ -1457,7 +1416,7 @@ final Map<String, Ability> abilities = {
               targetTeam: TargetTeam.enemies,
             ),
             scalingStat: "attackDamage",
-            scalingPercentByTier: [1.0, 1.5, 2.0],
+            scalingPercentByTier: [.5, .75, 1.0],
             effectImagePath: "images/effects/melee_pummel.png",
           ),
         ],
@@ -2021,7 +1980,7 @@ final Map<String, Ability> abilities = {
   'Unbreakable Form': Ability(
     name: 'Unbreakable Form',
     description:
-        'Gain 30 damage reduction for 5 seconds. Gain 10/20/30% Max health. Deal 20/30/40% Max health damage to the enemy.',
+        'Gain 10/20/30% damage reduction for 5 seconds. Gain 10/20/30% Max health. Deal 20/30/40% Max health damage to the enemy.',
 
     manaLockDuration: Duration(seconds: 2),
     effects: [
@@ -2034,7 +1993,7 @@ final Map<String, Ability> abilities = {
           targetTeam: TargetTeam.allies,
         ),
         stat: 'damageReduction',
-        baseAmountByTier: [30, 30, 30],
+        baseAmountByTier: [10, 20, 30],
         duration: Duration(seconds: 2),
       ),
       AbilityEffect(
@@ -2047,7 +2006,7 @@ final Map<String, Ability> abilities = {
         ),
         stat: 'maxHealth',
         scalingStat: 'maxHealth',
-        scalingPercentByTier: [0.10, 0.20, 0.30],
+        scalingPercentByTier: [0.5, 0.10, 0.15],
       ),
       AbilityEffect(
         type: AbilityEffectType.damage,
@@ -2058,7 +2017,7 @@ final Map<String, Ability> abilities = {
           targetTeam: TargetTeam.enemies,
         ),
         scalingStat: 'maxHealth',
-        scalingPercentByTier: [0.20, 0.30, 0.40],
+        scalingPercentByTier: [0.20, 0.20, 0.20],
       ),
     ],
   ),
