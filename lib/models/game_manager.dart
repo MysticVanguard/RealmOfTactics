@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'package:realm_of_tactics/models/round_data.dart';
+import 'package:realm_of_tactics/widgets/end_screen.dart';
 
+import 'package:realm_of_tactics/main.dart';
 import 'board_manager.dart';
 import 'synergy_manager.dart';
 import 'combat_manager.dart';
@@ -85,9 +87,9 @@ class GameManager extends ChangeNotifier {
   // Needed for animations
   TickerProvider? overlayTicker;
   // Controls enemy team generation
-  late final OpponentManager _opponentManager;
+  late OpponentManager _opponentManager;
   // Controls the map and it's generation
-  late final MapManager _mapManager;
+  late MapManager _mapManager;
 
   static GameManager? instance;
   List<Item> getBasicItems() {
@@ -652,6 +654,12 @@ class GameManager extends ChangeNotifier {
     if (_playerHealth <= 0) {
       _playerHealth = 0;
       _currentState = GameState.gameOver;
+      notifyListeners();
+      Future.delayed(const Duration(milliseconds: 500), () {
+        navigatorKey.currentState?.pushReplacement(
+          MaterialPageRoute(builder: (context) => const EndScreen()),
+        );
+      });
     }
   }
 
@@ -668,21 +676,30 @@ class GameManager extends ChangeNotifier {
 
   // Resets the entire game state
   void resetGame() {
-    _combatTickTimer?.cancel();
-    _combatTickTimer = null;
-    _playerHealth = 100;
-    _gold = 0;
-    _playerLevel = 1;
-    _playerXp = 0;
-    _currentStage = 1;
-    ironvaleScrap = 0;
-    _currentState = GameState.shopping;
+    // Clear static instance
+    GameManager.instance = null;
 
-    _boardManager?.initialize();
-    _synergyManager?.reset();
-    _combatManager?.reset();
+    // Create new GameManager and replace dependencies
+    final newGameManager = GameManager();
+    final newSynergyManager = SynergyManager()..initialize();
+    final newBoardManager = BoardManager(newGameManager, newSynergyManager)
+      ..initialize();
+    final newShopManager = ShopManager(newGameManager)..initialize();
+    final newCombatManager = CombatManager(
+      boardManager: newBoardManager,
+      synergyManager: newSynergyManager,
+    );
 
-    notifyListeners();
+    // Wire dependencies
+    newGameManager.setBoardManager(newBoardManager);
+    newGameManager.setSynergyManager(newSynergyManager);
+    newGameManager.setShopManager(newShopManager);
+    newGameManager.setCombatManager(newCombatManager);
+
+    newGameManager.initialize();
+
+    // Replace instance with new one
+    GameManager.instance = newGameManager;
   }
 
   // Called at the end of post-combat to prepare units and shop for next round

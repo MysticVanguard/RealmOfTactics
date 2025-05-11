@@ -43,6 +43,8 @@ class GameScreen extends StatefulWidget {
 }
 
 class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
+  GameManager? gameManager;
+
   // Currently selected unit, used for displaying stats/details
   Unit? selectedUnit;
 
@@ -67,6 +69,12 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
 
   // Global key used to measure board position for animations
   final GlobalKey boardKey = GlobalKey();
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    gameManager ??= Provider.of<GameManager>(context, listen: false);
+  }
 
   @override
   void initState() {
@@ -313,13 +321,6 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
     setState(() {
       _isShopOpen = !_isShopOpen;
     });
-  }
-
-  // Clean up
-  @override
-  void dispose() {
-    Provider.of<BoardManager>(context, listen: false);
-    super.dispose();
   }
 
   // New tab on the left with node info when the nodes are selected
