@@ -91,6 +91,8 @@ class GameManager extends ChangeNotifier {
   // Controls the map and it's generation
   late MapManager _mapManager;
 
+  GlobalKey<OverlayState> projectileOverlayKey = GlobalKey<OverlayState>();
+
   static GameManager? instance;
   List<Item> getBasicItems() {
     return allItems.values.where((item) => item.isComponent).toList();
@@ -866,7 +868,7 @@ class GameManager extends ChangeNotifier {
       },
     );
 
-    GameManager.instance!.overlayState!.insert(entry);
+    GameManager.instance!.projectileOverlayKey.currentState?.insert(entry);
 
     Future.delayed(duration ?? Duration(milliseconds: 500), () {
       entry.remove();
@@ -880,30 +882,38 @@ class GameManager extends ChangeNotifier {
     double tileSize,
     String type,
   ) {
-    if (boardKey == null) {
-      return Offset.zero;
-    }
+    if (boardKey == null) return Offset.zero;
 
-    final context = boardKey!.currentContext;
-    if (context == null) {
-      return Offset.zero;
-    }
+    final boardContext = boardKey!.currentContext;
+    final boardBox = boardContext?.findRenderObject() as RenderBox?;
 
-    final box = context.findRenderObject() as RenderBox?;
-    if (box == null || !box.hasSize) {
-      return Offset.zero;
-    }
+    if (boardBox == null || !boardBox.hasSize) return Offset.zero;
 
-    final boardTopLeft = box.localToGlobal(Offset.zero);
+    final boardTopLeftGlobal = boardBox.localToGlobal(Offset.zero);
+
     if (type == "ranged") {
       return Offset(
-        boardTopLeft.dx + col * tileSize + tileSize / 2,
-        boardTopLeft.dy + row * tileSize + tileSize / 2,
+        boardTopLeftGlobal.dx + col * tileSize + tileSize / 2,
+        boardTopLeftGlobal.dy + row * tileSize + tileSize / 2,
       );
     } else {
+      if (projectileOverlayKey.currentContext != null) {
+        final overlayBox =
+            projectileOverlayKey.currentContext!.findRenderObject()
+                as RenderBox?;
+        if (overlayBox != null && overlayBox.hasSize) {
+          final overlayTopLeftGlobal = overlayBox.localToGlobal(Offset.zero);
+          final relativeDx = boardTopLeftGlobal.dx - overlayTopLeftGlobal.dx;
+          final relativeDy = boardTopLeftGlobal.dy - overlayTopLeftGlobal.dy;
+          return Offset(
+            relativeDx + col * tileSize,
+            relativeDy + row * tileSize,
+          );
+        }
+      }
       return Offset(
-        boardTopLeft.dx + col * tileSize,
-        boardTopLeft.dy + row * tileSize,
+        boardTopLeftGlobal.dx + col * tileSize,
+        boardTopLeftGlobal.dy + row * tileSize,
       );
     }
   }

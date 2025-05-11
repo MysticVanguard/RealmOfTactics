@@ -887,6 +887,11 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
                           ),
                         ),
 
+                        Overlay(
+                          key: GameManager.instance!.projectileOverlayKey,
+                          initialEntries: [],
+                        ),
+
                         // Start choice overlay
                         if (gameManager.currentState == GameState.chooseStart)
                           StartChoiceOverlay(
