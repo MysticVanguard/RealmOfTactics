@@ -272,7 +272,7 @@ class Unit extends ChangeNotifier {
       if (source.stats.lifesteal > 0 && !fromItem) {
         int healAmount = (finalDamage * source.stats.lifesteal).floor();
         if (healAmount > 0) {
-          heal(source, healAmount);
+          source.heal(source, healAmount);
         }
       }
     }
@@ -1194,6 +1194,7 @@ class Unit extends ChangeNotifier {
     stats.itemStartingMana = 0;
     stats.itemDamageAmp = 0.0;
     stats.itemDamageReduction = 0.0;
+    stats.itemRange = 0;
     stats.itemOnAttackStats = OnAttackStats.empty;
 
     // Reapply bonuses from equipped items

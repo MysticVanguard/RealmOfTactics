@@ -31,7 +31,7 @@ class BlessingData {
     BlessingEntry("Equalizer", 2, {1}),
     BlessingEntry("Three Squared", 2, {1, 2}),
     BlessingEntry("Money Lover+", 2, {2}),
-    BlessingEntry("Forging", 2, {2, 3}),
+    BlessingEntry("Forging", 2, {1, 2, 3}),
     BlessingEntry("Speed It Up", 2, {2, 3}),
     BlessingEntry("Goodie Bag", 2, {2, 3}),
     BlessingEntry("Strength Up", 2, {1, 2, 3}),
@@ -258,7 +258,7 @@ class BlessingData {
     "Money Lover": "Gain 15 gold. Max interest increased to 10.",
     "Equalizer": "Your Tier 1 blessing becomes Tier 3.",
     "Three Squared":
-        "Start with 3 tier 3-cost units: they get 33% Attack Speed and 333 Health.",
+        "Start with 3 3-cost units: they get 33% Attack Speed and 333 Health.",
     "Money Lover+": "Gain 20 gold. Max interest increased to 10.",
     "Forging": "Gain a random forged item.",
     "Speed It Up": "After 15 seconds, your units gain 150% Attack Speed.",
@@ -272,7 +272,8 @@ class BlessingData {
     "Component Hoarder":
         "Tier 1 items give 4x stats at combat start. Gain 2 tier 1 items.",
     "Big Start": "Gain 50 XP.",
-    "Holy Trinity": "3 tier 3-cost tier 3 units get 33% stats and 333 Health.",
+    "Holy Trinity":
+        "Start with 3 tier 3 3-cost units: They get 33% Attack Speed, Damage Resistance, and Damage Amp, and 333 Health.",
     "End It": "After 15 seconds, your units gain 300% Attack Speed.",
     "Forged Iron": "Gain 2 random forged items.",
     "Aggressive Aggression": "Units gain 100 HP and 15% AD per item held.",

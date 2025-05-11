@@ -140,7 +140,7 @@ class GameManager extends ChangeNotifier {
   int _playerHealth = 100;
   int _playerXp = 0;
   int _currentStage = 0;
-  int _ironvaleScrap = 0;
+  int ironvaleScrap = 0;
   int playerItemReforgeTokens = 0;
   int playerSmallUnitDuplicator = 0;
   int playerLargeUnitDuplicator = 0;
@@ -177,7 +177,6 @@ class GameManager extends ChangeNotifier {
   int get playerHealth => _playerHealth;
   int get currentStage => _currentStage;
   int get playerXp => _playerXp;
-  int get ironvaleScrap => _ironvaleScrap;
   int get expForNextLevel => 4;
   BoardManager? get boardManager => _boardManager;
   CombatManager? get combatManager => _combatManager;
@@ -236,7 +235,7 @@ class GameManager extends ChangeNotifier {
     _playerLevel = 1;
     _playerHealth = 100;
     _currentStage = 1;
-    _ironvaleScrap = 0;
+    ironvaleScrap = 0;
     _nextRoundEnemies.clear();
 
     _combatManager?.reset();
@@ -676,7 +675,7 @@ class GameManager extends ChangeNotifier {
     _playerLevel = 1;
     _playerXp = 0;
     _currentStage = 1;
-    _ironvaleScrap = 0;
+    ironvaleScrap = 0;
     _currentState = GameState.shopping;
 
     _boardManager?.initialize();
@@ -739,7 +738,7 @@ class GameManager extends ChangeNotifier {
         }
       }
       if (scrapGained > 0) {
-        _ironvaleScrap += scrapGained;
+        ironvaleScrap += scrapGained;
       }
     }
 
@@ -754,10 +753,6 @@ class GameManager extends ChangeNotifier {
       units.addAll(_combatManager!.enemyUnits);
     }
     return units;
-  }
-
-  set ironvaleScrap(int newScrap) {
-    _ironvaleScrap = newScrap;
   }
 
   // Searches combat units by ID

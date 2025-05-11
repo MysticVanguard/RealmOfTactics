@@ -23,7 +23,8 @@ class BoardManager extends ChangeNotifier {
   );
 
   // The bench, same as the board but only a 1d list
-  final List<dynamic> _bench = List.generate(benchSlots, (_) => null);
+  final List<Unit?> _unitBench = List.generate(benchSlots, (_) => null);
+  List<Item> _itemBench = [];
 
   // Managers
   final SynergyManager _synergyManager;
@@ -33,7 +34,8 @@ class BoardManager extends ChangeNotifier {
   // Initializes the board and bench and updates the visuals
   void initialize() {
     _clearBoardRange();
-    _clearBench();
+    _clearUnitBench();
+    _clearItemBench();
     notifyListeners();
   }
 
@@ -58,11 +60,16 @@ class BoardManager extends ChangeNotifier {
     notifyListeners();
   }
 
-  // Removes everything from the bench
-  void _clearBench() {
+  // Removes everything from the unit bench
+  void _clearUnitBench() {
     for (int i = 0; i < benchSlots; i++) {
-      _bench[i] = null;
+      _unitBench[i] = null;
     }
+  }
+
+  // Removes everything from the item bench
+  void _clearItemBench() {
+    _itemBench = [];
   }
 
   // Gets the unit at a given position or null if none
@@ -73,10 +80,18 @@ class BoardManager extends ChangeNotifier {
     return null;
   }
 
-  // Get what is at a bench slot, could be unit or an item or null
-  dynamic getBenchSlotItem(int index) {
+  // Get what is at a bench slot, could be an item or null
+  Item? getBenchSlotItem(int index) {
+    if (index < _itemBench.length) {
+      return _itemBench[index];
+    }
+    return null;
+  }
+
+  // Get what is at a bench slot, could be a unit or null
+  Unit? getBenchSlotUnit(int index) {
     if (isValidBenchIndex(index)) {
-      return _bench[index];
+      return _unitBench[index];
     }
     return null;
   }
@@ -153,9 +168,9 @@ class BoardManager extends ChangeNotifier {
     if (currentBenchIndex != null &&
         currentBenchIndex >= 0 &&
         isValidBenchIndex(currentBenchIndex)) {
-      if (_bench[currentBenchIndex] is Unit &&
-          (_bench[currentBenchIndex] as Unit).id == unit.id) {
-        _bench[currentBenchIndex] = null;
+      if (_unitBench[currentBenchIndex] is Unit &&
+          (_unitBench[currentBenchIndex] as Unit).id == unit.id) {
+        _unitBench[currentBenchIndex] = null;
       }
     } else if (unit.isOnBoard && unit.boardX >= 0 && unit.boardY >= 0) {
       Position oldPos = Position(unit.boardY, unit.boardX);
@@ -219,7 +234,7 @@ class BoardManager extends ChangeNotifier {
       return true;
     }
 
-    int emptySlot = _findEmptyBenchSlot(targetIndex);
+    int emptySlot = _findEmptyBenchSlot(_unitBench, targetIndex);
     if (emptySlot == -1) {
       return false;
     }
@@ -251,7 +266,7 @@ class BoardManager extends ChangeNotifier {
     unitToAdd.benchIndex = emptySlot;
     unitToAdd.boardX = -1;
     unitToAdd.boardY = -1;
-    _bench[emptySlot] = unitToAdd;
+    _unitBench[emptySlot] = unitToAdd;
 
     unitToAdd.stats.currentHealth = unitToAdd.stats.maxHealth;
 
@@ -263,34 +278,6 @@ class BoardManager extends ChangeNotifier {
 
     notifyListeners();
     return true;
-  }
-
-  // Used for swapping two units on the bench
-  void swapBenchUnits(int indexA, int indexB) {
-    final Unit? unitA = getBenchSlotItem(indexA) as Unit?;
-    final Unit? unitB = getBenchSlotItem(indexB) as Unit?;
-
-    if (unitA != null && unitB != null) {
-      _bench[indexA] = unitB;
-      _bench[indexB] = unitA;
-      unitA.benchIndex = indexB;
-      unitB.benchIndex = indexA;
-      notifyListeners();
-    }
-  }
-
-  // Used for swapping two items on the bench
-  void swapBenchItems(int indexA, int indexB) {
-    final Item? itemA = getBenchSlotItem(indexA) as Item?;
-    final Item? itemB = getBenchSlotItem(indexB) as Item?;
-
-    if (itemA != null && itemB != null) {
-      _bench[indexA] = itemB;
-      _bench[indexB] = itemA;
-      itemA.benchIndex = indexB;
-      itemB.benchIndex = indexA;
-      notifyListeners();
-    }
   }
 
   // Used for swapping two units on the board
@@ -310,34 +297,9 @@ class BoardManager extends ChangeNotifier {
   }
 
   // Adds an item to the bench, or tries to combine it if dropped on another item
-  bool addItemToBench(Item item, [int? targetIndex]) {
-    int targetSlot = targetIndex ?? -1;
-
-    // If this is a component item and it's dropped on another component, try to combine them
-    if (item.isComponent && targetSlot != -1 && isValidBenchIndex(targetSlot)) {
-      dynamic targetSlotContent = _bench[targetSlot];
-      if (targetSlotContent is Item && targetSlotContent.isComponent) {
-        Item? combinedItem = item.combine(targetSlotContent);
-        if (combinedItem != null) {
-          _bench[targetSlot] = combinedItem;
-          combinedItem.benchIndex = targetSlot;
-          notifyListeners();
-          return true;
-        }
-      }
-    }
-
-    // Otherwise, find an empty bench slot at the index and place it there
-    int emptySlot = _findEmptyBenchSlot(targetIndex);
-    if (emptySlot == -1) {
-      return false;
-    }
-
-    item.benchIndex = emptySlot;
-    _bench[emptySlot] = item;
-
-    notifyListeners();
-    return true;
+  void addItemToBench(Item item, [int? targetIndex]) {
+    _itemBench.add(item);
+    item.benchIndex = _itemBench.indexOf(item);
   }
 
   // Checks if a bench index is within valid bounds
@@ -369,10 +331,10 @@ class BoardManager extends ChangeNotifier {
 
       // Look on the bench
       for (int i = 0; i < benchSlots; i++) {
-        if (_bench[i] is Unit &&
-            (_bench[i] as Unit).unitName == newUnit.unitName &&
-            (_bench[i] as Unit).tier == targetTier) {
-          Unit benchUnit = _bench[i] as Unit;
+        if (_unitBench[i] is Unit &&
+            (_unitBench[i] as Unit).unitName == newUnit.unitName &&
+            (_unitBench[i] as Unit).tier == targetTier) {
+          Unit benchUnit = _unitBench[i] as Unit;
 
           if (!allCopies.any((u) => u.id == benchUnit.id)) {
             allCopies.add(benchUnit);
@@ -405,10 +367,10 @@ class BoardManager extends ChangeNotifier {
 
       // Look on the bench
       for (int i = 0; i < benchSlots; i++) {
-        if (_bench[i] is Unit &&
-            (_bench[i] as Unit).unitName == newUnit.unitName &&
-            (_bench[i] as Unit).tier == 2) {
-          Unit benchUnit = _bench[i] as Unit;
+        if (_unitBench[i] is Unit &&
+            (_unitBench[i] as Unit).unitName == newUnit.unitName &&
+            (_unitBench[i] as Unit).tier == 2) {
+          Unit benchUnit = _unitBench[i] as Unit;
           if (!allCopies.any((u) => u.id == benchUnit.id)) {
             allCopies.add(benchUnit);
           }
@@ -455,7 +417,7 @@ class BoardManager extends ChangeNotifier {
             _board[pos.row][pos.col] = null;
           }
         } else if (unit.benchIndex != null && unit.benchIndex! >= 0) {
-          _bench[unit.benchIndex!] = null;
+          _unitBench[unit.benchIndex!] = null;
         }
       }
 
@@ -467,17 +429,13 @@ class BoardManager extends ChangeNotifier {
             _board[pos.row][pos.col] = null;
           }
         } else if (newUnit.benchIndex != null && newUnit.benchIndex! >= 0) {
-          _bench[newUnit.benchIndex!] = null;
+          _unitBench[newUnit.benchIndex!] = null;
         }
       }
 
       // Put unequipped items back on the bench
       for (var item in unequippedItems) {
-        int emptySlot = _findEmptyBenchSlot();
-        if (emptySlot != -1) {
-          _bench[emptySlot] = item;
-          item.benchIndex = emptySlot;
-        }
+        _itemBench.add(item);
       }
 
       // Try placing upgraded unit on the bench if needed
@@ -497,7 +455,7 @@ class BoardManager extends ChangeNotifier {
         }
 
         if (availableSlots.isEmpty) {
-          int emptySlot = _findEmptyBenchSlot();
+          int emptySlot = _findEmptyBenchSlot(_unitBench);
           if (emptySlot != -1) {
             availableSlots.add(emptySlot);
           }
@@ -511,7 +469,7 @@ class BoardManager extends ChangeNotifier {
           baseUnit.isOnBoard = false;
           baseUnit.boardX = -1;
           baseUnit.boardY = -1;
-          _bench[targetSlot] = baseUnit;
+          _unitBench[targetSlot] = baseUnit;
         } else {
           return false;
         }
@@ -534,9 +492,9 @@ class BoardManager extends ChangeNotifier {
         }
 
         for (int i = 0; i < benchSlots; i++) {
-          if (_bench[i] is Unit &&
-              (_bench[i] as Unit).unitName == baseUnit.unitName &&
-              (_bench[i] as Unit).tier == 2) {
+          if (_unitBench[i] is Unit &&
+              (_unitBench[i] as Unit).unitName == baseUnit.unitName &&
+              (_unitBench[i] as Unit).tier == 2) {
             tier2Count++;
           }
         }
@@ -570,32 +528,32 @@ class BoardManager extends ChangeNotifier {
 
   // Returns all the units currently on the bench
   List<Unit> getAllBenchUnits() {
-    return _bench.whereType<Unit>().toList();
+    return _unitBench.whereType<Unit>().toList();
   }
 
   // Returns all the items currently on the bench
   List<Item> getAllBenchItems() {
-    return _bench.whereType<Item>().toList();
+    return _itemBench;
   }
 
   // Finds the first empty bench slot, optionally starting at a target index
-  int _findEmptyBenchSlot([int? startIndex]) {
+  int _findEmptyBenchSlot(List<dynamic> bench, [int? startIndex]) {
     int start =
         startIndex != null &&
                 isValidBenchIndex(startIndex) &&
-                _bench[startIndex] == null
+                bench[startIndex] == null
             ? startIndex
             : 0;
 
     if (start == startIndex) return start;
 
     for (int i = 0; i < (startIndex ?? benchSlots); i++) {
-      if (_bench[i] == null) return i;
+      if (bench[i] == null) return i;
     }
 
     if (startIndex != null) {
       for (int i = startIndex + 1; i < benchSlots; i++) {
-        if (_bench[i] == null) return i;
+        if (bench[i] == null) return i;
       }
     }
 
@@ -625,17 +583,12 @@ class BoardManager extends ChangeNotifier {
 
   // Gets total number of units on the bench
   int get benchUnitCount {
-    return _bench.whereType<Unit>().length;
+    return _unitBench.whereType<Unit>().length;
   }
 
   // Gets total number of items on the bench
   int get benchItemCount {
-    return _bench.whereType<Item>().length;
-  }
-
-  // How many total bench slots are currently used
-  int get occupiedBenchSlots {
-    return _bench.where((slot) => slot != null).length;
+    return _itemBench.length;
   }
 
   // Finds the board position of a unit by ID
@@ -689,10 +642,10 @@ class BoardManager extends ChangeNotifier {
       else {
         int? benchIdx = entity.benchIndex;
         if (benchIdx != null && benchIdx >= 0 && isValidBenchIndex(benchIdx)) {
-          if (_bench[benchIdx] is Unit &&
-              (_bench[benchIdx] as Unit).id == entity.id) {
-            dynamic removed = _bench[benchIdx];
-            _bench[benchIdx] = null;
+          if (_unitBench[benchIdx] is Unit &&
+              (_unitBench[benchIdx] as Unit).id == entity.id) {
+            dynamic removed = _unitBench[benchIdx];
+            _unitBench[benchIdx] = null;
             notifyListeners();
             return removed;
           }
@@ -700,16 +653,9 @@ class BoardManager extends ChangeNotifier {
       }
     } else if (entity is Item) {
       // Remove item from bench
-      int? benchIdx = entity.benchIndex;
-      if (benchIdx >= 0 && isValidBenchIndex(benchIdx)) {
-        if (_bench[benchIdx] is Item &&
-            (_bench[benchIdx] as Item).id == entity.id) {
-          dynamic removed = _bench[benchIdx];
-          _bench[benchIdx] = null;
-          notifyListeners();
-          return removed;
-        }
-      }
+      _itemBench.remove(entity);
+      notifyListeners();
+      return entity;
     }
     return null;
   }
@@ -978,7 +924,7 @@ class BoardManager extends ChangeNotifier {
   bool isBenchFull() {
     int occupiedSlots = 0;
     for (int i = 0; i < 12; i++) {
-      if (_bench[i] != null) {
+      if (_unitBench[i] != null && _unitBench[i] is! Item) {
         occupiedSlots++;
       }
     }
@@ -999,7 +945,7 @@ class BoardManager extends ChangeNotifier {
 
     // Search units on the bench
     for (int i = 0; i < benchSlots; i++) {
-      final dynamic content = _bench[i];
+      final dynamic content = _unitBench[i];
       if (content is Unit && _isItemEquippedToUnit(content, item)) {
         return content;
       }

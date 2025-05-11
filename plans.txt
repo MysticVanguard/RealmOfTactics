@@ -1,7 +1,8 @@
 TODO:
-
+- Fix unit duplicator
 - Fix how units are displayed so they work with their new sprites
     - Maybe also add a size stat for units that can be changed
+- Make Start and End screens
 
 DONE:
 - Fix up stats player sees
@@ -39,3 +40,7 @@ DONE:
     - Will allow for infinitely more uniqueness to rounds
 - Add reforger for changing units/items for gold
 - Add other combat round sets
+- Fix Jeweled Scope range
+- Fix bench problems
+- Fix Items "Unequip" button always showing
+- Sort synergy tab by most active tier, then closest to next tier, then finally alphabetical

@@ -1764,7 +1764,8 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
       final Unit original = _reforgerSlot;
       if (original.cost <= 3 && gameManager.playerSmallUnitDuplicator < 1) {
         return;
-      } else if (gameManager.playerLargeUnitDuplicator < 1) {
+      }
+      if (original.cost > 3 && gameManager.playerLargeUnitDuplicator < 1) {
         return;
       }
 

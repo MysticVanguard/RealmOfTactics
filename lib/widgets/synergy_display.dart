@@ -11,10 +11,46 @@ class SynergyDisplay extends StatelessWidget {
   Widget build(BuildContext context) {
     // Get the current synergy counts from the manager
     final allSynergyCounts = synergyManager.synergyCounts;
-    // Sort the synergies alphabetically by name
+    // Sort the synergies by Most active tier, Closest to next tier, and then alphabetically by name
     final sortedSynergies =
-        allSynergyCounts.entries.toList()
-          ..sort((a, b) => a.key.compareTo(b.key));
+        allSynergyCounts.entries.toList()..sort((a, b) {
+          final thresholdsA = synergyManager.getSynergyThresholds(a.key);
+          final thresholdsB = synergyManager.getSynergyThresholds(b.key);
+
+          final activeLevelA = synergyManager.determineSynergyTier(
+            thresholdsA,
+            a.value,
+          );
+          final activeLevelB = synergyManager.determineSynergyTier(
+            thresholdsB,
+            b.value,
+          );
+
+          if (activeLevelA != activeLevelB) {
+            return activeLevelB.compareTo(activeLevelA);
+          }
+
+          int nextThresholdA = thresholdsA.firstWhere(
+            (t) => t > a.value,
+            orElse:
+                () =>
+                    thresholdsA.isNotEmpty ? thresholdsA.last + 1 : a.value + 1,
+          );
+          int nextThresholdB = thresholdsB.firstWhere(
+            (t) => t > b.value,
+            orElse:
+                () =>
+                    thresholdsB.isNotEmpty ? thresholdsB.last + 1 : b.value + 1,
+          );
+
+          final progressA = nextThresholdA - a.value;
+          final progressB = nextThresholdB - b.value;
+
+          if (progressA != progressB) {
+            return progressA.compareTo(progressB);
+          }
+          return a.key.compareTo(b.key);
+        });
 
     return Container(
       padding: const EdgeInsets.all(16),

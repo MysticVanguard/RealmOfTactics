@@ -128,7 +128,8 @@ class ItemInfoBox extends StatelessWidget {
                     _buildRecipeSection(item.componentNames),
 
                   if (onUnequip != null &&
-                      GameManager.instance!.currentState != GameState.combat)
+                      GameManager.instance!.currentState != GameState.combat &&
+                      item.ownerUnitId != null)
                     Padding(
                       padding: const EdgeInsets.only(top: 12.0),
                       child: Center(

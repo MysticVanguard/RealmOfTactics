@@ -39,13 +39,10 @@ class OpponentManager {
       unit = unit.upgrade();
     }
     List<ItemType> types = [ItemType.weapon, ItemType.armor, ItemType.trinket];
-    print(items);
     if (items != null) {
       for (final item in items) {
-        print(item.name);
         item.type = types.removeAt(0);
-        bool equipped = unit.equipItem(item, enemyEquip: true);
-        print(equipped);
+        unit.equipItem(item, enemyEquip: true);
       }
     }
 
