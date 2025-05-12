@@ -395,60 +395,57 @@ class MapManager extends ChangeNotifier {
             break;
           case 2:
             items.add(gameManager.getRandomBasicItem());
+            itemReforgeTokens += 1;
             break;
           case 3:
+            items.add(gameManager.getRandomBasicItem());
             units.add(gameManager.getRandomUnitByCost(1));
             itemReforgeTokens += 1;
             break;
           case 4:
             items.add(gameManager.getRandomBasicItem());
+            itemReforgeTokens += 1;
             unitSmallDuplicators += 1;
             break;
           case 5:
-            itemReforgeTokens += 1;
             break;
           case 6:
-            items.add(gameManager.getRandomBasicItem());
-            units.add(gameManager.getRandomUnitByCost(2));
+            itemReforgeTokens += 1;
             break;
           case 7:
-            items.addAll([
-              gameManager.getRandomBasicItem(),
-              gameManager.getRandomBasicItem(),
-            ]);
+            items.add(gameManager.getRandomBasicItem());
+            units.add(gameManager.getRandomUnitByCost(2));
             itemReforgeTokens += 1;
             break;
           case 8:
-            items.addAll([
-              gameManager.getRandomBasicItem(),
-              gameManager.getRandomBasicItem(),
-            ]);
+            items.add(gameManager.getRandomBasicItem());
+            itemReforgeTokens += 1;
             break;
           case 9:
             items.addAll([
               gameManager.getRandomBasicItem(),
               gameManager.getRandomBasicItem(),
             ]);
-            units.add(gameManager.getRandomUnitByCost(3));
             itemReforgeTokens += 2;
             unitSmallDuplicators += 2;
             break;
           case 10:
-            items.add(gameManager.getRandomItemByTier(2));
-            itemReforgeTokens += 1;
             break;
           case 11:
+            units.add(gameManager.getRandomUnitByCost(3));
+            items.add(gameManager.getRandomItemByTier(2));
             itemReforgeTokens += 1;
             break;
           case 12:
-            itemReforgeTokens += 1;
-            units.add(gameManager.getRandomUnitByCost(4));
             items.add(gameManager.getRandomItemByTier(2));
+            itemReforgeTokens += 1;
             break;
           case 13:
+            items.add(gameManager.getRandomItemByTier(2));
             itemReforgeTokens += 1;
             break;
           case 14:
+            units.add(gameManager.getRandomUnitByCost(4));
             items.addAll([
               gameManager.getRandomItemByTier(2),
               gameManager.getRandomItemByTier(2),

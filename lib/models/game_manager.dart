@@ -35,21 +35,43 @@ final allStartOptions = [
   ),
   StartOption(
     name: "High Tier",
-    description: "Level 3, 2 XP, 5x 3-cost units, 2 items",
+    description: "Level 3, 2 XP, 2x tier 2 3-costs, 2 items",
   ),
   StartOption(
     name: "Full Bench",
-    description: "Level 4, 0 XP, 4x 2-cost, 4x 1-cost, 2 item",
+    description: "Level 4, 0 XP, 6x 2-cost, 6x 1-cost, 2 item",
   ),
-  StartOption(name: "Max Gold", description: "Level 1, 0 XP, 41 gold"),
+  StartOption(name: "Max Gold", description: "Level 1, 0 XP, 50 gold"),
   StartOption(name: "Equipped", description: "Level 3, 2 XP, 5 items, 5 gold"),
   StartOption(
     name: "Champion",
-    description: "Level 3, 0 XP, 1x 4-cost unit, 2 items, 12 gold",
+    description: "Level 3, 0 XP, 1x 4-cost unit, 3 items, 12 gold",
   ),
   StartOption(
     name: "Leveled Up",
-    description: "Level 5, 0 XP, 2x 2-cost units, 3 1-cost units",
+    description: "Level 5, 0 XP, 2x 2-cost units, 3 3-cost units, 1 item",
+  ),
+  StartOption(
+    name: "Duplicator",
+    description:
+        "Level 3, 2 XP, 15 gold, 3 Small Unit Duplicators, 1 Large Unit Duplicator",
+  ),
+  StartOption(
+    name: "Reforger",
+    description: "Level 3, 2 XP, 15 gold, 2 Items, 10 Item Reforge Tokens",
+  ),
+  StartOption(
+    name: "Healthy",
+    description: "Level 3, 2 XP, 10 gold, 1 Item, 25 Extra Player Health",
+  ),
+  StartOption(
+    name: "Small One",
+    description: "Level 1, 0 XP, 1x Tier 3 1-cost unit, 4 Item",
+  ),
+  StartOption(
+    name: "Randomness",
+    description:
+        "Level 1, 0 XP, 4x 1-cost, 4x 2-cost, 2x 3-cost, 1 Item, 2 Tier 2 Item,",
   ),
 ];
 
@@ -306,21 +328,26 @@ class GameManager extends ChangeNotifier {
         gm._playerLevel = 3;
         gm._playerXp = 2;
         gm.addGold(0);
-        addRandomUnitsToBench(3, 5);
+        Unit unit = getRandomUnitByCost(3);
+        unit = unit.upgrade();
+        boardManager?.addUnitToBench(unit);
+        unit = getRandomUnitByCost(3);
+        unit = unit.upgrade();
+        boardManager?.addUnitToBench(unit);
         addRandomBasicItems(2);
         break;
       case "Full Bench":
         gm._playerLevel = 4;
         gm._playerXp = 0;
         gm.addGold(0);
-        addRandomUnitsToBench(2, 4);
-        addRandomUnitsToBench(1, 4);
+        addRandomUnitsToBench(2, 6);
+        addRandomUnitsToBench(1, 6);
         addRandomBasicItems(2);
         break;
       case "Max Gold":
         gm._playerLevel = 1;
         gm._playerXp = 0;
-        gm.addGold(41);
+        gm.addGold(50);
         break;
       case "Equipped":
         gm._playerLevel = 3;
@@ -333,15 +360,49 @@ class GameManager extends ChangeNotifier {
         gm._playerXp = 0;
         gm.addGold(12);
         addRandomUnitsToBench(4, 1);
-        addRandomBasicItems(2);
+        addRandomBasicItems(3);
         break;
       case "Leveled Up":
         gm._playerLevel = 5;
         gm._playerXp = 0;
         gm.addGold(0);
         addRandomUnitsToBench(2, 2);
-        addRandomUnitsToBench(1, 3);
+        addRandomUnitsToBench(3, 3);
+        addRandomBasicItems(1);
         break;
+      case "Duplicator":
+        gm._playerLevel = 3;
+        gm._playerXp = 2;
+        gm.addGold(15);
+        gm.playerSmallUnitDuplicator = 3;
+        gm.playerLargeUnitDuplicator = 1;
+      case "Reforger":
+        gm._playerLevel = 3;
+        gm._playerXp = 2;
+        gm.addGold(15);
+        addRandomBasicItems(2);
+        gm.playerItemReforgeTokens = 10;
+      case "Healthy":
+        gm._playerLevel = 3;
+        gm._playerXp = 2;
+        gm.addGold(10);
+        addRandomBasicItems(1);
+        gm.addHealth(25);
+      case "Small One":
+        Unit unit = getRandomUnitByCost(1);
+        unit = unit.upgrade();
+        unit = unit.upgrade();
+        boardManager?.addUnitToBench(unit);
+        addRandomBasicItems(4);
+      case "Randomness":
+        addRandomUnitsToBench(1, 4);
+        addRandomUnitsToBench(2, 4);
+        addRandomUnitsToBench(3, 2);
+        addRandomBasicItems(1);
+        Item item = getRandomItemByTier(2);
+        boardManager?.addItemToBench(item);
+        item = getRandomItemByTier(2);
+        boardManager?.addItemToBench(item);
     }
 
     _mapManager.generateMap();
@@ -706,10 +767,7 @@ class GameManager extends ChangeNotifier {
 
   // Called at the end of post-combat to prepare units and shop for next round
   void _prepareNextRound() {
-    _refreshShop();
-
     _boardManager?.resetBoard();
-
     for (var unit in _originalPlayerUnits) {
       var position = _initialPlayerPositions[unit.id];
       if (position != null) {
@@ -719,6 +777,7 @@ class GameManager extends ChangeNotifier {
         _boardManager?.placeUnit(unit, position);
       }
     }
+    _refreshShop();
 
     final currentNode = mapManager.currentNode;
     if (currentNode == null) return;

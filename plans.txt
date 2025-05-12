@@ -2,7 +2,7 @@ TODO:
 - Fix unit duplicator
 - Fix how units are displayed so they work with their new sprites
     - Maybe also add a size stat for units that can be changed
-- Make Start and End screens
+
 
 DONE:
 - Fix up stats player sees
@@ -44,3 +44,5 @@ DONE:
 - Fix bench problems
 - Fix Items "Unequip" button always showing
 - Sort synergy tab by most active tier, then closest to next tier, then finally alphabetical
+- Make Start and End screens
+- Fix visual effects being on top of everything
