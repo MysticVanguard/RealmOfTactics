@@ -82,6 +82,9 @@ class BoardManager extends ChangeNotifier {
 
   // Get what is at a bench slot, could be an item or null
   Item? getBenchSlotItem(int index) {
+    print(
+      "Get Item: ${_itemBench.map((e) => e.name).toList()} looking for index $index",
+    );
     if (index < _itemBench.length) {
       return _itemBench[index];
     }
@@ -298,8 +301,12 @@ class BoardManager extends ChangeNotifier {
 
   // Adds an item to the bench, or tries to combine it if dropped on another item
   void addItemToBench(Item item, [int? targetIndex]) {
+    print("Before: ${_itemBench.map((e) => e.name).toList()}");
     _itemBench.add(item);
-    item.benchIndex = _itemBench.indexOf(item);
+    print(
+      "After: ${_itemBench.map((e) => e.name).toList()}, (benchIndex of added ${_itemBench.length - 1})",
+    );
+    item.benchIndex = _itemBench.length - 1;
   }
 
   // Checks if a bench index is within valid bounds
@@ -533,7 +540,7 @@ class BoardManager extends ChangeNotifier {
 
   // Returns all the items currently on the bench
   List<Item> getAllBenchItems() {
-    return _itemBench;
+    return _itemBench.toList();
   }
 
   // Finds the first empty bench slot, optionally starting at a target index
@@ -653,6 +660,15 @@ class BoardManager extends ChangeNotifier {
       }
     } else if (entity is Item) {
       // Remove item from bench
+      bool removed = false;
+      for (int i = 0; i < _itemBench.length; i++) {
+        if (removed) {
+          _itemBench[i].benchIndex -= 1;
+        }
+        if (_itemBench[i] == entity) {
+          removed = true;
+        }
+      }
       _itemBench.remove(entity);
       notifyListeners();
       return entity;

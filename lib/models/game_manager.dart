@@ -114,6 +114,7 @@ class GameManager extends ChangeNotifier {
   late MapManager _mapManager;
 
   GlobalKey<OverlayState> projectileOverlayKey = GlobalKey<OverlayState>();
+  String? chosenStartOptionName;
 
   static GameManager? instance;
   List<Item> getBasicItems() {
@@ -314,6 +315,7 @@ class GameManager extends ChangeNotifier {
   // Applies effects from the chosen starting setup
   void applyStartOption(String optionKey) {
     final gm = GameManager.instance!;
+    gm.chosenStartOptionName = optionKey;
 
     gm.addGold(-gm.gold); // Reset gold to 0 before applying rewards
 
@@ -720,7 +722,7 @@ class GameManager extends ChangeNotifier {
       notifyListeners();
       Future.delayed(const Duration(milliseconds: 500), () {
         navigatorKey.currentState?.pushReplacement(
-          MaterialPageRoute(builder: (context) => const EndScreen()),
+          MaterialPageRoute(builder: (context) => EndScreen()),
         );
       });
     }
